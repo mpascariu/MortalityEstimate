@@ -1,0 +1,5 @@
+^data-raw$
+^.git$
+^.Rproj.user$
+^.*\.Rproj$
+^\.Rproj\.user$
