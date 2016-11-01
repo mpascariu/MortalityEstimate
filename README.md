@@ -1,11 +1,11 @@
 # The Linear-Link model: deriving age-specific death rates from life expectancy
 -----------------------------------
 
-`extomx` lets you derive age-specific death rates from a value of life expectancy
+`LinearLink` package lets you derive age-specific death rates from a value of life expectancy
 
 To install in R run the following code
 `install.packages('devtools')`
-`devtools::install_github("mpascariu/extomx")`.
+`devtools::install_github("mpascariu/LinearLink")`.
 
 Check the examples provided in the `Kannisto` `life.table` and `LinearLink` functions.
 
