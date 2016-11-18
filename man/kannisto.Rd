@@ -14,8 +14,6 @@ rates in a single year}
 \item{x}{Corresponding ages in the input matrix}
 
 \item{parS}{Starting parameters used in optimization process}
-
-\item{...}{Some more stuff}
 }
 \value{
 Results

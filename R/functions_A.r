@@ -130,10 +130,35 @@ FUN.lt_optim <- function(ages, coefs, ex0){
      return(out)
 }
 
-#' Fit linear link model
-#' @keywords internal
-#'
-FUN.linearlink <- function(mx, mx_ages, mx_years, mx_country = NA, 
+#' Fit Linear-Link model
+#' 
+#' @param mx Death rates matrix with age as row and time as column
+#' @param mx_ages vector of ages corresponding to the mx matrix
+#' @param mx_years vector of years corresponding to the mx matrix
+#' @param mx_country The name of the country that the data corresponds to.
+#' The name will be adopted in the output tables. It is optional.
+#' @param x_fit Age to be fitted
+#' @param use.smooth Logical variable indicating wheter the spline smoothing is 
+#' applyed or not to the estimated coefficients (bx and vx).
+#' @return Results
+#' @export
+#' @examples 
+#' library(LinearLink)
+#' library(dplyr)
+#' 
+#' # Select the 1965 - 1990 time interval and fit the Linear-Link model
+#' ages    <- 0:100 # available ages in our datasets
+#' years   <- 1965:1990 # available years
+#' fit_SWE <- HMD_mx$SWE %>% select(mx.1965:mx.1990) %>%
+#'      LinearLink(mx = ., ages, years, 'SWEDEN', x_fit = 0)
+#' summary(fit_SWE)
+#' 
+#' # Derive a mortality curve (life table) from a value of
+#' # life expectancy at birth in 2014, say 84.05
+#' new_e0   <- 84.05
+#' pred_SWE <- predict(fit_SWE, new_e0)
+#' pred_SWE$lt
+LinearLink <- function(mx, mx_ages, mx_years, mx_country = NA, 
                            x_fit = 0, use.smooth = TRUE){
      ptm <- proc.time() # Start the clock!
      
@@ -217,12 +242,15 @@ FUN.linearlink <- function(mx, mx_ages, mx_years, mx_country = NA,
      proc_speed <- round((proc.time() - ptm)[3], 2) # Stop the clock
      cat(paste(mx_country, "Process time:", proc_speed, "seconds!\n") ) # Print speed
      
-     out = list(input_mx = mx_input, input_ages = mx_ages, input_years = mx_years, 
-                input_country = mx_country, x_fit = x_fit, df_spline = df_spline, 
+     out = structure(class = 'LinearLink',
+                     list(input_mx = mx_input, input_ages = mx_ages, 
+                          input_years = mx_years, input_country = mx_country, 
+                          x_fit = x_fit, df_spline = df_spline, 
                 coefficients = coefficients, k_values = k_values, 
                 fitted.values = fitted.values, residuals = residuals,
                 fitted.life.tables = LT_optim, model_name = model_name,
-                process_speed = proc_speed, process_date = date())
+                process_speed = proc_speed, process_date = date()))
+     out$call <- match.call()
      return(out)
 }
 

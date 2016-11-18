@@ -8,7 +8,8 @@ Fun_ux(model)
 }
 \description{
 This function calls the mortality model that will be 
-used in all the calculations
+used in all the calculations. 
+In this package only 1 model is implemented so far.
 }
 \keyword{internal}
 
