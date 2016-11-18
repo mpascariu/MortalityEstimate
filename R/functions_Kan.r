@@ -52,7 +52,7 @@ Fun_ux <- function(model){
 #' 
 #' head(HMD_mx$SWE) # check data for Sweden
 #' ages <- 80:100
-#' dta  <- HMD_mx$SWE[paste(ages),] # filter Sweden mx between age 80 and 100
+#' dta  <- HMD_mx$SWE[paste(ages), ] # filter Sweden mx between age 80 and 100
 #' fit_kan <- Kannisto(mx = dta, x = ages) # fit Kannisto model
 #' summary(fit_kan)
 #' 

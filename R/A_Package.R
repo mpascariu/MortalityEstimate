@@ -8,7 +8,7 @@
 NULL
 
 
-#' @import dplyr
+#' @importFrom dplyr %>% 
 NULL
 #' @importFrom stats complete.cases lsfit optim 
 #' smooth.spline coef reshape fitted
