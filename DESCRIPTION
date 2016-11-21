@@ -1,7 +1,7 @@
 Package: LinearLink
 Type: Package
 Title: The Linear-Link: deriving age-specific death rates from life expectancy
-Version: 0.1.7
+Version: 0.1.8
 Author: Marius Pascariu <wpascariu@outlook.com>,
   Vladimir Canudas-Romo <vcanudas@health.sdu.dk>
 Maintainer: Marius Pascariu <wpascariu@outlook.com>

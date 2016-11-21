@@ -46,26 +46,25 @@ life.table <- function(x, Dx = NULL, Ex = NULL,
      nmax     <- length(x)
      n        <- rep(1,nmax)           # width of the intervals
      ax       <- n/2
-     if(min(x) == 0) ax[1] <- ax0
+     if (min(x) == 0) ax[1] <- ax0
      
-     mx	   <- if(length(Dx) > 0) { Dx/Ex } 
+     mx	   <- if (length(Dx) > 0) { Dx/Ex } 
      else { 
-          if(length(mx)>0) { mx } 
-          else { qx/(n-qx*(n-ax)) 
+          if (length(mx) > 0) { mx } 
+          else {qx/(n - qx*(n - ax)) 
           }   
      }
-     if(mx[nmax] < 0.5 | is.na(mx[nmax])) mx[nmax] = mx[nmax-1]*1.1 
+     if (mx[nmax] < 0.5 | is.na(mx[nmax])) mx[nmax] = mx[nmax - 1]*1.1 
      # In small populations we could have problems 
      # in estimating a reliable mx at last age in the lifetable
-     ax[nmax] <- if(mx[nmax] == 0) 0.5 else 1/mx[nmax]
+     ax[nmax] <- if (mx[nmax] == 0) 0.5 else 1/mx[nmax]
      
-     qx       <- if(length(qx) > 0) {qx} 
-     else{n*mx / (1+(n-ax)*mx)} 
+     qx       <- if (length(qx) > 0) {qx} 
+     else{n*mx / (1 + (n - ax)*mx)} 
      qx[x >= 100 & mx == 0] <- 1
      qx[nmax] <- 1
      
-     px       <- 1-qx
-     lx       <- c(1,cumprod(1-qx))*lx0 
+     lx       <- c(1,cumprod(1 - qx))*lx0 
      lx       <- lx[1:nmax]
      dx       <- lx*qx
      Lx       <- n*lx - ax*dx
@@ -75,7 +74,7 @@ life.table <- function(x, Dx = NULL, Ex = NULL,
      # Tx[nmax] <- max(dx[nmax,], Lx[nmax])
      ex       <- Tx/Lx
      ex[is.na(ex)] <- 0
-     ex[nmax] <- if(ex[nmax-1] == 0) 0 else ax[nmax]
+     ex[nmax] <- if (ex[nmax - 1] == 0) 0 else ax[nmax]
      
      lt <- data.frame(age = x, mx = round(mx,6), qx = round(qx,6), ax = ax, 
                       lx = round(lx), dx = round(dx), Lx = round(Lx), 
@@ -122,7 +121,7 @@ FUN.lt_optim <- function(ages, coefs, ex0){
      }
      k.optim <- optim(0, penalty, method = "Brent", 
                       upper = 30, lower = -30)$par
-     LT.init <- FUN.lt_k0(ages, coefs, ex0, k = 0)
+     # LT.init <- FUN.lt_k0(ages, coefs, ex0, k = 0)
      LT      <- FUN.lt_k0(ages, coefs, ex0, k = k.optim)
      proc_speed <- round((proc.time() - ptm)[3], 2) # Stop the clock
      out <- list(k = k.optim, lt = LT$lt, lt.exact = LT$lt.exact, 
@@ -162,13 +161,13 @@ LinearLink <- function(mx, mx_ages, mx_years, mx_country = NA,
                            x_fit = 0, use.smooth = TRUE){
      ptm <- proc.time() # Start the clock!
      
-     model_name <- "Linear-Link (2016): ln[e(x)] = b(x)ln[m(x)] + kv(x)"
+     model_name <- "Linear-Link (2016): ln[m(x)] = b(x)ln[e(x)] + kv(x)"
      # Data preparation
      mx_input <- as.matrix(mx)
      
      # Compute life expectancy
      Life_Tables <- data.frame()
-     for(i in 1:ncol(mx)){
+     for (i in 1:ncol(mx)) {
           LT_i   <- life.table(x = mx_ages, mx = mx_input[, i])$lt
           year_i <- mx_years[i]
           LT_i   <- cbind(country = mx_country, year = year_i, LT_i)
@@ -199,9 +198,9 @@ LinearLink <- function(mx, mx_ages, mx_years, mx_country = NA,
      degrees   <- ifelse(use.smooth, round(length(mx_ages)/5), mx_ages)
      df_spline <- ifelse(use.smooth, degrees, 'Smooting not used')
      
-     if(use.smooth){
+     if (use.smooth) {
        coefs.smooth <- coefs.raw*0
-       for(j in 1:ncol(coefs.raw)){
+       for (j in 1:ncol(coefs.raw)) {
             coefs.smooth[, j] <- smooth.spline(coefs.raw[, j], df = degrees)$y
        }
        coefs.smooth[1, 1] <- coefs.raw[1, 1] # leave infant mortality unsmoothed.
@@ -216,7 +215,7 @@ LinearLink <- function(mx, mx_ages, mx_years, mx_country = NA,
      
      LT_optim <- NULL
      k_values <- NULL
-     for(i in 1:length(mx_years)){
+     for (i in 1:length(mx_years)) {
           year_i <- table_ex[i, 1]
           ex_target_i <- table_ex[i, 2]
           Optim_out <- FUN.lt_optim(ages = mx_ages, coefs = coefficients, 
