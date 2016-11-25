@@ -73,10 +73,10 @@ FUN.lt_optim <- function(ages, coefs, ex0){
 #' @param mx_years vector of years corresponding to the mx matrix
 #' @param mx_country The name of the country that the data corresponds to.
 #' The name will be adopted in the output tables. It is optional.
-#' @param x_fit Age to be fitted
+#' @param theta Age to be fitted
 #' @param use.smooth Logical variable indicating wheter the spline smoothing is 
 #' applyed or not to the estimated coefficients (bx and vx).
-#' @param method Optimizing method. Least squared approch \code{LSE} or Poisson 
+#' @param method Optimizing method. Least squared approach \code{LSE} or Poisson 
 #' likelihood estimation \code{MLE}.
 #' @return A \code{LinearLink} object
 #' @export
@@ -84,45 +84,56 @@ FUN.lt_optim <- function(ages, coefs, ex0){
 #' library(LinearLink)
 #'  
 #' # Select the 1965 - 1990 time interval and fit the Linear-Link model
-#' ages    <- 0:100 # available ages in our datasets
-#' years   <- 1965:1990 # available years
+#' ages  <- 0:100 # available ages in our datasets
+#' years <- 1965:1990 # available years
 #' 
 #' SWEmx <- HMD.test.data$SWE[paste(ages), paste(years)]
 #' 
-#' fit_SWE <- LinearLink(mx = SWEmx, mx_ages = ages, mx_years = years, 
-#'                       mx_country = 'SWEDEN', x_fit = 0, method = 'LSE')
-#' summary(fit_SWE)
+#' # Fit the Linear-Link using the least square approach (LSE). For poisson 
+#' # maximum likelihood use \code{method = 'MLE'}
+#' fit_LL <- LinearLink(mx = SWEmx, mx_ages = ages, mx_years = years, 
+#'                       mx_country = 'SWEDEN', theta = 0, method = 'LSE')
+#' fit_LL
+#' 
+#' summary(fit_LL) # summary
+#' coef(fit_LL) # cofficients
+#' ls(fit_LL) # check the all the output
 #' 
 #' # Derive a mortality curve (life table) from a value of
 #' # life expectancy at birth in 2014, say 84.05
 #' new_e0   <- 84.05
-#' pred_SWE <- predict(fit_SWE, new_e0)
-#' pred_SWE$lt
+#' pred_LL <- predict(fit_LL, new_e0)
+#' pred_LL$lt
 #' 
-LinearLink <- function(mx, mx_ages, mx_years, mx_country = '...', 
-                           x_fit = 0, use.smooth = TRUE, method = 'LSE'){
+LinearLink <- function(mx, mx_ages, mx_years, 
+                       mx_country = '...', theta = 0, 
+                       use.smooth = TRUE, method = 'LSE'){
+  check_input_LL(mx, mx_ages, mx_years, mx_country, theta, 
+                 use.smooth, method)
+  #-------------------------------------------------
+  # Data preparation 
   input <- c(as.list(environment()))
+  cat('\n   Fitting LL model\n')
   pb <- startpb(0, length(mx_years)) # Start the clock!
   on.exit(closepb(pb)) # Stop clock on exit.
-  
-  # Data preparation ---------------------------------
-  model_name <- "Linear-Link (2016): ln[m(x)] = b(x)ln[e(x)] + kv(x)"
+  model_info <- "Linear-Link (2016): ln[m(x)] = b(x)ln[e(x)] + kv(x)"
   mx_input <- as.matrix(mx)
   dimnames(mx_input) <- list(mx_ages, mx_years)
-  
-  # Compute life expectancy --------------------------
+  # Compute life expectancy 
   LT <- data.frame()
   for (i in 1:ncol(mx)) {
     year_i <- mx_years[i]
     LT_i   <- lifetable(x = mx_ages, mx = mx_input[, i])$lt
     LT_i   <- cbind(country = mx_country, year = year_i, LT_i, 
-                    ex0 = LT_i[LT_i$age == x_fit, 'ex'], Ex = 1)
+                    ex0 = LT_i[LT_i$age == theta, 'ex'], Ex = 1)
     LT_i   <- LT_i[complete.cases(LT_i), ]
     LT <- rbind(LT, LT_i)
   }
   #-------------------------------------------------
-  # Fit linear portion of model
-  log_ex_theta <- log(LT[LT$age == x_fit, 'ex'])
+  # Fit linear portion of model (Step 2)
+  # (Step 1 - Takes place before entering this function. For example in 
+  # Kannisto function.)
+  log_ex_theta <- log(LT[LT$age == theta, 'ex'])
   log_mx_theta <- t(log(mx_input))
   if (method == 'LSE') {
     fit_link.LSE <- FUN.bifit(y = log_mx_theta, x = log_ex_theta)
@@ -135,14 +146,14 @@ LinearLink <- function(mx, mx_ages, mx_years, mx_country = '...',
     bx <- as.numeric(coef(fit_link.MLE))
   }
   #-------------------------------------------------
-  # Compute residuals and fit SVD portion of model
+  # Compute residuals and fit SVD portion of model (Step 3)
   fitted_log_mx <- log_ex_theta %*% t(bx)
   dimnames(fitted_log_mx) <- dimnames(log_mx_theta)
   resid_log_mx <- fitted_log_mx - log_mx_theta
   resid_log_mx[resid_log_mx == Inf] <- unique(sort(resid_log_mx, decreasing = T))[2]
   vx  <- svd(resid_log_mx, 1, 1)$v
-  
-  # Coefficients ----------------------------------
+  #-------------------------------------------------
+  # Smooth Coefficients (Step 4)
   coefs.raw <- round(data.frame(bx , vx, row.names = mx_ages), 8)
   coeffs <- coefs.raw
   # I have to smooth the vx's so that we can avoid jumps 
@@ -150,7 +161,6 @@ LinearLink <- function(mx, mx_ages, mx_years, mx_country = '...',
   # by using splines. We can allocate 1 degree of freedom for every 5 ages.
   degrees   <- ifelse(use.smooth, round(length(mx_ages)/5), mx_ages)
   df_spline <- ifelse(use.smooth, degrees, 'Smoothing not used')
-  
   if (use.smooth) {
     coefs.smooth <- coefs.raw*0
     for (j in 1:ncol(coefs.raw)) {
@@ -160,8 +170,8 @@ LinearLink <- function(mx, mx_ages, mx_years, mx_country = '...',
     coeffs <- coefs.smooth
   }
   #--------------------------------------------------
-  # Compute fitted values of mx ---- 
-  table_ex <- LT[LT$age == x_fit, c('year', 'ex')]
+  # Compute fitted values of mx (Step 5 & 6)
+  table_ex <- LT[LT$age == theta, c('year', 'ex')]
   k_values = LT_optim <- NULL
   for (i in 1:length(mx_years)) {
     year_i <- table_ex[i, 1]
@@ -170,19 +180,19 @@ LinearLink <- function(mx, mx_ages, mx_years, mx_country = '...',
                               ex0 = ex_target_i)
     LT_optim_i <- cbind(country = mx_country, 
                         year = year_i, Optim_out$lt)
-    colnames(LT_optim_i)[3] <- 'age'
     LT_optim <- rbind(LT_optim, LT_optim_i)
     k_optim  <- data.frame(country = mx_country, year = year_i, 
-                           ex = LT_optim_i[LT_optim_i$age == x_fit, ]$ex, 
+                           ex = LT_optim_i[LT_optim_i$age == theta, ]$ex, 
                            k = round(Optim_out$k, 6))
     k_values <- rbind(k_values, k_optim)
     setpb(pb, i)
   }
-  
   table_mx <- LT_optim[, 1:4]
-  fitted.values <- spread(table_mx, key = year, value = mx)[, -(1:2)]
-  rownames(fitted.values) <- mx_ages
-  residuals <- mx_input - fitted.values
+  fitted.values <- reshape(table_mx, direction = 'wide', 
+                           idvar = c('country','age'), 
+                           timevar = 'year')[, -(1:2)]
+  dimnames(fitted.values) <- list(mx_ages, mx_years)
+  residuals    <- mx_input - fitted.values
   coefficients <- list(bx = coeffs$bx, vx = coeffs$vx, k = k_values$k)
   #-----------------------------------
   # Output
@@ -190,12 +200,21 @@ LinearLink <- function(mx, mx_ages, mx_years, mx_country = '...',
                  list(input = input, df_spline = df_spline, 
                       coefficients = coefficients, fitted.values = fitted.values, 
                       residuals = residuals, fitted.life.tables = LT_optim, 
-                      model_name = model_name, process_date = date()))
+                      model_info = model_info, process_date = date()))
   out$call <- match.call()
   return(out)
 }
 
-
+#' @keywords internal
+#' 
+check_input_LL <- function(mx, mx_ages, mx_years, mx_country, theta, 
+                        use.smooth, method){
+  if (nrow(mx) != length(mx_ages) ) {cat('\nMismatch mx <-> mx_ages'); stop()}
+  if (ncol(mx) != length(mx_years) ) {cat('\nMismatch mx <-> mx_years'); stop()}
+  if (theta != 0) {cat('\nFor now the model was tested only for theta = 0'); stop()}
+  if (!(method %in% c('LSE', 'MLE'))) {
+    cat(paste('Method', method, 'not available. Try LSE or MLE')); stop()}
+}
 
 
 

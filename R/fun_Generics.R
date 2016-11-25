@@ -5,21 +5,40 @@
 #' @export
 summary.LinearLink <- function(object, ...) {
      cat('\nModel:\n')
-     cat(object$model_name,'\n')
-     cat("\nCall:\n")
+     cat(object$model_info)
+     cat("\n\nCall:\n")
      print(object$call)
-     
+     cat('\nDeviance Residuals:\n')
+     print(round(summary(as.vector(as.matrix(object$residuals))), 5))
      cat("\nCoefficients:\n")
      coefs <- data.frame(bx = coef(object)$bx, vx = coef(object)$vx,
                          row.names = object$input$mx_ages)
-     print(headTail(coefs, digits = 5, hlength = 6, tlength = 6))
-     cat("\nk-values:\n")
-     cat(round(coef(object)$k,3))
-     
-     cat("\n\nSpline Smoothing (degrees of freedom): ")
+     Hbxvx <- headTail(coefs, digits = 5, hlength = 6, tlength = 6)
+     Hk <- headTail(data.frame(. = '.', k = coef(object)$k),
+                    digits = 5, hlength = 6, tlength = 6)
+     print(data.frame(Hbxvx, Hk))
+     cat("\nSpline Smoothing (degrees of freedom): ")
      cat(object$df_spline)
 }
 
+#' @keywords internal
+#' @export
+print.LinearLink <- function(x, ...){
+  with(x$input,
+       {
+        cat('\nLinear-Link Model (2016): \nln[m(x)] = b(x)ln[e(x)] + kv(x)\n')
+        cat('\nFitted for life expectancy at age:', theta)
+        cat('\nTime interval:', min(mx_years), '-', max(mx_years))
+        cat('\nAge-range:', min(mx_ages), '-', max(mx_ages))
+        cat('\nCountry:', mx_country, '\n')
+        met <- ifelse(method == 'LSE', 'Least Squares (LSE)', 
+                      'Poisson Maximum Likelihood (MLE)')
+        cat('\nFitting Procedure:', met)
+        cat('\nSmoothing:', use.smooth)
+  })
+}
+  
+  
 #' @keywords internal
 #' @export
 predict.LinearLink <- function(object, ex_target, ...) {
@@ -27,7 +46,7 @@ predict.LinearLink <- function(object, ex_target, ...) {
                       row.names = object$input$mx_ages)
   pred.values <- FUN.lt_optim(ages = object$input$mx_ages, 
                              coefs = coefs, ex0 = ex_target)
-  pred.values
+  return(pred.values)
 }
 
 # ==========================================================================
@@ -56,7 +75,7 @@ predict.Kannisto <- function(object, newdata=NULL, ...) {
     fun_ux <- Fun_ux('kannisto')
     for (i in 1:nrow(pars)) {pred.values[,i] = fun_ux(pars[i,], x_scaled)}
   }
-  pred.values
+  return(pred.values)
 }
 
 

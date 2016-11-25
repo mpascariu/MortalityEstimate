@@ -3,23 +3,23 @@
 #' Data preparation function
 #' @keywords internal
 fun_data_prep <- function(mx, x, n_parameters){
-     # Format input data
-     mx <- as.matrix(mx)
-     x  <- as.numeric(x)
-     c_names <- if (is.null(ncol(mx)) | ncol(mx) == 1) 'mx' else colnames(mx)
-     dimnames(mx) <- list(x, c_names)
-     c_no    <- ncol(mx)
-     mx <- mx + (mx == 0)*1e-04 # If death rate is 0 we assign a very small value
-     # Scale the age vectors in order to obtain meaningful parameter estimates
-     x_scaled <- x - min(x)
-     # Create storage objects for parametes and fitted mx's
-     pars <- matrix(NA, c_no, n_parameters)
-     dimnames(pars) <- list(c_names, letters[1:n_parameters] )
-     fitted.values <- mx*0
-     # Output
-     return(list(mx = mx, x = x, x_scaled = x_scaled,
-                 pars = pars, fitted.values = fitted.values,
-                 n_parameters = n_parameters))
+  # Format input data
+  mx <- as.matrix(mx)
+  x  <- as.numeric(x)
+  c_names <- if (is.null(ncol(mx)) | ncol(mx) == 1) 'mx' else colnames(mx)
+  dimnames(mx) <- list(x, c_names)
+  c_no    <- ncol(mx)
+  mx <- mx + (mx == 0)*1e-04 # If death rate is 0 we assign a very small value
+  # Scale the age vectors in order to obtain meaningful parameter estimates
+  x_scaled <- x - min(x)
+  # Create storage objects for parametes and fitted mx's
+  pars <- matrix(NA, c_no, n_parameters)
+  dimnames(pars) <- list(c_names, letters[1:n_parameters] )
+  fitted.values <- mx*0
+  # Output
+  return(list(mx = mx, x = x, x_scaled = x_scaled,
+             pars = pars, fitted.values = fitted.values,
+             n_parameters = n_parameters))
 }
 
 # --------------------------------------------
@@ -31,10 +31,10 @@ fun_data_prep <- function(mx, x, n_parameters){
 #' @keywords internal
 #' 
 Fun_ux <- function(model){
-     switch(model,
-             kannisto = function(par, x) {
-               with(as.list(par), a*exp(b*x) / (1 + a*exp(b*x)) ) 
-               })
+  switch(model,
+         kannisto = function(par, x) {
+           with(as.list(par), a*exp(b*x) / (1 + a*exp(b*x)) ) 
+           })
 }
 
 # --------------------------------------------

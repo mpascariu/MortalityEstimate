@@ -2,6 +2,7 @@
 
 S3method(predict,Kannisto)
 S3method(predict,LinearLink)
+S3method(print,LinearLink)
 S3method(summary,Kannisto)
 S3method(summary,LinearLink)
 export(Kannisto)
@@ -20,4 +21,3 @@ importFrom(stats,optim)
 importFrom(stats,poisson)
 importFrom(stats,reshape)
 importFrom(stats,smooth.spline)
-importFrom(tidyr,spread)

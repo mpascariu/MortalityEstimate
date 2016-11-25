@@ -8,9 +8,6 @@
 # NULL
 # 
 
-# #' @importFrom dplyr %>% 
-#NULL
-
 #' @importFrom stats complete.cases lsfit optim 
 #' smooth.spline coef reshape fitted poisson
 NULL
@@ -20,5 +17,4 @@ NULL
 NULL
 #' @importFrom gnm gnm
 NULL
-#' @importFrom tidyr spread
-NULL
+

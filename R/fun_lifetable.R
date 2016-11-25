@@ -26,6 +26,7 @@
 #'
 lifetable <- function(x, Dx = NULL, Ex = NULL, mx = NULL, 
                       qx = NULL, lx0 = 1e+05, ax0 = 0.1){
+  input <- c(as.list(environment()))
   if (!is.null(mx)) mx[is.na(mx)] <- 0
   if (!is.null(qx)) qx[is.na(qx)] <- 0
   if (!is.null(Ex)) Ex[is.na(Ex) | Ex == 0] <- 0.01
@@ -67,7 +68,8 @@ lifetable <- function(x, Dx = NULL, Ex = NULL, mx = NULL,
                    Tx = round(Tx), ex = round(ex,2))
   lt.exact <- data.frame(age = x, mx = mx, qx = qx, ax = ax,
                          lx = lx, dx = dx, Lx = Lx, Tx = Tx, ex = ex)
-  out <- list(lt = lt, lt.exact = lt.exact, process_date = date())
+  out <- list(input = input, lt = lt, lt.exact = lt.exact, 
+              process_date = date())
   return(out)
 }
 
