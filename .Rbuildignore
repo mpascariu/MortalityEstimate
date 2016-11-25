@@ -1,4 +1,5 @@
 ^data-raw$
+^LICENSE$
 ^.git$
 ^.Rproj.user$
 ^.*\.Rproj$

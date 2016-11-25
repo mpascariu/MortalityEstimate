@@ -6,7 +6,7 @@ fun_data_prep <- function(mx, x, n_parameters){
      # Format input data
      mx <- as.matrix(mx)
      x  <- as.numeric(x)
-     c_names <- if(is.null(ncol(mx)) | ncol(mx) == 1) 'mx' else colnames(mx)
+     c_names <- if (is.null(ncol(mx)) | ncol(mx) == 1) 'mx' else colnames(mx)
      dimnames(mx) <- list(x, c_names)
      c_no    <- ncol(mx)
      mx <- mx + (mx == 0)*1e-04 # If death rate is 0 we assign a very small value
@@ -31,7 +31,7 @@ fun_data_prep <- function(mx, x, n_parameters){
 #' @keywords internal
 #' 
 Fun_ux <- function(model){
-     switch (model,
+     switch(model,
              kannisto = function(par, x) {
                with(as.list(par), a*exp(b*x) / (1 + a*exp(b*x)) ) 
                })
@@ -50,9 +50,9 @@ Fun_ux <- function(model){
 #' @examples 
 #' library(LinearLink)
 #' 
-#' head(HMD_mx$SWE) # check data for Sweden
+#' head(HMD.test.data$SWE) # check data for Sweden
 #' ages <- 80:100
-#' dta  <- HMD_mx$SWE[paste(ages), ] # filter Sweden mx between age 80 and 100
+#' dta  <- HMD.test.data$SWE[paste(ages), ] # filter Sweden mx between age 80 and 100
 #' fit_kan <- Kannisto(mx = dta, x = ages) # fit Kannisto model
 #' summary(fit_kan)
 #' 
@@ -65,31 +65,31 @@ Kannisto <- function(mx, x, parS = NULL){
       {
       mx <- as.matrix(mx)
       x  <- as.numeric(x)
-      if(min(x) < 80 | max(x) > 100) {
+      if (min(x) < 80 | max(x) > 100) {
           cat('The Kannisto model is usually fitted in the 80-100 age-range\n')
       }
       model_name <- "Kannisto (1992): u(x) = a*exp(b*x) / [1 + a*exp(b*x)]"
       parS_default <- c(a = 0.5, b = 0.13)
-      parS <- if(is.null(parS)) parS_default else parS 
-      if(is.null(names(parS))) names(parS) <- letters[1:length(parS)]
+      parS <- if (is.null(parS)) parS_default else parS 
+      if (is.null(names(parS))) names(parS) <- letters[1:length(parS)]
       # Model ------------------------------------------
       fun_ux <- Fun_ux('kannisto')
       # Find parameters / Optimization -----------------
       fun_resid <- function(par, x, ux) {
           sum(ux*log(fun_ux(par, x)) - fun_ux(par, x), na.rm = TRUE)
       }
-      for(i in 1:nrow(pars)){
+      for (i in 1:nrow(pars)) {
           opt_i <- optim(par = parS, fn = fun_resid, x = x_scaled,
                          ux = mx[, i], method = 'L-BFGS-B',
                          lower = 1e-15, control = list(fnscale = -1))
           pars[i, ] <- opt_i$par
       }
       # Compute death rates ---------------------------
-      for(i in 1:nrow(pars)) fitted.values[, i] = fun_ux(pars[i, ], x_scaled)
+      for (i in 1:nrow(pars)) fitted.values[, i] = fun_ux(pars[i, ], x_scaled)
       residuals <- mx - fitted.values
       
       # Retun results ----------------------------------
-      out <- structure(class =  'Kannisto', 
+      out <- structure(class = 'Kannisto', 
                        list(x = x, mx.input = mx, fitted.values = fitted.values,
                             residuals = residuals, model_name = model_name, 
                             coefficients = pars))
