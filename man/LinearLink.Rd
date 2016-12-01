@@ -33,28 +33,57 @@ Fit Linear-Link model
 }
 \examples{
 library(LinearLink)
- 
+
 # Select the 1965 - 1990 time interval and fit the Linear-Link model
-ages  <- 0:100 # available ages in our datasets
-years <- 1965:1990 # available years
+ages    <- 0:100 # available ages in our datasets
+years   <- 1965:1990 # available years
 
 SWEmx <- HMD.test.data$SWE[paste(ages), paste(years)]
 
 # Fit the Linear-Link using the least square approach (LSE). For poisson 
 # maximum likelihood use \\code{method = 'MLE'}
 fit_LL <- LinearLink(mx = SWEmx, mx_ages = ages, mx_years = years, 
-                      mx_country = 'SWEDEN', theta = 0, method = 'LSE')
+                     mx_country = 'SWEDEN', theta = 0, method = 'LSE')
 fit_LL
 
 summary(fit_LL) # summary
 coef(fit_LL) # cofficients
 ls(fit_LL) # check the all the output
 
+
 # Derive a mortality curve (life table) from a value of
 # life expectancy at birth in 2014, say 84.05
 new_e0   <- 84.05
-pred_LL <- predict(fit_LL, new_e0)
-pred_LL$lt
+pred_LL  <- predict(fit_LL, new_e0)
+pred_LL2 <- predict(fit_LL, new_e0, use.vx.rotation = TRUE)
+
+observed_mx <- log(HMD.test.data$SWE[, '2014'])
+pred1 <- log(pred_LL$lt$mx)
+pred2 <- log(pred_LL2$lt$mx)
+
+plot(observed_mx, pch = 16, cex = 1.3, 
+     main = 'Observed and estimated \\n age-specific death rates')
+lines(pred1, lwd = 2, col = 2)
+lines(pred2, lwd = 2, col = 3)
+legend('bottomright', col = c(1, 2, 3), pch = c(16, NA, NA), 
+       lty = c(NA, 1, 1), lwd = 2, bty = 'n', 
+       legend = c('Observed', 'Estimated w fitted vx', 
+                  'Estimated w rotated vx'))
+
+# Let's see what happens when we want to estimate for e0 = 90
+new_e0   <- 90
+pred_LL  <- predict(fit_LL, new_e0)
+pred_LL2 <- predict(fit_LL, new_e0, use.vx.rotation = TRUE)
+
+pred1 <- log(pred_LL$lt$mx)
+pred2 <- log(pred_LL2$lt$mx)
+
+plot(pred1, lwd = 2, col = 2, type = 'l', cex = 1.3, 
+     main = 'Observed and estimated \\n age-specific death rates')
+lines(pred2, lwd = 2, col = 3)
+legend('bottomright', col = c(2, 3), lty = 1, lwd = 2, bty = 'n', 
+       legend = c('Estimated w fitted vx', 'Estimated w rotated vx'))
+# We have two different curves that return life expectancy at birth = 90 years 
 
 }
 
