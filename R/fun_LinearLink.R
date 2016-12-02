@@ -1,68 +1,4 @@
-###############  Fit linear model using least square method  ###################
-#'@keywords internal
-#'
-FUN.bifit <- function(x, y) {
-     
-     if (is.vector(y)) {
-          z <- lsfit(x, y, intercept = FALSE)
-          z.resid <- z$resid
-          coef.new <- z$coef
-          return(list(coef = coef.new, residuals = z.resid)) }
-     
-     if (is.matrix(y)) {
-          resid <- coef <- NULL
-          for (j in 1:ncol(y)) {
-               y.j <- y[, j] 
-               y.j[y.j == -Inf] = -10
-               z <- FUN.bifit(x, y.j)
-               resid <- cbind(resid, z$resid)
-               coef <- cbind(coef, z$coef) 
-          }
-          return(list(coef = coef, residuals = resid)) 
-     }
-}
-
-#' @keywords internal
-#'
-FUN.mxhat <- function(ages, coefs, ex0 = 0, k = 0) {
-     mx <- exp(coefs[, 1]*log(ex0) + coefs[, 2]*k)
-     return(mx) 
-}
-
-#' @keywords internal
-#'
-FUN.lt_k0 <- function(ages, coefs, ex0 = 0, k = 0) {
-     fx <- FUN.mxhat(ages, coefs, ex0, k)
-     LT <- lifetable(ages, mx = fx)
-     lt <- LT$lt
-     lt.exact <- LT$lt.exact
-     out <- list(lt = lt, lt.exact = lt.exact)
-     return(out)
-}
-
-
-#' Function to optimize a life table
-#' 
-#' @param ages ages
-#' @param coefs coefficients
-#' @param ex0 life expectancy
-#' @return Results
-#' @keywords internal
-#' 
-FUN.lt_optim <- function(ages, coefs, ex0){
-     penalty <- function(k_init){
-          ex_k <- FUN.lt_k0(ages, coefs, ex0, k = k_init)$lt.exact$ex[1]
-          out  <- abs(ex_k - ex0)
-          return(out)
-     }
-     k.optim <- optim(0, penalty, method = "Brent", 
-                      upper = 30, lower = -30)$par
-     # LT.init <- FUN.lt_k0(ages, coefs, ex0, k = 0)
-     LT      <- FUN.lt_k0(ages, coefs, ex0, k = k.optim)
-     out <- list(k = k.optim, lt = LT$lt, lt.exact = LT$lt.exact, 
-                 process_date = date())
-     return(out)
-}
+# ----- Wraper for Linear-Link model -----
 
 #' Fit Linear-Link model
 #' 
@@ -135,6 +71,8 @@ FUN.lt_optim <- function(ages, coefs, ex0){
 LinearLink <- function(mx, mx_ages, mx_years, 
                        mx_country = '...', theta = 0, 
                        use.smooth = TRUE, method = 'LSE'){
+  # Step 1 - Takes place before entering this function. 
+  # For example in Kannisto function.
   check_input_LL(mx, mx_ages, mx_years, mx_country, theta, 
                  use.smooth, method)
   #-------------------------------------------------
@@ -157,30 +95,17 @@ LinearLink <- function(mx, mx_ages, mx_years,
     LT <- rbind(LT, LT_i)
   }
   #-------------------------------------------------
-  # Fit linear portion of model (Step 2)
-  # (Step 1 - Takes place before entering this function. For example in 
-  # Kannisto function.)
+  # Step 2-3  - Estimate bx and vx
   log_ex_theta <- log(LT[LT$age == theta, 'ex'])
-  log_mx_theta <- t(log(mx_input))
-  if (method == 'LSE') {
-    fit_link.LSE <- FUN.bifit(y = log_mx_theta, x = log_ex_theta)
-    bx <- as.numeric(fit_link.LSE$coef)
-  }
-  if (method == 'MLE') {
-    fit_link.MLE <- suppressWarnings( 
-      gnm(mx ~ -1 + as.factor(age):log(ex0) + offset(log(Ex)), 
-          family = poisson(link = "log"), data = LT))
-    bx <- as.numeric(coef(fit_link.MLE))
-  }
+  log_mx <- t(log(mx_input))
+  if (method == 'LSE') { fit_link <- fitw_LSE(log_ex_theta, log_mx) }
+  if (method == 'MLE') { fit_link <- fitw_MLE(log_ex_theta, log_mx, LT) }
+  if (method == 'MLE2') { fit_link <- fitw_MLE2(log_ex_theta, log_mx) }
+  bx <- fit_link$bx
+  vx <- fit_link$vx
+  
   #-------------------------------------------------
-  # Compute residuals and fit SVD portion of model (Step 3)
-  fitted_log_mx <- log_ex_theta %*% t(bx)
-  dimnames(fitted_log_mx) <- dimnames(log_mx_theta)
-  resid_log_mx <- fitted_log_mx - log_mx_theta
-  resid_log_mx[resid_log_mx == Inf] <- unique(sort(resid_log_mx, decreasing = T))[2]
-  vx  <- svd(resid_log_mx, 1, 1)$v
-  #-------------------------------------------------
-  # Smooth Coefficients (Step 4)
+  # Step 4 - Smooth Coefficients
   coefs.raw <- round(data.frame(bx , vx, row.names = mx_ages), 8)
   coeffs <- coefs.raw
   # I have to smooth the vx's so that we can avoid jumps 
@@ -239,7 +164,7 @@ check_input_LL <- function(mx, mx_ages, mx_years, mx_country, theta,
   if (nrow(mx) != length(mx_ages) ) {cat('\nMismatch mx <-> mx_ages'); stop()}
   if (ncol(mx) != length(mx_years) ) {cat('\nMismatch mx <-> mx_years'); stop()}
   if (theta != 0) {cat('\nFor now the model was tested only for theta = 0'); stop()}
-  if (!(method %in% c('LSE', 'MLE'))) {
+  if (!(method %in% c('LSE', 'MLE', 'MLE2'))) {
     cat(paste('Method', method, 'not available. Try LSE or MLE')); stop()}
 }
 

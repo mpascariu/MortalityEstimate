@@ -74,7 +74,6 @@ lifetable <- function(x, Dx = NULL, Ex = NULL, mx = NULL,
 }
 
 
-
 #' mx to qx
 #'
 #' This is a description
@@ -88,4 +87,46 @@ mx_qx <- function(ux, x, out = 'qx'){
                      qx = ux / (1 + (1 - ax)*ux),
                      mx = ux/(n - ux*(n - ax))  )
      return(vect)
+}
+
+
+#' @keywords internal
+#'
+FUN.mxhat <- function(ages, coefs, ex0 = 0, k = 0) {
+  mx <- exp(coefs[, 1]*log(ex0) + coefs[, 2]*k)
+  return(mx) 
+}
+
+#' @keywords internal
+#'
+FUN.lt_k0 <- function(ages, coefs, ex0 = 0, k = 0) {
+  fx <- FUN.mxhat(ages, coefs, ex0, k)
+  LT <- lifetable(ages, mx = fx)
+  lt <- LT$lt
+  lt.exact <- LT$lt.exact
+  out <- list(lt = lt, lt.exact = lt.exact)
+  return(out)
+}
+
+
+#' Function to optimize a life table
+#' 
+#' @param ages ages
+#' @param coefs coefficients
+#' @param ex0 life expectancy
+#' @return Results
+#' @keywords internal
+#' 
+FUN.lt_optim <- function(ages, coefs, ex0){
+  penalty <- function(k_init){
+    ex_k <- FUN.lt_k0(ages, coefs, ex0, k = k_init)$lt.exact$ex[1]
+    out  <- abs(ex_k - ex0)
+    return(out)
+  }
+  k.optim <- optim(0, penalty, method = "Brent", 
+                   upper = 100, lower = -100)$par
+  LT      <- FUN.lt_k0(ages, coefs, ex0, k = k.optim)
+  out <- list(k = k.optim, lt = LT$lt, lt.exact = LT$lt.exact, 
+              process_date = date())
+  return(out)
 }
