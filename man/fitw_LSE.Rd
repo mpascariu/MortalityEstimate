@@ -2,12 +2,12 @@
 % Please edit documentation in R/fun_fit_LL.R
 \name{fitw_LSE}
 \alias{fitw_LSE}
-\title{Fit model using least square method}
+\title{Estimate bx using least square method and vx with SVD}
 \usage{
-fitw_LSE(log_ex_theta, log_mx)
+fitw_LSE(log_ex_theta, log_mx, ...)
 }
 \description{
-Fit model using least square method
+Estimate bx using least square method and vx with SVD
 }
 \keyword{internal}
 

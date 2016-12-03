@@ -38,15 +38,27 @@ print.LinearLink <- function(x, ...){
   })
 }
   
-  
-#' @keywords internal
+
+#' Predict function for a LinearLink object
+#' 
+#' @param object An object of class 'LinearLink'
+#' @param use.vx.rotation Logical argument. If \code{TRUE} the adjustment method
+#' described in Li et al. (2013) paper is applied to the vx coefficients before 
+#' estimated the life table. If \code{FALSE} the fitted vx coefficients are used 
+#' in the estimations of the life table.
+#' @param ex_target A value of life expectancy for which we want to estimate 
+#' the mortality curve
+#' @inheritParams rotated_vx 
+#' @param ... Other arguments 
+# #' @keywords internal
+#' @source Li et al. (2013) 
 #' @export
 predict.LinearLink <- function(object, ex_target, 
                                use.vx.rotation = FALSE, ...) {
   # Choose vx coefficients
-  vx_o <- coef(object)$vx # original vx coefficients
-  vx_r <- rotated_vx(object, e0_t = ex_target) # rotated vx coeffs
-  if (use.vx.rotation == TRUE) {vx = vx_r} else {vx = vx_o}
+  if (use.vx.rotation == TRUE) { 
+    vx = rotated_vx(object, ex_target = ex_target, ...) } else { 
+      vx = coef(object)$vx }
   # Data.frame with all coefficients used in prediction
   coefs <- data.frame(bx = coef(object)$bx, vx = vx, 
                       row.names = object$input$mx_ages)
@@ -58,41 +70,53 @@ predict.LinearLink <- function(object, ex_target,
   return(pred.values)
 }
 
+
+#' Compute rotated vx coefficients
+#' 
+#' This functions computes the rotation of the vx coefficients using the method
+#' presented in Li et al. (2013) paper. 
+#' @param object An object of class 'LinearLink'
+#' @param ex_target A value of life expectancy for which we want to derive the rotated vx
+#' @param e0_u Ultimate value of life expectancy. At this point the rotation 
+#' process reaches its maximum efficiency. Here. e0_u = 80 is taken as the default.  
+#' @param e0_threshold Level of life expectancy where the rotation should begin.
+#' If rotated_vx is computed for ex_target <= e0_threshold then no diffrence
+#' will be observed.  
+#' @param p_ The power to the smooth-weight function, p_, takes values 
+#' between 0 and 1, which makes the rotation faster at starting times and 
+#' slower at ending times. Here, p = .5 is taken as the default
+#' @source Li et al. (2013) 
 #' @keywords internal
 #' 
-rotated_vx <- function(object, e0_t, e0_u = 102, 
+rotated_vx <- function(object, ex_target, e0_u = 102, 
                        e0_threshold = 80, p_ = 0.5){
   vx = coef(object)$vx
   x  = object$input$mx_ages
-  x1 = max(min(x), 15):65
-  x2 = 66:max(x)
+  x1 = max(min(x), 15):65 # young ages
+  x2 = 66:max(x) # old ages
   
   vx_u     = vx * 0
-  vx_young = mean(vx[x1 + 1])
-  n_vx     = length(vx[x2 + 1])
+  vx_young_ages = mean(vx[x1 + 1]) # select vx corresponding to young ages. 
+  # Only the values between age 15 and 65 are being used.
+  
+  n_vx     = length(vx[x2]) #count age groups in x2
   # Derive a logistic shape. The values have to be between 0 and 1, 
   # they will be scaled.
   x_num = seq(-6, 6, length.out = n_vx)
   logit_shape = 1 - exp(x_num)/ (1 + exp(x_num)) 
-  vx_old_ = logit_shape * vx_young # scale values
-  # This is our new vx
-  vx_u[min(x):max(x1 + 1)] = vx_young  # we use only the values between age 15 and 65
-  vx_u[x2 + 1] <- vx_old_
-  
+  vx_old_ages = logit_shape * vx_young_ages # scale values
+  # This is our vx ultimate (vx_u)
+  vx_u[min(x):max(x1 + 1)] <- vx_young_ages
+  vx_u[x2 + 1] <- vx_old_ages
   # Compute weights
-  w_t  <- (e0_t - e0_threshold)/(e0_u - e0_threshold)
-  ws_t <- (0.5 * (1 + sin(pi/2 * (2*w_t - 1))) ) ^ p_ 
-  # The power to the smooth-weight function, p_, takes values
-  # between 0 and 1, which makes the rotation faster at 
-  # starting times and slower at ending times. 
-  # In this article, p = .5 is taken as the default. (Li et al. 2013)
-  
+  w_t  = (ex_target - e0_threshold)/(e0_u - e0_threshold)
+  ws_t = (0.5 * (1 + sin(pi/2 * (2*w_t - 1))) ) ^ p_ 
   # Compute rotate_vx
-  if ( e0_t < e0_threshold ) {rot_vx = vx }
-  if ( e0_threshold <= e0_t & e0_t < e0_u ) {
+  if ( ex_target < e0_threshold ) { rot_vx = vx }
+  if ( e0_threshold <= ex_target & ex_target < e0_u ) {
     rot_vx = (1 - ws_t) * vx + ws_t * vx_u
   }
-  if (e0_t >= e0_u) {rot_vx = vx_u}
+  if (ex_target >= e0_u) {rot_vx = vx_u}
   return(rot_vx)
 }
 

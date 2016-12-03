@@ -20,7 +20,10 @@ The name will be adopted in the output tables. It is optional.}
 \item{theta}{Age to be fitted}
 
 \item{use.smooth}{Logical variable indicating wheter the spline smoothing is 
-applyed or not to the estimated coefficients (bx and vx).}
+applyed or not to the estimated coefficients (bx and vx). The smoothing 
+can be applied in order to avoid jumps in the mortality rates from one 
+age to another. This using splines. One degree of freedom is allocated 
+for every 5 year of age.}
 
 \item{method}{Optimizing method. Least squared approach \code{LSE} or Poisson 
 likelihood estimation \code{MLE}.}
@@ -79,10 +82,10 @@ pred1 <- log(pred_LL$lt$mx)
 pred2 <- log(pred_LL2$lt$mx)
 
 plot(pred1, lwd = 2, col = 2, type = 'l', cex = 1.3, 
-     main = 'Observed and estimated \\n age-specific death rates')
+     main = 'Estimated mortality curves')
 lines(pred2, lwd = 2, col = 3)
 legend('bottomright', col = c(2, 3), lty = 1, lwd = 2, bty = 'n', 
-       legend = c('Estimated w fitted vx', 'Estimated w rotated vx'))
+       legend = c('Estimated mx w fitted vx', 'Estimated mx w rotated vx'))
 # We have two different curves that return life expectancy at birth = 90 years 
 
 }

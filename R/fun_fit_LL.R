@@ -1,8 +1,7 @@
-
-#' Fit model using least square method
+#' Estimate bx using least square method and vx with SVD
 #' @keywords internal
 #'
-fitw_LSE <- function(log_ex_theta, log_mx){
+fitw_LSE <- function(log_ex_theta, log_mx, ...){
   # Step 2 - Fit bx
   fit = FUN.bifit(x = log_ex_theta, y = log_mx)
   bx  = as.numeric(fit$coef)
@@ -43,77 +42,79 @@ FUN.bifit <- function(x, y) {
 }
 
 
-# Fit model with Poisson Likelihood Method --------------
-#' @keywords internal
-#'
-fitw_MLE <- function(log_ex_theta, log_mx, LT){
-  # Step 2 - Fit bx
-    fit <- suppressWarnings( 
-      gnm(LT$mx ~ -1 + as.factor(LT$age):log(LT$ex0) + offset(log(LT$Ex)), 
-          family = poisson(link = "log")))
-    bx <- as.numeric(coef(fit))
-    # Step 3 - Compute residuals and fit SVD portion of model
-    fitted_log_mx <- log_ex_theta %*% t(bx)
-    dimnames(fitted_log_mx) <- dimnames(log_mx)
-    resid_log_mx <- fitted_log_mx - log_mx
-    resid_log_mx[resid_log_mx == Inf] <- unique(sort(resid_log_mx, 
-                                                     decreasing = T))[2]
-    vx  <- svd(resid_log_mx, 1, 1)$v
-    vx  <- vx / sum(vx) # scale to 1
-    
-    out <- list(bx = bx, vx = vx)
-    return(out)
-}
+# # Estimate bx with Poisson Likelihood Method and vx with SVD --
+# # (Method not used. However, let's keep the code.)
+# #' @keywords internal
+# #'
+# fitw_MLE <- function(log_ex_theta, log_mx, LT){
+#   # Step 2 - Fit bx
+#     fit <- suppressWarnings(
+#       gnm(LT$mx ~ -1 + as.factor(LT$age):log(LT$ex0) + offset(log(LT$Ex)),
+#           family = poisson(link = "log")))
+#     bx <- as.numeric(coef(fit))
+#     # Step 3 - Compute residuals and fit SVD portion of model
+#     fitted_log_mx <- log_ex_theta %*% t(bx)
+#     dimnames(fitted_log_mx) <- dimnames(log_mx)
+#     resid_log_mx <- fitted_log_mx - log_mx
+#     resid_log_mx[resid_log_mx == Inf] <- unique(sort(resid_log_mx,
+#                                                      decreasing = T))[2]
+#     vx  <- svd(resid_log_mx, 1, 1)$v
+#     vx  <- vx / sum(vx) # scale to 1
+# 
+#     out <- list(bx = bx, vx = vx)
+#     return(out)
+# }
 
+
+#' # Estimate bx, vx and k with Poisson Likelihood Method --------
+#' 
+#' The implemeted method of estimated the bx, vx and k coefficients of the 
+#' LinearLink model is based on the approach described in Brouhns et al. 2002
+#' for fittin the Lee-Carter model. 
+#' Code writen by Jose Manuel Aburto with minor changes by Marius Pascariu
+#' @source Brouhns et al. 2002
 #' @keywords internal
 #'
-fitw_MLE2 <- function(log_ex_theta, log_mx){
-  Dx = t(exp(log_mx)) * 1e6
-  Ex = Dx*0 + 1e6
-  fit <- PoissonMLE(log_ex_theta, Dx, Ex)
+fitw_MLE <- function(log_ex_theta, log_mx, ...){
+  # Normally, deaths and exposes is needed in order to fit the model using 
+  # the Poisson distribution. However if a vector of mx is available we can 
+  # estimate Dx (deaths) and Ex (exposures) in such a way that the parameters 
+  # are resonable computed.
+  Dx = t(exp(log_mx)) * 1e6 # Dx estimation
+  Ex = Dx*0 + 1e6 # Ex estimation
+  fit <- PoissonMLE(log_ex_theta, Dx, Ex, ...)
   out <- list(bx = fit$bx, vx = matrix(fit$vx, ncol = 1), k = fit$k)
   return(out)
 }
 
 
-
-# Based mainly in Brouhns et al 2002
-# Some useful functions to fit the model 
-# We just reparametrize to fit Pascariu et al's model
-# alpha= b_x log(e(theta))
-# vx = v_x
-# k = k
-# Note we need Deaths an Exposures
-
 #' @keywords internal
 #'
-PoissonMLE <- function(log_ex_theta, Dx, Ex){
+PoissonMLE <- function(log_ex_theta, Dx, Ex, iter = 500, tol = 1e-04){
   # dimensions
   n <- ncol(Dx)
   # Initialise
-  mat_1 <- matrix(1, nrow = ncol(Dx), ncol = 1)    
+  mat_1    <- matrix(1, nrow = ncol(Dx), ncol = 1)    
   Fit.init <- log((Dx + 1)/(Ex + 2))
-  Dx_fit <- Ex * exp(Fit.init)  # Ex * exp(log_mx)
-  alpha <- Fit.init %*% mat_1 / n
+  Dx_fit   <- Ex * exp(Fit.init)  # Ex * exp(log_mx)
+  alpha    <- Fit.init %*% mat_1 / n
   
-  vx <- matrix(1 * alpha, ncol = 1)
+  vx     <- matrix(1 * alpha, ncol = 1)
   sum_vx <- sum(vx) 
-  vx <- vx / sum_vx
+  vx     <- vx / sum_vx
   
   k <- matrix(seq(n, 1, by = -1), nrow = n, ncol = 1)
   k <- k - mean(k)
   k <- k / sqrt(sum(k * k))
   k <- k * sum_vx
-  # Iteration
   
-  for (iter in 1:50) {
-    alpha.old <- alpha
-    vx.old <- vx
-    k.old <- k
+  # Iteration
+  for (i in 1:iter) {
+    alpha_old = alpha; vx_old = vx; k_old = k
     #
-    temp <- Update.alpha(alpha, vx, k, Dx, Ex, Dx_fit)
+    temp   <- Update.alpha(alpha, vx, k, Dx, Ex, Dx_fit)
     Dx_fit <- temp$Dx_fit
-    alpha <- temp$alpha
+    alpha  <- temp$alpha
     #
     temp <- Update.vx(alpha, vx, k, Dx, Ex, Dx_fit)
     Dx_fit <- temp$Dx_fit
@@ -122,10 +123,9 @@ PoissonMLE <- function(log_ex_theta, Dx, Ex){
     temp <- Update.k(alpha, vx, k, Dx, Ex, Dx_fit)
     Dx_fit <- temp$Dx_fit
     k <- temp$k
-    crit <- max(max(abs(alpha - alpha.old)),
-                max(abs(vx - vx.old)),
-                max(abs(k - k.old)))
-    if (crit < 1e-04) break
+    crit <- max(max(abs(alpha - alpha_old)), max(abs(vx - vx_old)),
+                max(abs(k - k_old)))
+    if (crit <= tol) break
   }
   
   #constraints
@@ -136,7 +136,8 @@ PoissonMLE <- function(log_ex_theta, Dx, Ex){
   bx_hat <- rowMeans((log.MU.hat - vx %*% t(k))/log_ex_theta)
   
   # output
-  out <- list(bx = as.numeric(bx_hat), vx = as.numeric(vx), k = as.numeric(k))
+  out <- list(bx = as.numeric(bx_hat), 
+              vx = as.numeric(vx), k = as.numeric(k))
   return(out)
 }
 
