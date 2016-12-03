@@ -124,7 +124,7 @@ FUN.lt_optim <- function(ages, coefs, ex0){
     return(out)
   }
   k.optim <- optim(0, penalty, method = "Brent", 
-                   upper = 100, lower = -100)$par
+                   upper = 150, lower = -150)$par
   LT      <- FUN.lt_k0(ages, coefs, ex0, k = k.optim)
   out <- list(k = k.optim, lt = LT$lt, lt.exact = LT$lt.exact, 
               process_date = date())
