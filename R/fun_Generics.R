@@ -85,11 +85,15 @@ predict.LinearLink <- function(object, ex_target,
 #' @param p_ The power to the smooth-weight function, p_, takes values 
 #' between 0 and 1, which makes the rotation faster at starting times and 
 #' slower at ending times. Here, p = .5 is taken as the default
+#' @param positive.vx.only Logical argument. If negative values of vx are 
+#' estimated we can shift up the entire vx curve so that the minimum value 
+#' is equal to zero.
 #' @source Li et al. (2013) 
 #' @keywords internal
 #' 
 rotated_vx <- function(object, ex_target, e0_u = 102, 
-                       e0_threshold = 80, p_ = 0.5){
+                       e0_threshold = 80, p_ = 0.5,
+                       positive.vx.only = FALSE){
   vx = coef(object)$vx
   x  = object$input$mx_ages
   x1 = max(min(x), 15):65 # young ages
@@ -116,7 +120,11 @@ rotated_vx <- function(object, ex_target, e0_u = 102,
   if ( e0_threshold <= ex_target & ex_target < e0_u ) {
     rot_vx = (1 - ws_t) * vx + ws_t * vx_u
   }
-  if (ex_target >= e0_u) {rot_vx = vx_u}
+  if (ex_target >= e0_u) { rot_vx = vx_u }
+  # Shift up vx curve (suggested by Ugo Basellini)
+  if (positive.vx.only == TRUE & min(rot_vx) < 0) { 
+    rot_vx = rot_vx + abs(min(rot_vx)) 
+    }
   return(rot_vx)
 }
 
