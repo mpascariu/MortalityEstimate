@@ -1,13 +1,16 @@
 # The Linear-Link model
 -----------------------------------
 
-This repository includes R code for a paper presented at 
-The Twelfth International Longevity Risk and 
-Capital Markets Solutions Conference in Chicago titled
+This repository includes R code for estimating mortality curves and life tables
+based on a value of life expectancy at birth. An initial version the model was 
+presented at The Twelfth International Longevity Risk and 
+Capital Markets Solutions Conference in Chicago (September 30, 2016).
 `The Linear Link: Deriving Age-Specific Death Rates from Life Expectancy`
 by [Marius Pascariu](http://findresearcher.sdu.dk:8080/portal/da/person/mpascariu) 
-and [Vladimir Canudas-Romo](http://www.sdu.dk/ansat/vcanudas).
-
+and [Vladimir Canudas-Romo](http://www.sdu.dk/ansat/vcanudas). Since then 
+[Jose Manuel Aburto](https://www.researchgate.net/profile/Jose_Aburto2) and 
+[Ugofilippo Basellini](https://fr.linkedin.com/in/ugofilippo-basellini-79726931) 
+have made important contributions to this project.
 
 Installation
 ============
@@ -29,7 +32,7 @@ once you load the package using ```library(LinearLink)```
 you can just type ```?LinearLink``` to see the help file. 
 
 Check the examples provided in the `Kannisto` 
-`life.table` and `LinearLink` functions.
+`lifetable` and `LinearLink` functions.
 
 For now the model was tested to work for life expectancy at birth. For the other
 ages further changes need to be implemented.
