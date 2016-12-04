@@ -7,7 +7,7 @@
 mx_qx(ux, x, out = "qx")
 }
 \description{
-This is a description
+Function to convert mx into qx and back.
 }
 \keyword{internal}
 

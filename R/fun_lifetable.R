@@ -76,30 +76,30 @@ lifetable <- function(x, Dx = NULL, Ex = NULL, mx = NULL,
 
 #' mx to qx
 #'
-#' This is a description
+#' Function to convert mx into qx and back.
 #' @keywords internal
 mx_qx <- function(ux, x, out = 'qx'){
-     nmax     <- length(x)
-     n        <- rep(1,nmax)
-     ax       <- n/2
-     ax[1] <- ifelse(x[1] == 0, .1, .5)
-     vect <- switch(out,
-                     qx = ux / (1 + (1 - ax)*ux),
-                     mx = ux/(n - ux*(n - ax))  )
-     return(vect)
+  nmax  <- length(x)
+  n     <- rep(1,nmax)
+  ax    <- n/2
+  ax[1] <- ifelse(x[1] == 0, .1, .5)
+  vect  <- switch(out,
+                 qx = ux / (1 + (1 - ax)*ux),
+                 mx = ux/(n - ux*(n - ax))  )
+  return(vect)
 }
 
 
 #' @keywords internal
 #'
-FUN.mxhat <- function(ages, coefs, ex0 = 0, k = 0) {
+FUN.mxhat <- function(ages, coefs, ex0, k = 0) {
   mx <- exp(coefs[, 1]*log(ex0) + coefs[, 2]*k)
   return(mx) 
 }
 
 #' @keywords internal
 #'
-FUN.lt_k0 <- function(ages, coefs, ex0 = 0, k = 0) {
+FUN.lt_k0 <- function(ages, coefs, ex0, k = 0) {
   fx <- FUN.mxhat(ages, coefs, ex0, k)
   LT <- lifetable(ages, mx = fx)
   lt <- LT$lt
@@ -125,7 +125,7 @@ FUN.lt_optim <- function(ages, coefs, ex0){
   }
   k.optim <- optim(0, penalty, method = "Brent", 
                    upper = 150, lower = -150)$par
-  LT      <- FUN.lt_k0(ages, coefs, ex0, k = k.optim)
+  LT  <- FUN.lt_k0(ages, coefs, ex0, k = k.optim)
   out <- list(k = k.optim, lt = LT$lt, lt.exact = LT$lt.exact, 
               process_date = date())
   return(out)

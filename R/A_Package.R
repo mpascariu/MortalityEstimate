@@ -15,6 +15,4 @@ NULL
 NULL
 #' @importFrom pbapply startpb closepb setpb
 NULL
-#' @importFrom gnm gnm
-NULL
 

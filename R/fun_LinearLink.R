@@ -71,90 +71,81 @@
 #'        legend = c('Estimated mx w fitted vx', 'Estimated mx w rotated vx'))
 #' # We have two different curves that return life expectancy at birth = 90 years 
 #' 
-LinearLink <- function(mx, mx_ages, mx_years, 
-                       mx_country = '...', theta = 0, 
+LinearLink <- function(mx, mx_ages, mx_years,
+                       mx_country = '...', theta = 0,
                        use.smooth = TRUE, method = 'LSE'){
   #-------------------------------------------------
-  # Data preparation 
   input <- c(as.list(environment()))
-  check_input_LL(input)
+  check_input_LL(input) # Check consistency in input arguments
   cat('\n   Fitting LL model\n')
   pb <- startpb(0, length(mx_years)) # Start the clock!
   on.exit(closepb(pb)) # Stop clock on exit.
-  
-  model_info <- "Linear-Link (2016): ln[m(x)] = b(x)ln[e(x)] + kv(x)"
-  mx_input <- as.matrix(mx)
+  #-------------------------------------------------
+  # Data preparation
+  mx_input   <- as.matrix(mx)
   dimnames(mx_input) <- list(mx_ages, mx_years)
-  # Compute life expectancy 
+  model_info <- "Linear-Link (2016): ln[m(x)] = b(x)ln[e(x)] + kv(x)"
+  # Compute multiple life tables (in oreder to get ex)
   LT <- data.frame()
   for (i in 1:ncol(mx)) {
-    year_i <- mx_years[i]
-    LT_i   <- lifetable(x = mx_ages, mx = mx_input[, i])$lt
-    LT_i   <- cbind(country = mx_country, year = year_i, LT_i, 
-                    ex0 = LT_i[LT_i$age == theta, 'ex'], Ex = 1)
-    LT_i   <- LT_i[complete.cases(LT_i), ]
-    LT <- rbind(LT, LT_i)
+    LT_i <- lifetable(x = mx_ages, mx = mx_input[, i])$lt
+    LT_i <- cbind(country = mx_country, year = mx_years[i], LT_i,
+                  ex0 = LT_i[LT_i$age == theta, 'ex'], Ex = 1)
+    LT_i <- LT_i[complete.cases(LT_i), ]
+    LT   <- rbind(LT, LT_i)
   }
   #-------------------------------------------------
-  # Step 1 - Takes place before entering this function. 
+  # Step 1 - Takes place before entering this function.
   # For example in Kannisto function.
   #-------------------------------------------------
   # Step 2-3  - Estimate bx and vx
   log_ex_theta <- log(LT[LT$age == theta, 'ex'])
-  log_mx <- t(log(mx_input))
+  log_mx       <- t(log(mx_input))
   if (method == 'LSE') { fit_link <- fitw_LSE(log_ex_theta, log_mx) }
   if (method == 'MLE') { fit_link <- fitw_MLE(log_ex_theta, log_mx) }
   bx <- fit_link$bx
   vx <- fit_link$vx
   #-------------------------------------------------
   # Step 4 - Smooth Coefficients
-  coefs.raw <- round(data.frame(bx , vx, row.names = mx_ages), 8)
-  coeffs <- coefs.raw
-  degrees   <- ifelse(use.smooth, round(length(mx_ages)/5), mx_ages)
-  df_spline <- ifelse(use.smooth, degrees, 'Smoothing not used')
+  coeffs_raw    <- round(data.frame(bx, vx, row.names = mx_ages), 8)
+  coeffs_smooth <- coeffs_raw*0
+  degrees       <- ifelse(use.smooth, round(length(mx_ages)/5), mx_ages)
+  df_spline     <- ifelse(use.smooth, degrees, 'Smoothing not used')
   if (use.smooth) {
-    coefs.smooth <- coefs.raw*0
-    for (j in 1:ncol(coefs.raw)) {
-      coefs.smooth[, j] <- smooth.spline(coefs.raw[, j], df = degrees)$y
+    for (j in 1:ncol(coeffs_raw)) {
+      coeffs_smooth[, j] <- smooth.spline(coeffs_raw[, j], df = degrees)$y
     }
-    coefs.smooth[1, 1] <- coefs.raw[1, 1] # leave infant mortality unsmoothed.
-    coeffs <- coefs.smooth
+    coeffs_smooth[1, 1] <- coeffs_raw[1, 1] # leave infant mortality unsmoothed
   }
+  if (use.smooth) {coeffs = coeffs_smooth} else {coeffs = coeffs_raw}
   #--------------------------------------------------
-  # Step 5-6 - Compute fitted values of mx
-  table_ex <- LT[LT$age == theta, c('year', 'ex')]
-  k_values = LT_optim <- NULL
+  # Step 5-6 - Compute fitted values of mx using precise k
+  tab_ex <- LT[LT$age == theta, c('year', 'ex')]
+  k_ = LT_optim <- NULL
   for (i in 1:length(mx_years)) {
-    year_i <- table_ex[i, 1]
-    ex_target_i <- table_ex[i, 2]
-    Optim_out <- FUN.lt_optim(ages = mx_ages, coefs = coeffs, 
-                              ex0 = ex_target_i)
-    LT_optim_i <- cbind(country = mx_country, 
-                        year = year_i, Optim_out$lt)
-    LT_optim <- rbind(LT_optim, LT_optim_i)
-    k_optim  <- data.frame(country = mx_country, year = year_i, 
-                           ex = LT_optim_i[LT_optim_i$age == theta, ]$ex, 
-                           k = round(Optim_out$k, 6))
-    k_values <- rbind(k_values, k_optim)
+    Optim_out   <- FUN.lt_optim(mx_ages, coeffs, tab_ex[i, 2])
+    LT_optim_i  <- cbind(country = mx_country, year = tab_ex[i, 1], Optim_out$lt)
+    LT_optim    <- rbind(LT_optim, LT_optim_i)
+    k_          <- c(k_, round(Optim_out$k, 6))
     setpb(pb, i)
   }
-  table_mx <- LT_optim[, 1:4]
-  fitted.values <- reshape(table_mx, direction = 'wide', 
-                           idvar = c('country','age'), 
+  fitted.values <- reshape(data = LT_optim[, 1:4], direction = 'wide',
+                           idvar = c('country','age'),
                            timevar = 'year')[, -(1:2)]
   dimnames(fitted.values) <- list(mx_ages, mx_years)
   residuals    <- mx_input - fitted.values
-  coefficients <- list(bx = coeffs$bx, vx = coeffs$vx, k = k_values$k)
+  coefficients <- list(bx = coeffs$bx, vx = coeffs$vx, k = k_)
   #-----------------------------------
   # Output
   out = structure(class = 'LinearLink',
-                 list(input = input, df_spline = df_spline, 
-                      coefficients = coefficients, fitted.values = fitted.values, 
-                      residuals = residuals, fitted.life.tables = LT_optim, 
+                 list(input = input, df_spline = df_spline,
+                      coefficients = coefficients, fitted.values = fitted.values,
+                      residuals = residuals, fitted.life.tables = LT_optim,
                       model_info = model_info, process_date = date()))
   out$call <- match.call()
   return(out)
 }
+
 
 #' @keywords internal
 #' 

@@ -1,3 +1,9 @@
+# This file 2 fitting procedures for Linear-Link model
+# 1. LSE + SVD
+# 2. Poisson MLE
+
+
+# 1. ------------------------------------------------------
 #' Estimate bx using least square method and vx with SVD
 #' @keywords internal
 #'
@@ -12,8 +18,7 @@ fitw_LSE <- function(log_ex_theta, log_mx, ...){
   resid_log_mx[resid_log_mx == Inf] <- unique(sort(resid_log_mx, 
                                                    decreasing = T))[2]
   vx  <- svd(resid_log_mx, 1, 1)$v
-  vx <- vx / sum(vx) # scale to 1
-  
+  vx  <- vx / sum(vx) # scale to 1
   out <- list(bx = bx, vx = vx)
   return(out)
 }
@@ -24,49 +29,27 @@ FUN.bifit <- function(x, y) {
   
   if (is.vector(y)) {
     z <- lsfit(x, y, intercept = FALSE)
-    z.resid <- z$resid
+    z.resid  <- z$resid
     coef.new <- z$coef
     return(list(coef = coef.new, residuals = z.resid)) }
   
   if (is.matrix(y)) {
     resid <- coef <- NULL
     for (j in 1:ncol(y)) {
-      y.j <- y[, j] 
+      y.j   <- y[, j] 
       y.j[y.j == -Inf] = -10
-      z <- FUN.bifit(x, y.j)
+      z     <- FUN.bifit(x, y.j)
       resid <- cbind(resid, z$resid)
-      coef <- cbind(coef, z$coef) 
+      coef  <- cbind(coef, z$coef) 
     }
-    return(list(coef = coef, residuals = resid)) 
+    out <- list(coef = coef, residuals = resid)
+    return(out) 
   }
 }
 
 
-# # Estimate bx with Poisson Likelihood Method and vx with SVD --
-# # (Method not used. However, let's keep the code.)
-# #' @keywords internal
-# #'
-# fitw_MLE <- function(log_ex_theta, log_mx, LT){
-#   # Step 2 - Fit bx
-#     fit <- suppressWarnings(
-#       gnm(LT$mx ~ -1 + as.factor(LT$age):log(LT$ex0) + offset(log(LT$Ex)),
-#           family = poisson(link = "log")))
-#     bx <- as.numeric(coef(fit))
-#     # Step 3 - Compute residuals and fit SVD portion of model
-#     fitted_log_mx <- log_ex_theta %*% t(bx)
-#     dimnames(fitted_log_mx) <- dimnames(log_mx)
-#     resid_log_mx <- fitted_log_mx - log_mx
-#     resid_log_mx[resid_log_mx == Inf] <- unique(sort(resid_log_mx,
-#                                                      decreasing = T))[2]
-#     vx  <- svd(resid_log_mx, 1, 1)$v
-#     vx  <- vx / sum(vx) # scale to 1
-# 
-#     out <- list(bx = bx, vx = vx)
-#     return(out)
-# }
-
-
-#' # Estimate bx, vx and k with Poisson Likelihood Method --------
+# 2. ------------------------------------------------------
+#' # Estimate bx, vx and k with Poisson Likelihood Method 
 #' 
 #' The implemeted method of estimated the bx, vx and k coefficients of the 
 #' LinearLink model is based on the approach described in Brouhns et al. 2002
