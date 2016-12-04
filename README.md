@@ -8,9 +8,9 @@ Capital Markets Solutions Conference in Chicago (September 30, 2016).
 `The Linear Link: Deriving Age-Specific Death Rates from Life Expectancy`
 by [Marius Pascariu](http://findresearcher.sdu.dk:8080/portal/da/person/mpascariu) 
 and [Vladimir Canudas-Romo](http://www.sdu.dk/ansat/vcanudas). Since then 
-[Jose Manuel Aburto](https://www.researchgate.net/profile/Jose_Aburto2) and 
-[Ugofilippo Basellini](https://fr.linkedin.com/in/ugofilippo-basellini-79726931) 
-have made important contributions to this project.
+[Jose Manuel Aburto](https://twitter.com/jm_aburto) and 
+[Ugofilippo Basellini](https://twitter.com/ugobas) joined the project and
+made important contributions.
 
 Installation
 ============
