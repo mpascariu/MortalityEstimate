@@ -78,8 +78,8 @@ new_e0   <- 90
 pred_LL  <- predict(fit_LL, new_e0)
 pred_LL2 <- predict(fit_LL, new_e0, use.vx.rotation = TRUE)
 
-pred1 <- log(pred_LL$lt$mx)
-pred2 <- log(pred_LL2$lt$mx)
+pred1 <- log(pred_LL$lt.exact$mx)
+pred2 <- log(pred_LL2$lt.exact$mx)
 
 plot(pred1, lwd = 2, col = 2, type = 'l', cex = 1.3, 
      main = 'Estimated mortality curves')

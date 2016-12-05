@@ -63,9 +63,9 @@ lifetable <- function(x, Dx = NULL, Ex = NULL, mx = NULL,
   ex[is.na(ex)] <- 0
   ex[nmax] <- if (ex[nmax - 1] == 0) 0 else ax[nmax]
   
-  lt <- data.frame(age = x, mx = round(mx,6), qx = round(qx,6), ax = ax, 
-                   lx = round(lx), dx = round(dx), Lx = round(Lx), 
-                   Tx = round(Tx), ex = round(ex,2))
+  lt <- data.frame(age = x, mx = round(mx, 8), qx = round(qx, 8), ax = ax, 
+                   lx = round(lx), dx = round(dx, 2), Lx = round(Lx), 
+                   Tx = round(Tx), ex = round(ex, 2))
   lt.exact <- data.frame(age = x, mx = mx, qx = qx, ax = ax,
                          lx = lx, dx = dx, Lx = Lx, Tx = Tx, ex = ex)
   out <- list(input = input, lt = lt, lt.exact = lt.exact, 
@@ -92,19 +92,10 @@ mx_qx <- function(ux, x, out = 'qx'){
 
 #' @keywords internal
 #'
-FUN.mxhat <- function(ages, coefs, ex0, k = 0) {
-  mx <- exp(coefs[, 1]*log(ex0) + coefs[, 2]*k)
-  return(mx) 
-}
-
-#' @keywords internal
-#'
 FUN.lt_k0 <- function(ages, coefs, ex0, k = 0) {
-  fx <- FUN.mxhat(ages, coefs, ex0, k)
-  LT <- lifetable(ages, mx = fx)
-  lt <- LT$lt
-  lt.exact <- LT$lt.exact
-  out <- list(lt = lt, lt.exact = lt.exact)
+  mxhat <- exp(coefs[, 1]*log(ex0) + coefs[, 2]*k)
+  LT    <- lifetable(ages, mx = mxhat)
+  out   <- list(lt = LT$lt, lt.exact = LT$lt.exact)
   return(out)
 }
 
@@ -119,14 +110,13 @@ FUN.lt_k0 <- function(ages, coefs, ex0, k = 0) {
 #' 
 FUN.lt_optim <- function(ages, coefs, ex0){
   penalty <- function(k_init){
-    ex_k <- FUN.lt_k0(ages, coefs, ex0, k = k_init)$lt.exact$ex[1]
-    out  <- abs(ex_k - ex0)
+    ex_k = FUN.lt_k0(ages, coefs, ex0, k = k_init)$lt.exact$ex[1]
+    out  = abs(ex_k - ex0)
     return(out)
   }
   k.optim <- optim(0, penalty, method = "Brent", 
                    upper = 150, lower = -150)$par
   LT  <- FUN.lt_k0(ages, coefs, ex0, k = k.optim)
-  out <- list(k = k.optim, lt = LT$lt, lt.exact = LT$lt.exact, 
-              process_date = date())
+  out <- list(k = k.optim, lt = LT$lt, lt.exact = LT$lt.exact)
   return(out)
 }

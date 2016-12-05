@@ -61,8 +61,8 @@
 #' pred_LL  <- predict(fit_LL, new_e0)
 #' pred_LL2 <- predict(fit_LL, new_e0, use.vx.rotation = TRUE)
 #' 
-#' pred1 <- log(pred_LL$lt$mx)
-#' pred2 <- log(pred_LL2$lt$mx)
+#' pred1 <- log(pred_LL$lt.exact$mx)
+#' pred2 <- log(pred_LL2$lt.exact$mx)
 #' 
 #' plot(pred1, lwd = 2, col = 2, type = 'l', cex = 1.3, 
 #'      main = 'Estimated mortality curves')
@@ -105,9 +105,10 @@ LinearLink <- function(mx, mx_ages, mx_years,
   if (method == 'MLE') { fit_link <- fitw_MLE(log_ex_theta, log_mx) }
   bx <- fit_link$bx
   vx <- fit_link$vx
+  k_ <- fit_link$k_
   #-------------------------------------------------
   # Step 4 - Smooth Coefficients
-  coeffs_raw    <- round(data.frame(bx, vx, row.names = mx_ages), 8)
+  coeffs_raw    <- data.frame(bx, vx, row.names = mx_ages)
   coeffs_smooth <- coeffs_raw*0
   degrees       <- ifelse(use.smooth, round(length(mx_ages)/5), mx_ages)
   df_spline     <- ifelse(use.smooth, degrees, 'Smoothing not used')
@@ -120,26 +121,25 @@ LinearLink <- function(mx, mx_ages, mx_years,
   if (use.smooth) {coeffs = coeffs_smooth} else {coeffs = coeffs_raw}
   #--------------------------------------------------
   # Step 5-6 - Compute fitted values of mx using precise k
-  tab_ex <- LT[LT$age == theta, c('year', 'ex')]
-  k_ = LT_optim <- NULL
+  tab_ex   <- LT[LT$age == theta, c('year', 'ex')]
+  LT_optim <- NULL
   for (i in 1:length(mx_years)) {
-    Optim_out   <- FUN.lt_optim(mx_ages, coeffs, tab_ex[i, 2])
-    LT_optim_i  <- cbind(country = mx_country, year = tab_ex[i, 1], Optim_out$lt)
+    optim_obj   <- FUN.lt_optim(mx_ages, coeffs, tab_ex[i, 2])
+    LT_optim_i  <- cbind(country = mx_country, year = tab_ex[i, 1], optim_obj$lt)
     LT_optim    <- rbind(LT_optim, LT_optim_i)
-    k_          <- c(k_, round(Optim_out$k, 6))
+    k_[i]       <- optim_obj$k
     setpb(pb, i)
   }
-  fitted.values <- reshape(data = LT_optim[, 1:4], direction = 'wide',
-                           idvar = c('country','age'),
-                           timevar = 'year')[, -(1:2)]
-  dimnames(fitted.values) <- list(mx_ages, mx_years)
-  residuals    <- mx_input - fitted.values
+  fitted_mx <- reshape(data = LT_optim[, 1:4], direction = 'wide',
+                       idvar = c('country','age'), timevar = 'year')[, -(1:2)]
+  dimnames(fitted_mx) <- list(mx_ages, mx_years)
+  residuals    <- mx_input - fitted_mx
   coefficients <- list(bx = coeffs$bx, vx = coeffs$vx, k = k_)
   #-----------------------------------
   # Output
   out = structure(class = 'LinearLink',
                  list(input = input, df_spline = df_spline,
-                      coefficients = coefficients, fitted.values = fitted.values,
+                      coefficients = coefficients, fitted.values = fitted_mx,
                       residuals = residuals, fitted.life.tables = LT_optim,
                       model_info = model_info, process_date = date()))
   out$call <- match.call()
@@ -158,10 +158,4 @@ check_input_LL <- function(input){
     stop(paste("Method", method, "not available. Try 'LSE' or 'MLE' "))}
   })
 }
-
-
-
-
-
-
 

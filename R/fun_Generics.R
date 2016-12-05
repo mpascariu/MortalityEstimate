@@ -57,8 +57,10 @@ predict.LinearLink <- function(object, ex_target,
                                use.vx.rotation = FALSE, ...) {
   # Choose vx coefficients
   if (use.vx.rotation == TRUE) { 
-    vx = rotated_vx(object, ex_target = ex_target, ...) } else { 
-      vx = coef(object)$vx }
+    vx = rotated_vx(object, ex_target = ex_target, ...) 
+    } else { 
+      vx = coef(object)$vx 
+    }
   # Data.frame with all coefficients used in prediction
   coefs <- data.frame(bx = coef(object)$bx, vx = vx, 
                       row.names = object$input$mx_ages)
@@ -99,13 +101,13 @@ rotated_vx <- function(object, ex_target, e0_u = 102,
   x1 = max(min(x), 15):65 # young ages
   x2 = 66:max(x) # old ages
   
-  vx_u     = vx * 0
+  vx_u = vx * 0
   vx_young_ages = mean(vx[x1 + 1]) # select vx corresponding to young ages. 
   # Only the values between age 15 and 65 are being used.
   
-  n_vx     = length(vx[x2]) #count age groups in x2
   # Derive a logistic shape. The values have to be between 0 and 1, 
   # they will be scaled.
+  n_vx  = length(vx[x2]) #count age groups in x2
   x_num = seq(-6, 6, length.out = n_vx)
   logit_shape = 1 - exp(x_num)/ (1 + exp(x_num)) 
   vx_old_ages = logit_shape * vx_young_ages # scale values
@@ -144,15 +146,18 @@ summary.Kannisto <- function(object, ...) {
 #' @keywords internal
 #' @export
 predict.Kannisto <- function(object, newdata=NULL, ...) {
-  if (is.null(newdata)) { pred.values <- fitted(object)
-  }else{
-    x <- newdata
-    x_scaled <- x - min(object$x) 
-    pars <- coef(object)
-    pred.values <- matrix(NA, nrow = length(x), ncol = nrow(pars))
-    dimnames(pred.values) <- list(x, rownames(pars))
-    fun_ux <- Fun_ux('kannisto')
-    for (i in 1:nrow(pars)) {pred.values[,i] = fun_ux(pars[i,], x_scaled)}
+  if (is.null(newdata)) { 
+    pred.values <- fitted(object) 
+    } else {
+      x           <- newdata
+      x_scaled    <- x - min(object$x) 
+      pars        <- coef(object)
+      pred.values <- matrix(NA, nrow = length(x), ncol = nrow(pars))
+      dimnames(pred.values) <- list(x, rownames(pars))
+      fun_ux      <- Fun_ux('kannisto')
+      for (i in 1:nrow(pars)) { 
+        pred.values[,i] = fun_ux(pars[i,], x_scaled) 
+      }
   }
   return(pred.values)
 }

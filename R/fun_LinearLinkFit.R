@@ -19,7 +19,8 @@ fitw_LSE <- function(log_ex_theta, log_mx, ...){
                                                    decreasing = T))[2]
   vx  <- svd(resid_log_mx, 1, 1)$v
   vx  <- vx / sum(vx) # scale to 1
-  out <- list(bx = bx, vx = vx)
+  k_  <- rep(NA, length(log_ex_theta))
+  out <- list(bx = bx, vx = vx, k_ = k_)
   return(out)
 }
 
@@ -66,7 +67,8 @@ fitw_MLE <- function(log_ex_theta, log_mx, ...){
   Dx = t(exp(log_mx)) * 1e6 # Dx estimation
   Ex = Dx*0 + 1e6 # Ex estimation
   fit <- PoissonMLE(log_ex_theta, Dx, Ex, ...)
-  out <- list(bx = fit$bx, vx = matrix(fit$vx, ncol = 1), k = fit$k)
+  out <- list(bx = fit$bx, vx = matrix(fit$vx, ncol = 1), 
+              k_ = as.numeric(fit$k))
   return(out)
 }
 
@@ -99,15 +101,16 @@ PoissonMLE <- function(log_ex_theta, Dx, Ex, iter = 500, tol = 1e-04){
     Dx_fit <- temp$Dx_fit
     alpha  <- temp$alpha
     #
-    temp <- Update.vx(alpha, vx, k, Dx, Ex, Dx_fit)
+    temp   <- Update.vx(alpha, vx, k, Dx, Ex, Dx_fit)
     Dx_fit <- temp$Dx_fit
-    vx <- temp$vx
+    vx     <- temp$vx
     #
-    temp <- Update.k(alpha, vx, k, Dx, Ex, Dx_fit)
+    temp   <- Update.k(alpha, vx, k, Dx, Ex, Dx_fit)
     Dx_fit <- temp$Dx_fit
-    k <- temp$k
-    crit <- max(max(abs(alpha - alpha_old)), max(abs(vx - vx_old)),
-                max(abs(k - k_old)))
+    k      <- temp$k
+    crit   <- max(max(abs(alpha - alpha_old)), 
+                  max(abs(vx - vx_old)), 
+                  max(abs(k - k_old)))
     if (crit <= tol) break
   }
   
