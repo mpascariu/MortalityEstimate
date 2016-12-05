@@ -19,7 +19,8 @@ fitw_LSE <- function(log_ex_theta, log_mx, ...){
                                                    decreasing = T))[2]
   vx  <- svd(resid_log_mx, 1, 1)$v
   vx  <- vx / sum(vx) # scale to 1
-  out <- list(bx = bx, vx = vx)
+  k_  <- rep(NA, length(log_ex_theta))
+  out <- list(bx = bx, vx = vx, k_ = k_)
   return(out)
 }
 
@@ -51,22 +52,23 @@ FUN.bifit <- function(x, y) {
 # 2. ------------------------------------------------------
 #' # Estimate bx, vx and k with Poisson Likelihood Method 
 #' 
-#' The implemeted method of estimated the bx, vx and k coefficients of the 
+#' The implemented method of estimated the bx, vx and k coefficients of the 
 #' LinearLink model is based on the approach described in Brouhns et al. 2002
-#' for fittin the Lee-Carter model. 
-#' Code writen by Jose Manuel Aburto with minor changes by Marius Pascariu
+#' for fitting the Lee-Carter model. 
+#' Code written by Jose Manuel Aburto with minor changes by Marius Pascariu
 #' @source Brouhns et al. 2002
 #' @keywords internal
 #'
 fitw_MLE <- function(log_ex_theta, log_mx, ...){
   # Normally, deaths and exposes is needed in order to fit the model using 
-  # the Poisson distribution. However if a vector of mx is available we can 
+  # the Poisson distribution. However, if a vector of mx is available we can 
   # estimate Dx (deaths) and Ex (exposures) in such a way that the parameters 
-  # are resonable computed.
-  Dx = t(exp(log_mx)) * 1e6 # Dx estimation
+  # are reasonable computed.
+    Dx = t(exp(log_mx)) * 1e6 # Dx estimation
   Ex = Dx*0 + 1e6 # Ex estimation
   fit <- PoissonMLE(log_ex_theta, Dx, Ex, ...)
-  out <- list(bx = fit$bx, vx = matrix(fit$vx, ncol = 1), k = fit$k)
+  out <- list(bx = fit$bx, vx = matrix(fit$vx, ncol = 1), 
+              k_ = as.numeric(fit$k))
   return(out)
 }
 
@@ -99,15 +101,16 @@ PoissonMLE <- function(log_ex_theta, Dx, Ex, iter = 500, tol = 1e-04){
     Dx_fit <- temp$Dx_fit
     alpha  <- temp$alpha
     #
-    temp <- Update.vx(alpha, vx, k, Dx, Ex, Dx_fit)
+    temp   <- Update.vx(alpha, vx, k, Dx, Ex, Dx_fit)
     Dx_fit <- temp$Dx_fit
-    vx <- temp$vx
+    vx     <- temp$vx
     #
-    temp <- Update.k(alpha, vx, k, Dx, Ex, Dx_fit)
+    temp   <- Update.k(alpha, vx, k, Dx, Ex, Dx_fit)
     Dx_fit <- temp$Dx_fit
-    k <- temp$k
-    crit <- max(max(abs(alpha - alpha_old)), max(abs(vx - vx_old)),
-                max(abs(k - k_old)))
+    k      <- temp$k
+    crit   <- max(max(abs(alpha - alpha_old)), 
+                  max(abs(vx - vx_old)), 
+                  max(abs(k - k_old)))
     if (crit <= tol) break
   }
   
