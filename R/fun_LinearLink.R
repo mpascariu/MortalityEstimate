@@ -1,6 +1,6 @@
 # ----- Wrapper for Linear-Link model -----
 
-#' Fit Linear-Link model
+#' Fit Linear-Link model --
 #' 
 #' @param mx Death rates matrix with age as row and time as column
 #' @param mx_ages vector of ages corresponding to the mx matrix
