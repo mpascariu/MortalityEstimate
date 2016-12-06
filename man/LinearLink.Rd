@@ -19,8 +19,8 @@ The name will be adopted in the output tables. It is optional.}
 
 \item{theta}{Age to be fitted}
 
-\item{use.smooth}{Logical variable indicating wheter the spline smoothing is 
-applyed or not to the estimated coefficients (bx and vx). The smoothing 
+\item{use.smooth}{Logical variable indicating whether the spline smoothing is 
+applied or not to the estimated coefficients (bx and vx). The smoothing 
 can be applied in order to avoid jumps in the mortality rates from one 
 age to another. This using splines. One degree of freedom is allocated 
 for every 5 year of age.}
@@ -38,9 +38,8 @@ Fit Linear-Link model
 library(LinearLink)
 
 # Select the 1965 - 1990 time interval and fit the Linear-Link model
-ages    <- 0:100 # available ages in our datasets
-years   <- 1965:1990 # available years
-
+ages  <- 0:100 # available ages in our datasets
+years <- 1965:1990 # available years
 SWEmx <- HMD.test.data$SWE[paste(ages), paste(years)]
 
 # Fit the Linear-Link using the least square approach (LSE). For poisson 

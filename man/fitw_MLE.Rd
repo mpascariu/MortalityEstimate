@@ -10,10 +10,10 @@ Brouhns et al. 2002
 fitw_MLE(log_ex_theta, log_mx, ...)
 }
 \description{
-The implemeted method of estimated the bx, vx and k coefficients of the 
+The implemented method of estimated the bx, vx and k coefficients of the 
 LinearLink model is based on the approach described in Brouhns et al. 2002
-for fittin the Lee-Carter model. 
-Code writen by Jose Manuel Aburto with minor changes by Marius Pascariu
+for fitting the Lee-Carter model. 
+Code written by Jose Manuel Aburto with minor changes by Marius Pascariu
 }
 \keyword{internal}
 

@@ -18,12 +18,12 @@ Ex is the mid-year population aged x to x+1}
 
 \item{mx}{Age-specific death rates}
 
-\item{qx}{1-year pobability of dying between age x and x+1}
+\item{qx}{1-year probability of dying between age x and x+1}
 
 \item{lx0}{Radix}
 
 \item{ax0}{average time spent between age 0 and age 1 of those how died 
-in age 0. For x > 0  we assume an uniform distribution of deaths (UDD).}
+in age 0. For x > 0 we assume a uniform distribution of deaths (UDD).}
 }
 \value{
 Life Tables

@@ -19,7 +19,7 @@ rotated_vx(object, ex_target, e0_u = 102, e0_threshold = 80, p_ = 0.5,
 process reaches its maximum efficiency. Here. e0_u = 80 is taken as the default.}
 
 \item{e0_threshold}{Level of life expectancy where the rotation should begin.
-If rotated_vx is computed for ex_target <= e0_threshold then no diffrence
+If rotated_vx is computed for ex_target <= e0_threshold then no difference
 will be observed.}
 
 \item{p_}{The power to the smooth-weight function, p_, takes values 
