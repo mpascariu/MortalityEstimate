@@ -15,9 +15,9 @@ fitw_LSE <- function(log_ex_theta, log_mx, ...){
   fitted_log_mx <- log_ex_theta %*% t(bx)
   dimnames(fitted_log_mx) <- dimnames(log_mx)
   resid_log_mx <- fitted_log_mx - log_mx
-  resid_log_mx[resid_log_mx == Inf] <- unique(sort(resid_log_mx, 
-                                                   decreasing = T))[2]
+  resid_log_mx[resid_log_mx == Inf] <- unique(sort(resid_log_mx, decreasing = T))[2]
   vx  <- svd(resid_log_mx, 1, 1)$v
+  if (min(vx) < 0) { vx = vx + abs(min(vx)) } # Shift up vx curve if negative
   vx  <- vx / sum(vx) # scale to 1
   k_  <- rep(NA, length(log_ex_theta))
   out <- list(bx = bx, vx = vx, k_ = k_)
@@ -64,11 +64,16 @@ fitw_MLE <- function(log_ex_theta, log_mx, ...){
   # the Poisson distribution. However, if a vector of mx is available we can 
   # estimate Dx (deaths) and Ex (exposures) in such a way that the parameters 
   # are reasonable computed.
-    Dx = t(exp(log_mx)) * 1e6 # Dx estimation
-  Ex = Dx*0 + 1e6 # Ex estimation
+  Dx = t(exp(log_mx)) * 1e6 # Dx estimation
+  Ex = Dx*0 + 1e6           # Ex estimation
   fit <- PoissonMLE(log_ex_theta, Dx, Ex, ...)
-  out <- list(bx = fit$bx, vx = matrix(fit$vx, ncol = 1), 
-              k_ = as.numeric(fit$k))
+  
+  bx = fit$bx
+  vx = matrix(fit$vx, ncol = 1)
+  if (min(vx) < 0) { vx = vx + abs(min(vx)) } # Shift up vx curve if negative
+  k_ = as.numeric(fit$k)
+  
+  out <- list(bx = bx, vx = vx, k_ = k_)
   return(out)
 }
 

@@ -35,7 +35,7 @@ or (age, mx) or (age, qx)
 \examples{
 library(LinearLink)
 
-F_mx <- HMD.test.data$SWE
+F_mx <- HMD.test.data$female$SWE
 ages <- as.numeric(rownames(F_mx))
 year <- 1970
 mx <- F_mx[, paste(year)]

@@ -2,7 +2,7 @@
 % Please edit documentation in R/fun_LinearLink.R
 \name{LinearLink}
 \alias{LinearLink}
-\title{Fit Linear-Link model}
+\title{Fit Linear-Link model --}
 \usage{
 LinearLink(mx, mx_ages, mx_years, mx_country = "...", theta = 0,
   use.smooth = TRUE, method = "LSE")
@@ -32,7 +32,7 @@ likelihood estimation \code{MLE}.}
 A \code{LinearLink} object
 }
 \description{
-Fit Linear-Link model
+Fit Linear-Link model --
 }
 \examples{
 library(LinearLink)
@@ -40,7 +40,8 @@ library(LinearLink)
 # Select the 1965 - 1990 time interval and fit the Linear-Link model
 ages  <- 0:100 # available ages in our datasets
 years <- 1965:1990 # available years
-SWEmx <- HMD.test.data$SWE[paste(ages), paste(years)]
+sex   <- 'female'
+SWEmx <- HMD.test.data$female$SWE[paste(ages), paste(years)]
 
 # Fit the Linear-Link using the least square approach (LSE). For poisson 
 # maximum likelihood use \\code{method = 'MLE'}
@@ -59,7 +60,7 @@ new_e0   <- 84.05
 pred_LL  <- predict(fit_LL, new_e0)
 pred_LL2 <- predict(fit_LL, new_e0, use.vx.rotation = TRUE)
 
-observed_mx <- log(HMD.test.data$SWE[, '2014'])
+observed_mx <- log(HMD.test.data$female$SWE[, '2014'])
 pred1 <- log(pred_LL$lt$mx)
 pred2 <- log(pred_LL2$lt$mx)
 

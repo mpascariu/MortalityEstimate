@@ -57,7 +57,7 @@ predict.LinearLink <- function(object, ex_target,
                                use.vx.rotation = FALSE, ...) {
   # Choose vx coefficients
   if (use.vx.rotation == TRUE) { 
-    vx = rotated_vx(object, ex_target = ex_target, ...) 
+    vx = rotate_vx(object, ex_target = ex_target, ...) 
     } else { 
       vx = coef(object)$vx 
     }
@@ -93,9 +93,8 @@ predict.LinearLink <- function(object, ex_target,
 #' @source Li et al. (2013) 
 #' @keywords internal
 #' 
-rotated_vx <- function(object, ex_target, e0_u = 102, 
-                       e0_threshold = 80, p_ = 0.5,
-                       positive.vx.only = FALSE){
+rotate_vx <- function(object, ex_target, e0_u = 102, 
+                       e0_threshold = 80, p_ = 0.5){
   vx = coef(object)$vx
   x  = object$input$mx_ages
   x1 = max(min(x), 15):65 # young ages
@@ -108,12 +107,14 @@ rotated_vx <- function(object, ex_target, e0_u = 102,
   # Derive a logistic shape. The values have to be between 0 and 1, 
   # they will be scaled.
   n_vx  = length(vx[x2]) #count age groups in x2
-  x_num = seq(-6, 6, length.out = n_vx)
+  n_vx_ext = n_vx + (130 - max(x)) #set limit for convergence at 130
+  x_num = seq(-6, 6, length.out = n_vx_ext) 
   logit_shape = 1 - exp(x_num)/ (1 + exp(x_num)) 
   vx_old_ages = logit_shape * vx_young_ages # scale values
   # This is our vx ultimate (vx_u)
   vx_u[min(x):max(x1 + 1)] <- vx_young_ages
-  vx_u[x2 + 1] <- vx_old_ages
+  vx_u[x2 + 1] <- vx_old_ages[1:n_vx]
+  vx_u <- vx_u/sum(vx_u)  ## rescale
   # Compute weights
   w_t  = (ex_target - e0_threshold)/(e0_u - e0_threshold)
   ws_t = (0.5 * (1 + sin(pi/2 * (2*w_t - 1))) ) ^ p_ 
@@ -123,10 +124,7 @@ rotated_vx <- function(object, ex_target, e0_u = 102,
     rot_vx = (1 - ws_t) * vx + ws_t * vx_u
   }
   if (ex_target >= e0_u) { rot_vx = vx_u }
-  # Shift up vx curve (suggested by Ugo Basellini)
-  if (positive.vx.only == TRUE & min(rot_vx) < 0) { 
-    rot_vx = rot_vx + abs(min(rot_vx)) 
-    }
+
   return(rot_vx)
 }
 
