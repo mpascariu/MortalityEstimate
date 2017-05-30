@@ -10,4 +10,3 @@ Update.vx(alpha, vx, k, Dx, Ex, Dx_fit)
 Update vx
 }
 \keyword{internal}
-

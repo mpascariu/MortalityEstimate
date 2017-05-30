@@ -15,6 +15,9 @@
 #' for every 5 year of age.
 #' @param method Optimizing method. Least squared approach \code{LSE} or Poisson 
 #' likelihood estimation \code{MLE}.
+#' @importFrom stats complete.cases lsfit optim 
+#' smooth.spline coef reshape fitted poisson
+#' @importFrom pbapply startpb closepb setpb
 #' @return A \code{LinearLink} object
 #' @export
 #' @examples 
@@ -28,8 +31,12 @@
 #' 
 #' # Fit the Linear-Link using the least square approach (LSE). For poisson 
 #' # maximum likelihood use \code{method = 'MLE'}
-#' fit_LL <- LinearLink(mx = SWEmx, mx_ages = ages, mx_years = years, 
-#'                      mx_country = 'SWEDEN', theta = 0, method = 'LSE')
+#' fit_LL <- LinearLink(mx = SWEmx, 
+#'                      mx_ages = ages, 
+#'                      mx_years = years,
+#'                      mx_country = 'SWEDEN', 
+#'                      theta = 0, 
+#'                      method = 'LSE')
 #' fit_LL
 #' 
 #' summary(fit_LL) # summary
@@ -73,11 +80,11 @@
 #' 
 LinearLink <- function(mx, mx_ages, mx_years,
                        mx_country = '...', theta = 0,
-                       use.smooth = TRUE, method = 'LSE'){
+                       use.smooth = TRUE, method = 'MLE'){
   #-------------------------------------------------
   input <- c(as.list(environment()))
   check_input_LL(input) # Check consistency in input arguments
-  cat('\n   Fitting LL model\n')
+  cat('\n   Fitting Linear-Link model\n')
   pb <- startpb(0, length(mx_years)) # Start the clock!
   on.exit(closepb(pb)) # Stop clock on exit.
   #-------------------------------------------------
@@ -85,7 +92,7 @@ LinearLink <- function(mx, mx_ages, mx_years,
   mx_input   <- as.matrix(mx)
   dimnames(mx_input) <- list(mx_ages, mx_years)
   model_info <- "Linear-Link (2016): ln[m(x)] = b(x)ln[e(x)] + kv(x)"
-  # Compute multiple life tables (in oreder to get ex)
+  # Compute multiple life tables (in order to get ex)
   LT <- data.frame()
   for (i in 1:ncol(mx)) {
     LT_i <- lifetable(x = mx_ages, mx = mx_input[, i])$lt
@@ -153,7 +160,7 @@ check_input_LL <- function(input){
   with(input, {
   if (nrow(mx) != length(mx_ages) ) {stop('\nMismatch mx <-> mx_ages')}
   if (ncol(mx) != length(mx_years) ) {stop('\nMismatch mx <-> mx_years')}
-  if (theta != 0) {stop('\nFor now the model was tested only for theta = 0')}
+  if (theta > 50 & method == 'LSE') {print('For theta > 50 the MLE method has been observed to be more reliable.')}
   if (!(method %in% c('LSE', 'MLE'))) {
     stop(paste("Method", method, "not available. Try 'LSE' or 'MLE' "))}
   })

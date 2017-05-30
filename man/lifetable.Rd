@@ -42,4 +42,3 @@ mx <- F_mx[, paste(year)]
 
 lifetable(x = ages, mx = mx)$lt
 }
-

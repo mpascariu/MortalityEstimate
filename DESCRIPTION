@@ -1,7 +1,7 @@
 Package: LinearLink
 Type: Package
 Title: The Linear-Link: deriving age-specific death rates from life expectancy
-Version: 0.5.0
+Version: 0.5.1
 Author: Marius Pascariu,
   Vladimir Canudas-Romo,
   Jose Manuel Aburto,
@@ -14,7 +14,6 @@ License: GPL-2
 LazyData: TRUE
 Depends: R (>= 3.0.0)
 Imports:
-    psych,
     pbapply
 Suggests: 
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1

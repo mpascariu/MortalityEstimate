@@ -10,4 +10,3 @@ Update.k(alpha, vx, k, Dx, Ex, Dx_fit)
 Update k
 }
 \keyword{internal}
-

@@ -25,4 +25,3 @@ in the estimations of the life table.}
 \description{
 Predict function for a LinearLink object
 }
-

@@ -34,9 +34,6 @@ you can just type ```?LinearLink``` to see the help file.
 Check the examples provided in the `Kannisto` 
 `lifetable` and `LinearLink` functions.
 
-For now the model was tested to work for life expectancy at birth. For the other
-ages further changes need to be implemented.
-
 Abstract
 ========
 

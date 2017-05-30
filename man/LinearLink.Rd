@@ -5,7 +5,7 @@
 \title{Fit Linear-Link model --}
 \usage{
 LinearLink(mx, mx_ages, mx_years, mx_country = "...", theta = 0,
-  use.smooth = TRUE, method = "LSE")
+  use.smooth = TRUE, method = "MLE")
 }
 \arguments{
 \item{mx}{Death rates matrix with age as row and time as column}
@@ -45,8 +45,12 @@ SWEmx <- HMD.test.data$female$SWE[paste(ages), paste(years)]
 
 # Fit the Linear-Link using the least square approach (LSE). For poisson 
 # maximum likelihood use \\code{method = 'MLE'}
-fit_LL <- LinearLink(mx = SWEmx, mx_ages = ages, mx_years = years, 
-                     mx_country = 'SWEDEN', theta = 0, method = 'LSE')
+fit_LL <- LinearLink(mx = SWEmx, 
+                     mx_ages = ages, 
+                     mx_years = years,
+                     mx_country = 'SWEDEN', 
+                     theta = 0, 
+                     method = 'LSE')
 fit_LL
 
 summary(fit_LL) # summary
@@ -89,4 +93,3 @@ legend('bottomright', col = c(2, 3), lty = 1, lwd = 2, bty = 'n',
 # We have two different curves that return life expectancy at birth = 90 years 
 
 }
-

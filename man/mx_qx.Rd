@@ -10,4 +10,3 @@ mx_qx(ux, x, out = "qx")
 Function to convert mx into qx and back.
 }
 \keyword{internal}
-

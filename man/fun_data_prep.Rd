@@ -10,4 +10,3 @@ fun_data_prep(mx, x, n_parameters)
 Data preparation function
 }
 \keyword{internal}
-

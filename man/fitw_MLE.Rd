@@ -16,4 +16,3 @@ for fitting the Lee-Carter model.
 Code written by Jose Manuel Aburto with minor changes by Marius Pascariu
 }
 \keyword{internal}
-

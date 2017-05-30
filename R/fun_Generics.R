@@ -13,8 +13,8 @@ summary.LinearLink <- function(object, ...) {
      cat("\nCoefficients:\n")
      coefs <- data.frame(bx = coef(object)$bx, vx = coef(object)$vx,
                          row.names = object$input$mx_ages)
-     Hbxvx <- headTail(coefs, digits = 5, hlength = 6, tlength = 6)
-     Hk <- headTail(data.frame(. = '.', k = coef(object)$k),
+     Hbxvx <- head_tail(coefs, digits = 5, hlength = 6, tlength = 6)
+     Hk <- head_tail(data.frame(. = '.', k = coef(object)$k),
                     digits = 5, hlength = 6, tlength = 6)
      print(data.frame(Hbxvx, Hk))
      cat("\nSpline Smoothing (degrees of freedom): ")
@@ -56,7 +56,8 @@ print.LinearLink <- function(x, ...){
 predict.LinearLink <- function(object, ex_target, 
                                use.vx.rotation = FALSE, ...) {
   # Choose vx coefficients
-  if (use.vx.rotation == TRUE) { 
+  if (use.vx.rotation == TRUE) {
+    if (object$input$theta > 0) stop("vx rotation works only for theta = 0. Set use.vx.totation = FALSE.", call. = FALSE)
     vx = rotate_vx(object, ex_target = ex_target, ...) 
     } else { 
       vx = coef(object)$vx 
@@ -83,18 +84,19 @@ predict.LinearLink <- function(object, ex_target,
 #' process reaches its maximum efficiency. Here. e0_u = 80 is taken as the default.  
 #' @param e0_threshold Level of life expectancy where the rotation should begin.
 #' If rotated_vx is computed for ex_target <= e0_threshold then no difference
-#' will be observed.  
+#' will be observed.
+#' @param e0_conv Set limit for convergence. For life expectancy a birth the default value is 130.  
 #' @param p_ The power to the smooth-weight function, p_, takes values 
 #' between 0 and 1, which makes the rotation faster at starting times and 
 #' slower at ending times. Here, p = .5 is taken as the default
-#' @param positive.vx.only Logical argument. If negative values of vx are 
-#' estimated we can shift up the entire vx curve so that the minimum value 
-#' is equal to zero.
 #' @source Li et al. (2013) 
 #' @keywords internal
 #' 
-rotate_vx <- function(object, ex_target, e0_u = 102, 
-                       e0_threshold = 80, p_ = 0.5){
+rotate_vx <- function(object, ex_target, 
+                      e0_u = 102, 
+                      e0_threshold = 80,
+                      e0_conv = 130,
+                      p_ = 0.5){
   vx = coef(object)$vx
   x  = object$input$mx_ages
   x1 = max(min(x), 15):65 # young ages
@@ -106,10 +108,10 @@ rotate_vx <- function(object, ex_target, e0_u = 102,
   
   # Derive a logistic shape. The values have to be between 0 and 1, 
   # they will be scaled.
-  n_vx  = length(vx[x2]) #count age groups in x2
-  n_vx_ext = n_vx + (130 - max(x)) #set limit for convergence at 130
+  n_vx  = length(vx[x2]) # count age groups in x2
+  n_vx_ext = n_vx + (e0_conv - max(x)) # set limit for convergence at 130
   x_num = seq(-6, 6, length.out = n_vx_ext) 
-  logit_shape = 1 - exp(x_num)/ (1 + exp(x_num)) 
+  logit_shape = 1 - exp(x_num) / (1 + exp(x_num)) 
   vx_old_ages = logit_shape * vx_young_ages # scale values
   # This is our vx ultimate (vx_u)
   vx_u[min(x):max(x1 + 1)] <- vx_young_ages
@@ -138,7 +140,7 @@ summary.Kannisto <- function(object, ...) {
   cat("\nCall:\n")
   print(object$call)
   cat("\nCoefficients:\n")
-  print(headTail(coef(object), digits = 4))
+  print(head_tail(coef(object), digits = 4))
 }
 
 #' @keywords internal
@@ -161,5 +163,46 @@ predict.Kannisto <- function(object, newdata=NULL, ...) {
 }
 
 
-
+#' Summary function - display head and tail in a single data.frame
+#' The code for this function was first written for 'psych' R package
+#' @importFrom utils head tail
+#' @keywords internal
+head_tail <- function(x, hlength = 4, tlength = 4, digits = 2, ellipsis = TRUE) 
+{
+  if (is.data.frame(x) | is.matrix(x)) {
+    if (is.matrix(x)) 
+      x <- data.frame(unclass(x))
+    nvar <- dim(x)[2]
+    dots <- rep("...", nvar)
+    h <- data.frame(head(x, hlength))
+    t <- data.frame(tail(x, tlength))
+    for (i in 1:nvar) {
+      if (is.numeric(h[1, i])) {
+        h[i] <- round(h[i], digits)
+        t[i] <- round(t[i], digits)
+      }
+      else {
+        dots[i] <- NA
+      }
+    }
+    if (ellipsis) {
+      head.tail <- rbind(h, ... = dots, t)
+    }
+    else {
+      head.tail <- rbind(h, t)
+    }
+  }
+  else {
+    h <- head(x, hlength)
+    t <- tail(x, tlength)
+    if (ellipsis) {
+      head.tail <- rbind(h, "...       ...", t)
+    }
+    else {
+      head.tail <- rbind(h, t)
+      head.tail <- as.matrix(head.tail)
+    }
+  }
+  return(head.tail)
+}
 

@@ -33,4 +33,3 @@ summary(fit_kan)
 pred_kan  <- predict(fit_kan, 80:120) # extend mortality curve up to 120
 
 }
-

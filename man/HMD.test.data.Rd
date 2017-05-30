@@ -22,4 +22,3 @@ This data is provided for testing purposes only. It may not be updated.
 Download the actual data free of charge from \url{http://www.mortality.org}.
 }
 \keyword{datasets}
-

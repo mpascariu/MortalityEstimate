@@ -7,7 +7,8 @@
 Li et al. (2013)
 }
 \usage{
-rotate_vx(object, ex_target, e0_u = 102, e0_threshold = 80, p_ = 0.5)
+rotate_vx(object, ex_target, e0_u = 102, e0_threshold = 80, e0_conv = 130,
+  p_ = 0.5)
 }
 \arguments{
 \item{object}{An object of class 'LinearLink'}
@@ -21,17 +22,14 @@ process reaches its maximum efficiency. Here. e0_u = 80 is taken as the default.
 If rotated_vx is computed for ex_target <= e0_threshold then no difference
 will be observed.}
 
+\item{e0_conv}{Set limit for convergence. For life expectancy a birth the default value is 130.}
+
 \item{p_}{The power to the smooth-weight function, p_, takes values 
 between 0 and 1, which makes the rotation faster at starting times and 
 slower at ending times. Here, p = .5 is taken as the default}
-
-\item{positive.vx.only}{Logical argument. If negative values of vx are 
-estimated we can shift up the entire vx curve so that the minimum value 
-is equal to zero.}
 }
 \description{
 This functions computes the rotation of the vx coefficients using the method
 presented in Li et al. (2013) paper.
 }
 \keyword{internal}
-

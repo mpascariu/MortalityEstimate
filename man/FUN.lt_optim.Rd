@@ -20,4 +20,3 @@ Results
 Function to optimize a life table
 }
 \keyword{internal}
-

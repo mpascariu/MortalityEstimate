@@ -10,4 +10,3 @@ fitw_LSE(log_ex_theta, log_mx, ...)
 Estimate bx using least square method and vx with SVD
 }
 \keyword{internal}
-

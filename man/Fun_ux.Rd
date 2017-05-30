@@ -12,4 +12,3 @@ used in all the calculations.
 In this package only 1 model is implemented so far.
 }
 \keyword{internal}
-
