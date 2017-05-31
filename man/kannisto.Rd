@@ -24,7 +24,6 @@ This is a description
 \examples{
 library(LinearLink)
 
-head(HMD.test.data$SWE) # check data for Sweden
 ages <- 80:100
 dta  <- HMD.test.data$female$SWE[paste(ages), ] # filter Sweden mx between age 80 and 100
 fit_kan <- Kannisto(mx = dta, x = ages) # fit Kannisto model
