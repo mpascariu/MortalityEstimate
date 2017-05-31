@@ -10,7 +10,7 @@ Colaborator:
 Maintainer: Marius Pascariu <mpascariu@outlook.com>
 Description: The Linear-Link model lets you derive age-specific death rates 
   from a value of life expectancy.
-License: GPL-2
+License: GPL-3
 LazyData: TRUE
 Depends: R (>= 3.0.0)
 Imports:

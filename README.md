@@ -1,5 +1,7 @@
 # The Linear-Link model
 -----------------------------------
+[![Build Status](https://travis-ci.org/mpascariu/LinearLink.svg?branch=master)](https://travis-ci.org/mpascariu/MortalityLaws)
+[![license](https://img.shields.io/github/license/mpascariu/LinearLink.svg)]()
 
 This repository includes R code for estimating mortality curves and life tables
 based on a value of life expectancy at birth. An initial version the model was 
