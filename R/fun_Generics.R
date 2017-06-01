@@ -130,38 +130,6 @@ rotate_vx <- function(object, ex_target,
   return(rot_vx)
 }
 
-# ==========================================================================
-
-#' @keywords internal
-#' @export
-summary.Kannisto <- function(object, ...) {
-  cat('Model:\n')
-  cat(object$model_name,'\n-----')
-  cat("\nCall:\n")
-  print(object$call)
-  cat("\nCoefficients:\n")
-  print(head_tail(coef(object), digits = 4))
-}
-
-#' @keywords internal
-#' @export
-predict.Kannisto <- function(object, newdata=NULL, ...) {
-  if (is.null(newdata)) { 
-    pred.values <- fitted(object) 
-    } else {
-      x           <- newdata
-      x_scaled    <- x - min(object$x) 
-      pars        <- coef(object)
-      pred.values <- matrix(NA, nrow = length(x), ncol = nrow(pars))
-      dimnames(pred.values) <- list(x, rownames(pars))
-      fun_ux      <- Fun_ux('kannisto')
-      for (i in 1:nrow(pars)) { 
-        pred.values[,i] = fun_ux(pars[i,], x_scaled) 
-      }
-  }
-  return(pred.values)
-}
-
 
 #' Summary function - display head and tail in a single data.frame
 #' The code for this function was first written for 'psych' R package

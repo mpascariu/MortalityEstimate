@@ -22,20 +22,7 @@ fun_data_prep <- function(mx, x, n_parameters){
              n_parameters = n_parameters))
 }
 
-# --------------------------------------------
-#' Select the mortality model
-#' 
-#' This function calls the mortality model that will be 
-#' used in all the calculations. 
-#' In this package only 1 model is implemented so far.
-#' @keywords internal
-#' 
-Fun_ux <- function(model){
-  switch(model,
-         kannisto = function(par, x) {
-           with(as.list(par), a*exp(b*x) / (1 + a*exp(b*x)) ) 
-           })
-}
+
 
 # --------------------------------------------
 #' Fit Kannisto model for old age mortality
@@ -71,8 +58,7 @@ Kannisto <- function(mx, x, parS = NULL){
       parS_default <- c(a = 0.5, b = 0.13)
       parS <- if (is.null(parS)) parS_default else parS 
       if (is.null(names(parS))) names(parS) <- letters[1:length(parS)]
-      # Model ------------------------------------------
-      fun_ux <- Fun_ux('kannisto')
+
       # Find parameters / Optimization -----------------
       fun_resid <- function(par, x, ux) {
           sum(ux*log(fun_ux(par, x)) - fun_ux(par, x), na.rm = TRUE)
@@ -97,7 +83,39 @@ Kannisto <- function(mx, x, parS = NULL){
       })
 }
 
+#' @keywords internal
+#' 
+fun_ux <- function(par, x) with(as.list(par), a*exp(b*x) / (1 + a*exp(b*x)) ) 
 
+
+#' @keywords internal
+#' @export
+summary.Kannisto <- function(object, ...) {
+  cat('Model:\n')
+  cat(object$model_name,'\n-----')
+  cat("\nCall:\n")
+  print(object$call)
+  cat("\nCoefficients:\n")
+  print(head_tail(coef(object), digits = 4))
+}
+
+#' @keywords internal
+#' @export
+predict.Kannisto <- function(object, newdata=NULL, ...) {
+  if (is.null(newdata)) { 
+    pred.values <- fitted(object) 
+  } else {
+    x           <- newdata
+    x_scaled    <- x - min(object$x) 
+    pars        <- coef(object)
+    pred.values <- matrix(NA, nrow = length(x), ncol = nrow(pars))
+    dimnames(pred.values) <- list(x, rownames(pars))
+    for (i in 1:nrow(pars)) { 
+      pred.values[,i] = fun_ux(pars[i,], x_scaled) 
+    }
+  }
+  return(pred.values)
+}
 
 
 
