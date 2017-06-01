@@ -46,15 +46,15 @@ fun_data_prep <- function(mx, x, n_parameters){
 #' 
 #' @export
 Kannisto <- function(mx, x, parS = NULL){
-  all_data <- fun_data_prep(mx, x, n_parameters = 2)
-  with(all_data,
-      {
-      mx <- as.matrix(mx)
-      x  <- as.numeric(x)
+  dt <- fun_data_prep(mx, x, n_parameters = 2)
+  # with(all_data,
+  #     {
+      mx <- as.matrix(dt$mx)
+      x  <- as.numeric(dt$x)
       if (min(x) < 80 | max(x) > 100) {
           cat('The Kannisto model is usually fitted in the 80-100 age-range\n')
       }
-      model_name <- "Kannisto (1992): u(x) = a*exp(b*x) / [1 + a*exp(b*x)]"
+      model_name <- "Kannisto (1992): m(x) = a*exp(b*x) / [1 + a*exp(b*x)]"
       parS_default <- c(a = 0.5, b = 0.13)
       parS <- if (is.null(parS)) parS_default else parS 
       if (is.null(names(parS))) names(parS) <- letters[1:length(parS)]
@@ -63,29 +63,31 @@ Kannisto <- function(mx, x, parS = NULL){
       fun_resid <- function(par, x, ux) {
           sum(ux*log(fun_ux(par, x)) - fun_ux(par, x), na.rm = TRUE)
       }
-      for (i in 1:nrow(pars)) {
-          opt_i <- optim(par = parS, fn = fun_resid, x = x_scaled,
+      pars_ <- dt$pars
+      fv <- dt$fitted.values
+      for (i in 1:nrow(pars_)) {
+          opt_i <- optim(par = parS, fn = fun_resid, x = dt$x_scaled,
                          ux = mx[, i], method = 'L-BFGS-B',
                          lower = 1e-15, control = list(fnscale = -1))
-          pars[i, ] <- opt_i$par
+          pars_[i, ] <- opt_i$par
       }
       # Compute death rates ---------------------------
-      for (i in 1:nrow(pars)) fitted.values[, i] = fun_ux(pars[i, ], x_scaled)
-      residuals <- mx - fitted.values
+      for (i in 1:nrow(pars_)) fv[, i] = fun_ux(pars_[i, ], dt$x_scaled)
+      residuals <- mx - fv
       
       # Retun results ----------------------------------
       out <- structure(class = 'Kannisto', 
-                       list(x = x, mx.input = mx, fitted.values = fitted.values,
+                       list(x = x, mx.input = mx, fitted.values = fv,
                             residuals = residuals, model_name = model_name, 
-                            coefficients = pars))
+                            coefficients = pars_))
       out$call <- match.call(definition = Kannisto)
       return(out)
-      })
+      # })
 }
 
 #' @keywords internal
 #' 
-fun_ux <- function(par, x) with(as.list(par), a*exp(b*x) / (1 + a*exp(b*x)) ) 
+fun_ux <- function(par, x) par[1]*exp(par[2]*x) / (1 + par[1]*exp(par[2]*x))  
 
 
 #' @keywords internal
