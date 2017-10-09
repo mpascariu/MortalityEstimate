@@ -22,7 +22,7 @@ Results
 This is a description
 }
 \examples{
-library(LinearLink)
+library(MortalityEstimate)
 
 ages <- 80:100
 dta  <- HMD.test.data$female$SWE[paste(ages), ] # filter Sweden mx between age 80 and 100

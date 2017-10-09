@@ -35,7 +35,7 @@ A \code{LinearLink} object
 Fit Linear-Link model --
 }
 \examples{
-library(LinearLink)
+library(MortalityEstimate)
 
 # Select the 1965 - 1990 time interval and fit the Linear-Link model
 ages  <- 0:100 # available ages in our datasets

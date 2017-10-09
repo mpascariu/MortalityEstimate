@@ -33,7 +33,7 @@ Function to create a life table with input variables: (age, Dx, Ex)
 or (age, mx) or (age, qx)
 }
 \examples{
-library(LinearLink)
+library(MortalityEstimate)
 
 F_mx <- HMD.test.data$female$SWE
 ages <- as.numeric(rownames(F_mx))

@@ -14,7 +14,7 @@
 #' in age 0. For x > 0 we assume a uniform distribution of deaths (UDD).
 #' @return Life Tables
 #' @examples 
-#' library(LinearLink)
+#' library(MortalityEstimate)
 #' 
 #' F_mx <- HMD.test.data$female$SWE
 #' ages <- as.numeric(rownames(F_mx))

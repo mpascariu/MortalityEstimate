@@ -1,15 +1,14 @@
-Package: LinearLink
+Package: MortalityEstimate
 Type: Package
-Title: The Linear-Link: deriving age-specific death rates from life expectancy
-Version: 0.5.2
+Title: MortalityEstimate: Indirect methods for estimating age-specific death rates
+Version: 0.6.0
 Author: Marius Pascariu,
   Vladimir Canudas-Romo,
   Jose Manuel Aburto,
   Ugofilippo Basellini
-Colaborator: 
+Collaborator: 
 Maintainer: Marius Pascariu <mpascariu@outlook.com>
-Description: The Linear-Link model lets you derive age-specific death rates 
-  from a value of life expectancy.
+Description: Indirect methods for estimating age-specific death rates.
 License: GPL-3
 LazyData: TRUE
 Depends: R (>= 3.0.0)

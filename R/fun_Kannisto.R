@@ -35,7 +35,7 @@ fun_data_prep <- function(mx, x, n_parameters){
 #' @param parS Starting parameters used in optimization process
 #' @return Results
 #' @examples 
-#' library(LinearLink)
+#' library(MortalityEstimate)
 #' 
 #' ages <- 80:100
 #' dta  <- HMD.test.data$female$SWE[paste(ages), ] # filter Sweden mx between age 80 and 100

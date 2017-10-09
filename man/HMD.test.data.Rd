@@ -18,7 +18,7 @@ HMD.test.data
 \description{
 Dataset containing list containing 6 matrices with death rates for 
 female and male populations in  USA, France and Sweden between 1965 and 2014. 
-This data is provided for testing purposes only. It may not be updated.
+This data is provided for testing purposes only. It may not be up to date anymore.
 Download the actual data free of charge from \url{http://www.mortality.org}.
 }
 \keyword{datasets}

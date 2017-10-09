@@ -136,10 +136,10 @@ PoissonMLE <- function(log_ex_theta, Dx, Ex, iter = 500, tol = 1e-04){
 #' @keywords internal
 #'
 Update.alpha <- function(alpha, vx, k, Dx, Ex, Dx_fit){
-  mat_1 <- matrix(1, nrow = ncol(Dx), ncol = 1) 
-  difD  <- Dx - Dx_fit
-  alpha <- alpha + difD %*% mat_1 / (Dx_fit %*% mat_1)
-  Eta   <- alpha %*% t(mat_1) + vx %*% t(k)
+  mat_1  <- matrix(1, nrow = ncol(Dx), ncol = 1) 
+  difD   <- Dx - Dx_fit
+  alpha  <- alpha + difD %*% mat_1 / (Dx_fit %*% mat_1)
+  Eta    <- alpha %*% t(mat_1) + vx %*% t(k)
   Dx_fit <- Ex * exp(Eta)
   list(alpha = alpha, Dx_fit = Dx_fit)
 }
@@ -148,10 +148,10 @@ Update.alpha <- function(alpha, vx, k, Dx, Ex, Dx_fit){
 #' @keywords internal
 #'
 Update.vx <- function(alpha, vx, k, Dx, Ex, Dx_fit){
-  mat_1 <- matrix(1, nrow = ncol(Dx), ncol = 1) 
-  difD  <- Dx - Dx_fit  # exp(log_mx) - Dx_fit
-  vx    <- vx + difD %*% k / (Dx_fit %*% (k ^ 2))
-  Eta   <- alpha %*% t(mat_1) + vx %*% t(k)
+  mat_1  <- matrix(1, nrow = ncol(Dx), ncol = 1) 
+  difD   <- Dx - Dx_fit  # exp(log_mx) - Dx_fit
+  vx     <- vx + difD %*% k / (Dx_fit %*% (k ^ 2))
+  Eta    <- alpha %*% t(mat_1) + vx %*% t(k)
   Dx_fit <- Ex * exp(Eta)
   list(vx = vx, Dx_fit = Dx_fit)
 }
@@ -160,13 +160,13 @@ Update.vx <- function(alpha, vx, k, Dx, Ex, Dx_fit){
 #' @keywords internal
 #'
 Update.k <- function(alpha, vx, k, Dx, Ex, Dx_fit){
-  mat_1 <- matrix(1, nrow = ncol(Dx), ncol = 1) 
-  difD <- Dx - Dx_fit
-  k <- k + t(difD) %*% vx / (t(Dx_fit) %*% (vx ^ 2))
-  k <- k - mean(k)
-  k <- k / sqrt(sum(k ^ 2))
-  k <- matrix(k, ncol = 1)
-  Eta <- alpha %*% t(mat_1) + vx %*% t(k)
+  mat_1  <- matrix(1, nrow = ncol(Dx), ncol = 1) 
+  difD   <- Dx - Dx_fit
+  k      <- k + t(difD) %*% vx / (t(Dx_fit) %*% (vx ^ 2))
+  k      <- k - mean(k)
+  k      <- k / sqrt(sum(k ^ 2))
+  k      <- matrix(k, ncol = 1)
+  Eta    <- alpha %*% t(mat_1) + vx %*% t(k)
   Dx_fit <- Ex * exp(Eta)
   list(k = k, Dx_fit = Dx_fit)
 }

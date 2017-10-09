@@ -15,13 +15,10 @@
 #' for every 5 year of age.
 #' @param method Optimizing method. Least squared approach \code{LSE} or Poisson 
 #' likelihood estimation \code{MLE}.
-#' @importFrom stats complete.cases lsfit optim 
-#' smooth.spline coef reshape fitted poisson
-#' @importFrom pbapply startpb closepb setpb
 #' @return A \code{LinearLink} object
 #' @export
 #' @examples 
-#' library(LinearLink)
+#' library(MortalityEstimate)
 #' 
 #' # Select the 1965 - 1990 time interval and fit the Linear-Link model
 #' ages  <- 0:100 # available ages in our datasets
