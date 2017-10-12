@@ -4,19 +4,20 @@
 \alias{lt.from.mx}
 \title{Construct a life table from a vector of death rates}
 \usage{
-lt.from.mx(mx, ages, sex, Q5 = NULL, lx0 = 10^5)
+lt.from.mx(mx, x, sex, q0_5 = NULL, lx0 = 10^5)
 }
 \arguments{
 \item{mx}{numeric vector of death dates}
 
-\item{ages}{numeric vector of ages.}
+\item{x}{numeric vector of ages.}
 
 \item{sex}{sex. Possible values: \code{"female", "male"}, or \code{"total"}.}
 
-\item{Q5}{Q5}
+\item{q0_5}{5q0}
 
 \item{lx0}{radix. Default: 100 000.}
 }
 \description{
 Construct a life table from a vector of death rates
 }
+\keyword{internal}

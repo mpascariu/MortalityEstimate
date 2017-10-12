@@ -17,8 +17,25 @@ bounds of the age intervals. Default: \code{c(0, 1, seq(5, 110, by = 5))}
 (corresponding to the HMD format).}
 }
 \value{
-An \code{wilmoth} object
+The output is of class \code{wilmoth} with the components:
+
+\item{input}{ a list with input objects provided in the function}
+
+\item{coefficients}{ estimated coefficient}
+
+\item{fitted.values}{ fitted values}
+
+\item{model.life.table}{ a model life table}
+
+\item{ages_groups}{ a vector containing the names of the resulted intervals}
 }
 \description{
-Fit log-quadratic model using bi-weight method
+Estimating the log-quadratic model using the bi-weight procedure as 
+described in the Appendix of Wilmoth et.al.(2012).
+}
+\references{
+John Wilmoth, Sarah Zureick, Vladimir Canudas-Romo, Mie Inoue & 
+Cheryl Sawyer (2012): A flexible two-dimensional mortality model for use in 
+indirect estimation, Population Studies: A Journal of Demography, 66:1, 1-28
+\url{http://dx.doi.org/10.1080/00324728.2011.611411}
 }

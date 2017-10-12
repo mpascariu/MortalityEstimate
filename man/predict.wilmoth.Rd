@@ -4,23 +4,24 @@
 \alias{predict.wilmoth}
 \title{Predict function for wilmoth object}
 \usage{
-\method{predict}{wilmoth}(object, Q5 = NULL, k = NULL, e0 = NULL,
-  QQa = NULL, QQb = NULL, Q1 = NULL, tol = 1e-09, maxit = 200, ...)
+\method{predict}{wilmoth}(object, q0_5 = NULL, k = NULL, e0 = NULL,
+  q15_45 = NULL, q15_35 = NULL, q0_1 = NULL, tol = 1e-09, maxit = 200,
+  ...)
 }
 \arguments{
 \item{object}{An \code{\link{wilmoth}} object.}
 
-\item{Q5}{5q0}
+\item{q0_5}{5q0. The probability that a newborn will die during the subsequent 5 years}
 
-\item{k}{k}
+\item{k}{k-parameter in the log-quadratic model}
 
-\item{e0}{life expectancy at birth level}
+\item{e0}{life expectancy at birth}
 
-\item{QQa}{45q15}
+\item{q15_45}{45q15. The probability that a life aged 15 will die during the subsequent 45 years}
 
-\item{QQb}{35q15}
+\item{q15_35}{35q15. The probability that a life aged 15 will die during the subsequent 35 years}
 
-\item{Q1}{1q0}
+\item{q0_1}{1q0. The probability that a life aged 0 will die during the following year}
 
 \item{tol}{tolerance level for convergence. The tolerance level, is relevant 
 for case 12 and 13 (QQ and e0 are known)}
@@ -30,9 +31,16 @@ for case 12 and 13 (QQ and e0 are known)}
 \item{...}{additional arguments affecting the predictions produced.}
 }
 \value{
-life table(s) matching given inputs, and associated values of 
-Q5, k, e0, QQa, QQb, and Q1
+a life table matching given inputs, and associated values of 
+\code{5q0, k, e0, 45q15, 35q15,} and \code{1q0}.
 }
 \description{
-Predict function for wilmoth object
+Construct a life table with various choices of 2 input parameters 
+\code{5q0, k, e0, 45q15, 35q15, 1q0} and a \code{wilmoth} object.
+}
+\examples{
+# See examples in wilmoth()
+}
+\seealso{
+\code{\link{wilmoth}}
 }

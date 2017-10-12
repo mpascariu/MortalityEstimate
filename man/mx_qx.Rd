@@ -6,7 +6,11 @@
 \usage{
 mx_qx(ux, x, out = "qx")
 }
+\arguments{
+\item{ux}{a vector of mx or qx}
+}
 \description{
-Function to convert mx into qx and back.
+Function to convert mx into qx and back, using the constant force of 
+mortality assumption (CFM).
 }
 \keyword{internal}

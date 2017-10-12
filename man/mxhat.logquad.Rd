@@ -4,7 +4,7 @@
 \alias{mxhat.logquad}
 \title{Estimate mx using the log-quadratic model}
 \usage{
-mxhat.logquad(coefs, sex, Q5, k = 0)
+mxhat.logquad(coefs, x, sex, q0_5, k = 0)
 }
 \description{
 Estimate mx using the log-quadratic model

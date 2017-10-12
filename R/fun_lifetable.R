@@ -9,114 +9,135 @@
 #' Ex is the mid-year population aged x to x+1 
 #' @param mx Age-specific death rates
 #' @param qx 1-year probability of dying between age x and x+1
-#' @param lx0 Radix
-#' @param ax0 average time spent between age 0 and age 1 of those how died 
-#' in age 0. For x > 0 we assume a uniform distribution of deaths (UDD).
-#' @return Life Tables
+#' @param sex sex of the population considered here. This argument affects the 
+#' first two values in the life table ax column. The values are computed based 
+#' on Coale-Demeny method and are sligthly different for males than for females. 
+#' @param lx0 Radix. Default: 100 000
+#' @return life tables
 #' @examples 
-#' library(MortalityEstimate)
 #' 
-#' F_mx <- HMD.test.data$female$SWE
+#' # Example 1 --- Full life table --------------
+#' F_mx <- HMD3mx$female$SWE
 #' ages <- as.numeric(rownames(F_mx))
-#' year <- 1970
-#' mx <- F_mx[, paste(year)]
+#' mx   <- F_mx[, paste(1970)]
 #' 
-#' lifetable(x = ages, mx = mx)$lt
+#' LT = lifetable(x = ages, mx = mx, sex = "female")
+#' LT
+#' 
+#' # Example 2 --- Abridge life table ------------
+#' x  = c(0, 1, seq(5, 110, by = 5))
+#' mx = c(0.05384, 0.00504, 0.00157, 0.00120, 0.00186, 0.00286, 0.00347, 0.00395, 
+#'        0.00486, 0.00527, 0.00686, 0.00939, 0.01295, 0.01957, 0.03106, 0.04931, 
+#'        0.08461, 0.12988, 0.18076, 0.23542, 0.30853, 0.39036, 0.47887, 0.55141)
+#' lt = lifetable(x, mx = mx, sex = "female")
+#' lt
 #' @export
 #'
 lifetable <- function(x, Dx = NULL, Ex = NULL, mx = NULL, 
-                      qx = NULL, lx0 = 1e+05, ax0 = 0.1){
+                      qx = NULL, sex = "total", lx0 = 1e+05){
   input <- c(as.list(environment()))
   if (!is.null(mx)) mx[is.na(mx)] <- 0
   if (!is.null(qx)) qx[is.na(qx)] <- 0
   if (!is.null(Ex)) Ex[is.na(Ex) | Ex == 0] <- 0.01
   if (!is.null(Dx)) Dx[is.na(Dx)] <- 0
   
-  nmax     <- length(x)
-  n        <- rep(1,nmax)           # width of the intervals
-  ax       <- n/2
-  if (min(x) == 0) ax[1] <- ax0
+  if (is.null(mx)) {
+    if (!is.null(Dx)) mx = Dx/Ex else mx = mx_qx(qx, x, out = "mx")
+  }
   
-  mx <- if (length(Dx) > 0) { Dx/Ex } else { 
-          if (length(mx) > 0) { mx } else { 
-            qx/(n - qx*(n - ax)) }
-          }
-  if (mx[nmax] < 0.5 | is.na(mx[nmax])) mx[nmax] = mx[nmax - 1]*1.1 
-  # In small populations we could have problems 
-  # in estimating a reliable mx at last age in the lifetable
-  ax[nmax] <- if (mx[nmax] == 0) 0.5 else 1/mx[nmax]
+  if (is.null(qx)) qx = mx_qx(mx, x, out = "qx")
   
-  qx       <- if (length(qx) > 0) {qx} 
-  else{n*mx / (1 + (n - ax)*mx)} 
-  qx[x >= 100 & mx == 0] <- 1
-  qx[nmax] <- 1
-  
-  lx       <- c(1,cumprod(1 - qx))*lx0 
-  lx       <- lx[1:nmax]
-  dx       <- lx*qx
-  Lx       <- n*lx - ax*dx
-  Lx[nmax] <- ax[nmax]*dx[nmax]
+  N       <- length(x)
+  nx      <- c(diff(x), Inf)
+  ax      <- nx + 1/mx - nx/qx
+  ax[1:2] <- coale.demeny.ax(x, mx = mx, sex)[1:2]
+  ax[N]   <- 1/mx[N]
+  LT      <- lt.core(x, mx, qx, ax, lx0)
+  out     <- list(input = input, lt = LT$lt, lt.exact = LT$lt.exact, process_date = date())
+  out     <- structure(class = "lifetable", out)
+  return(out)
+}
+
+#' @keywords internal
+#' 
+lt.core <- function(x, mx, qx, ax, lx0) {
+  N        <- length(x)
+  gr_names <- paste0("[", x,",", c(x[-1], "+"), ")")
+  nx       <- c(diff(x), Inf)
+  lx       <- lx0 * c(1, cumprod(1 - qx)[1:(N - 1)])
+  dx       <- lx * qx
+  Lx       <- nx*lx - (nx - ax)*dx
+  Lx[N]    <- ax[N]*dx[N]
   Lx[is.na(Lx)] <- 0
   Tx       <- rev(cumsum(rev(Lx)))
-  # Tx[nmax] <- max(dx[nmax,], Lx[nmax])
-  ex       <- Tx/Lx
+  ex       <- Tx/(lx - dx*(ax/nx))
   ex[is.na(ex)] <- 0
-  ex[nmax] <- if (ex[nmax - 1] == 0) 0 else ax[nmax]
+  ex[N] <- if (ex[N - 1] == 0) 0 else ax[N]
   
-  lt <- data.frame(age = x, mx = round(mx, 8), qx = round(qx, 8), ax = ax, 
-                   lx = round(lx), dx = round(dx, 2), Lx = round(Lx), 
-                   Tx = round(Tx), ex = round(ex, 2))
-  lt.exact <- data.frame(age = x, mx = mx, qx = qx, ax = ax,
+  lt <- data.frame(x = x, mx = round(mx, 8), qx = round(qx, 8), 
+                   ax = round(ax, 2), lx = round(lx), dx = round(dx), 
+                   Lx = round(Lx), Tx = round(Tx), ex = round(ex, 2))
+  lt.exact <- data.frame(x = x, mx = mx, qx = qx, ax = ax,
                          lx = lx, dx = dx, Lx = Lx, Tx = Tx, ex = ex)
-  out <- list(input = input, lt = lt, lt.exact = lt.exact, 
-              process_date = date())
+  rownames(lt) = rownames(lt.exact) <- gr_names
+  out <- list(lt = lt, lt.exact = lt.exact)
   return(out)
 }
 
 
 #' mx to qx
 #'
-#' Function to convert mx into qx and back.
+#' Function to convert mx into qx and back, using the constant force of 
+#' mortality assumption (CFM).
+#' @param ux a vector of mx or qx
 #' @keywords internal
-mx_qx <- function(ux, x, out = 'qx'){
-  nmax  <- length(x)
-  n     <- rep(1,nmax)
-  ax    <- n/2
-  ax[1] <- ifelse(x[1] == 0, .1, .5)
-  vect  <- switch(out,
-                 qx = ux / (1 + (1 - ax)*ux),
-                 mx = ux/(n - ux*(n - ax))  )
-  return(vect)
-}
-
-
-#' @keywords internal
-#'
-FUN.lt_k0 <- function(ages, coefs, ex0, k = 0) {
-  mxhat <- exp(coefs[, 1]*log(ex0) + coefs[, 2]*k)
-  LT    <- lifetable(ages, mx = mxhat)
-  out   <- list(lt = LT$lt, lt.exact = LT$lt.exact)
-  return(out)
-}
-
-
-#' Function to optimize a life table
-#' 
-#' @param ages ages
-#' @param coefs coefficients
-#' @param ex0 life expectancy
-#' @return Results
-#' @keywords internal
-#' 
-FUN.lt_optim <- function(ages, coefs, ex0){
-  penalty <- function(k_init){
-    ex_k = FUN.lt_k0(ages, coefs, ex0, k = k_init)$lt.exact$ex[1]
-    out  = abs(ex_k - ex0)
-    return(out)
+mx_qx <- function(ux, x, out = "qx"){
+  if (!(out %in% c("qx", "mx"))) stop("out must be: 'qx' or 'mx'", call. = FALSE)
+  N     <- length(x)
+  nx    <- c(diff(x), Inf)
+  if (out == "qx") {
+    out_ = 1 - exp(-nx*ux)
+    out_[x >= 100 & ux == 0] <- 1
+    out_[N] <- 1
   }
-  k.optim <- optim(0, penalty, method = "Brent", 
-                   upper = 150, lower = -250)$par
-  LT  <- FUN.lt_k0(ages, coefs, ex0, k = k.optim)
-  out <- list(k = k.optim, lt = LT$lt, lt.exact = LT$lt.exact)
-  return(out)
+  if (out == "mx") out_ = log(1 - ux)/nx 
+  return(out_)
 }
+
+#' Find ax indicator using the Coale-Demeny coefficients
+#' 
+#' ax - the point in the age internal where 50% of the deaths have already occurred
+#' @keywords internal
+#' 
+coale.demeny.ax <- function(x, mx, sex) {
+  nx <- c(diff(x), Inf)
+  N  <- length(x)
+  f  <- nx[1:2] / c(1, 4)
+  m0 <- mx[1]
+  ax <- nx/2
+  if (sum(m0 <= 0) > 0) stop("'m[1]' must be greater than 0", call. = F)
+  
+  a0M <- ifelse(m0 >= 0.107, 0.330, 0.045 + 2.684*m0)
+  a1M <- ifelse(m0 >= 0.107, 0.330, 1.651 - 2.816*m0)
+  a0F <- ifelse(m0 >= 0.107, 0.350, 0.053 + 2.800*m0)
+  a1F <- ifelse(m0 >= 0.107, 0.350, 1.522 - 1.518*m0)
+  a0T <- (a0M + a0F)/2
+  a1T <- (a1M + a1F)/2
+  
+  if (sex == "male")   ax[1:2] <- c(a0M, a1M) * f
+  if (sex == "female") ax[1:2] <- c(a0F, a1F) * f
+  if (sex == "total")  ax[1:2] <- c(a0T, a1T) * f
+  
+  ax[N] <- if (mx[N] == 0) 0.5 else 1/mx[N]
+  
+  return(ax) 
+}
+
+#' Print lifetable
+#' @keywords internal
+#' @export
+print.lifetable <- function(x, ...){
+  cat("\nLife Table\n\n")
+  tab = head_tail(x$lt, digits = 6, hlength = 5, tlength = 3, ...)
+  print(tab)
+} 

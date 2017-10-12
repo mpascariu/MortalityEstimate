@@ -16,19 +16,30 @@ rates in a single year}
 \item{parS}{Starting parameters used in optimization process}
 }
 \value{
-Results
+A \code{Kannisto} object containing:
+
+\item{fitted.values}{fitted values of the model}
+
+\item{residuals}{residuals}
+
+\item{coefficients}{Estimated coefficients}
 }
 \description{
-This is a description
+This is the implementation of the Kannisto model for old age mortality. For more 
+details see Thatcher et al. (1998).
 }
 \examples{
-library(MortalityEstimate)
 
 ages <- 80:100
-dta  <- HMD.test.data$female$SWE[paste(ages), ] # filter Sweden mx between age 80 and 100
-fit_kan <- Kannisto(mx = dta, x = ages) # fit Kannisto model
+mx  <- HMD3mx$female$SWE[paste(ages), ] # filter Sweden mx between age 80 and 100
+fit_kan <- Kannisto(mx, x = ages) # fit Kannisto model
 summary(fit_kan)
 
 pred_kan  <- predict(fit_kan, 80:120) # extend mortality curve up to 120
 
+}
+\references{
+Thatcher, A. R., Kannisto, V. and Vaupel, J. W. (1998) The Force 
+of Mortality at Ages 80 to 120. Odense: Odense University Press. 104, 20 p. 
+(Odense Monographs on Population Aging Vol. 5)
 }

@@ -5,7 +5,7 @@
 \title{Function that determintes the case/problem we have to solve
 It also performes some checks}
 \usage{
-find.my.case(Q5, k, e0, QQa, QQb, Q1)
+find.my.case(q0_5, k, e0, q15_45, q15_35, q0_1)
 }
 \description{
 Function that determintes the case/problem we have to solve

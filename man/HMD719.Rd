@@ -3,14 +3,22 @@
 \docType{data}
 \name{HMD719}
 \alias{HMD719}
-\title{719 life tables from HMD (2012).}
+\title{719 life tables from HMD}
 \format{An object of class \code{data.frame} with 51768 rows and 12 columns.}
+\source{
+Human Mortality Database, \url{http://www.mortality.org}. (2012)
+}
 \usage{
 HMD719
 }
 \description{
-This data is provided for testing purposes only. 
-This data is provided for testing purposes only. It may not be up to date anymore.
-Download the actual data free of charge from \url{http://www.mortality.org}.
+Data used in the Wilmoth et. al. (2012) article. Today this dataset is outdated,
+download the actual data free of charge from \url{http://www.mortality.org}.
+}
+\references{
+John Wilmoth, Sarah Zureick, Vladimir Canudas-Romo, Mie Inoue & 
+Cheryl Sawyer (2012): A flexible two-dimensional mortality model for use in 
+indirect estimation, Population Studies: A Journal of Demography, 66:1, 1-28
+\url{http://dx.doi.org/10.1080/00324728.2011.611411}
 }
 \keyword{datasets}

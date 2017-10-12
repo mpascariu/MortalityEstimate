@@ -1,5 +1,3 @@
-# ----- Wrapper for Linear-Link model -----
-
 #' Fit Linear-Link model --
 #' 
 #' @param mx Death rates matrix with age as row and time as column
@@ -15,16 +13,23 @@
 #' for every 5 year of age.
 #' @param method Optimizing method. Least squared approach \code{LSE} or Poisson 
 #' likelihood estimation \code{MLE}.
-#' @return A \code{LinearLink} object
+#' @return A \code{LinearLink} object containing:
+#' @return \item{input}{ a list with input objects provided in the function}
+#' @return \item{coefficients}{ estimated coefficient}
+#' @return \item{fitted.values}{ fitted values}
+#' @return \item{residuals}{ estimated residuals}
+#' @return \item{fitted.life.tables}{ life tables constructed using the fitted values}
+#' @return \item{df_splines}{ degrees of freedom used in spline smoothing procedure}
+#' @return \item{model_info}{ a description of the model}
+#' @return \item{process_date}{ data and time stamp}
 #' @export
 #' @examples 
-#' library(MortalityEstimate)
 #' 
 #' # Select the 1965 - 1990 time interval and fit the Linear-Link model
 #' ages  <- 0:100 # available ages in our datasets
 #' years <- 1965:1990 # available years
 #' sex   <- 'female'
-#' SWEmx <- HMD.test.data$female$SWE[paste(ages), paste(years)]
+#' SWEmx <- HMD3mx$female$SWE[paste(ages), paste(years)]
 #' 
 #' # Fit the Linear-Link using the least square approach (LSE). For poisson 
 #' # maximum likelihood use \code{method = 'MLE'}
@@ -37,7 +42,7 @@
 #' fit_LL
 #' 
 #' summary(fit_LL) # summary
-#' coef(fit_LL) # cofficients
+#' coef(fit_LL) # coefficients
 #' ls(fit_LL) # check the all the output
 #' 
 #' 
@@ -47,7 +52,7 @@
 #' pred_LL  <- predict(fit_LL, new_e0)
 #' pred_LL2 <- predict(fit_LL, new_e0, use.vx.rotation = TRUE)
 #' 
-#' observed_mx <- log(HMD.test.data$female$SWE[, '2014'])
+#' observed_mx <- log(HMD3mx$female$SWE[, '2014'])
 #' pred1 <- log(pred_LL$lt$mx)
 #' pred2 <- log(pred_LL2$lt$mx)
 #' 
@@ -94,7 +99,7 @@ LinearLink <- function(mx, mx_ages, mx_years,
   for (i in 1:ncol(mx)) {
     LT_i <- lifetable(x = mx_ages, mx = mx_input[, i])$lt
     LT_i <- cbind(country = mx_country, year = mx_years[i], LT_i,
-                  ex0 = LT_i[LT_i$age == theta, 'ex'], Ex = 1)
+                  ex0 = LT_i[LT_i$x == theta, 'ex'], Ex = 1)
     LT_i <- LT_i[complete.cases(LT_i), ]
     LT   <- rbind(LT, LT_i)
   }
@@ -103,7 +108,7 @@ LinearLink <- function(mx, mx_ages, mx_years,
   # For example in Kannisto function.
   #-------------------------------------------------
   # Step 2-3  - Estimate bx and vx
-  log_ex_theta <- log(LT[LT$age == theta, 'ex'])
+  log_ex_theta <- log(LT[LT$x == theta, 'ex'])
   log_mx       <- t(log(mx_input))
   if (method == 'LSE') { fit_link <- fitw_LSE(log_ex_theta, log_mx) }
   if (method == 'MLE') { fit_link <- fitw_MLE(log_ex_theta, log_mx) }
@@ -125,27 +130,26 @@ LinearLink <- function(mx, mx_ages, mx_years,
   if (use.smooth) {coeffs = coeffs_smooth} else {coeffs = coeffs_raw}
   #--------------------------------------------------
   # Step 5-6 - Compute fitted values of mx using precise k
-  tab_ex   <- LT[LT$age == theta, c('year', 'ex')]
+  tab_ex   <- LT[LT$x == theta, c('year', 'ex')]
   LT_optim <- NULL
   for (i in 1:length(mx_years)) {
-    optim_obj   <- FUN.lt_optim(mx_ages, coeffs, tab_ex[i, 2])
+    optim_obj   <- compute.lt.optim(x = mx_ages, coeffs, tab_ex[i, 2])
     LT_optim_i  <- cbind(country = mx_country, year = tab_ex[i, 1], optim_obj$lt)
     LT_optim    <- rbind(LT_optim, LT_optim_i)
     k_[i]       <- optim_obj$k
     setpb(pb, i)
   }
   fitted_mx <- reshape(data = LT_optim[, 1:4], direction = 'wide',
-                       idvar = c('country','age'), timevar = 'year')[, -(1:2)]
+                       idvar = c('country','x'), timevar = 'year')[, -(1:2)]
   dimnames(fitted_mx) <- list(mx_ages, mx_years)
   residuals    <- mx_input - fitted_mx
   coefficients <- list(bx = coeffs$bx, vx = coeffs$vx, k = k_)
   #-----------------------------------
   # Output
-  out = structure(class = 'LinearLink',
-                 list(input = input, df_spline = df_spline,
-                      coefficients = coefficients, fitted.values = fitted_mx,
-                      residuals = residuals, fitted.life.tables = LT_optim,
-                      model_info = model_info, process_date = date()))
+  out = list(input = input, coefficients = coefficients, fitted.values = fitted_mx,
+             residuals = residuals, fitted.life.tables = LT_optim,
+             df_spline = df_spline, model_info = model_info, process_date = date())
+  out = structure(class = 'LinearLink', out)
   out$call <- match.call()
   return(out)
 }
@@ -155,11 +159,361 @@ LinearLink <- function(mx, mx_ages, mx_years,
 #' 
 check_input_LL <- function(input){
   with(input, {
-  if (nrow(mx) != length(mx_ages) ) {stop('\nMismatch mx <-> mx_ages')}
-  if (ncol(mx) != length(mx_years) ) {stop('\nMismatch mx <-> mx_years')}
-  if (theta > 50 & method == 'LSE') {print('For theta > 50 the MLE method has been observed to be more reliable.')}
-  if (!(method %in% c('LSE', 'MLE'))) {
-    stop(paste("Method", method, "not available. Try 'LSE' or 'MLE' "))}
+    if (nrow(mx) != length(mx_ages) ) {stop('\nMismatch mx <-> mx_ages')}
+    if (ncol(mx) != length(mx_years) ) {stop('\nMismatch mx <-> mx_years')}
+    if (theta > 50 & method == 'LSE') {print('For theta > 50 the MLE method has been observed to be more reliable.')}
+    if (!(method %in% c('LSE', 'MLE'))) {
+      stop(paste("Method", method, "not available. Try 'LSE' or 'MLE' "))}
   })
 }
 
+#' @keywords internal
+#'
+compute.lt.given.k <- function(x, coefs, ex0, k = 0) {
+  mxhat <- exp(coefs[, 1]*log(ex0) + coefs[, 2]*k)
+  LT    <- lifetable(x, mx = mxhat)
+  out   <- list(lt = LT$lt, lt.exact = LT$lt.exact)
+  return(out)
+}
+
+
+#' Function to optimize a life table
+#' 
+#' @param ages ages
+#' @param coefs coefficients
+#' @param ex0 life expectancy
+#' @return Results
+#' @keywords internal
+#' 
+compute.lt.optim <- function(x, coefs, ex0){
+  penalty <- function(k_init){
+    ex_k = compute.lt.given.k(x, coefs, ex0, k = k_init)$lt.exact$ex[1]
+    out  = abs(ex_k - ex0)
+    return(out)
+  }
+  k.optim <- optim(0, penalty, method = "Brent", upper = 150, lower = -250)$par
+  LT      <- compute.lt.given.k(x, coefs, ex0, k = k.optim)
+  out     <- list(k = k.optim, lt = LT$lt, lt.exact = LT$lt.exact)
+  return(out)
+}
+
+
+# Two fitting procedures for Linear-Link model
+# 1. LSE + SVD
+# 2. Poisson MLE
+
+# 1. ------------------------------------------------------
+#' Estimate bx using least square method and vx with SVD
+#' @keywords internal
+#'
+fitw_LSE <- function(log_ex_theta, log_mx, ...){
+  # Step 2 - Fit bx
+  fit = FUN.bifit(x = log_ex_theta, y = log_mx)
+  bx  = as.numeric(fit$coef)
+  # Step 3 - Compute residuals and fit SVD portion of model
+  fitted_log_mx <- log_ex_theta %*% t(bx)
+  dimnames(fitted_log_mx) <- dimnames(log_mx)
+  resid_log_mx <- fitted_log_mx - log_mx
+  resid_log_mx[resid_log_mx == Inf] <- unique(sort(resid_log_mx, decreasing = T))[2]
+  vx  <- svd(resid_log_mx, 1, 1)$v
+  if (min(vx) < 0) { vx = vx + abs(min(vx)) } # Shift up vx curve if negative
+  vx  <- vx / sum(vx) # scale to 1
+  k_  <- rep(NA, length(log_ex_theta))
+  out <- list(bx = bx, vx = vx, k_ = k_)
+  return(out)
+}
+
+#'@keywords internal
+#'
+FUN.bifit <- function(x, y) {
+  
+  if (is.vector(y)) {
+    z <- lsfit(x, y, intercept = FALSE)
+    z.resid  <- z$resid
+    coef.new <- z$coef
+    return(list(coef = coef.new, residuals = z.resid)) }
+  
+  if (is.matrix(y)) {
+    resid <- coef <- NULL
+    for (j in 1:ncol(y)) {
+      y.j   <- y[, j] 
+      y.j[y.j == -Inf] = -10
+      z     <- FUN.bifit(x, y.j)
+      resid <- cbind(resid, z$resid)
+      coef  <- cbind(coef, z$coef) 
+    }
+    out <- list(coef = coef, residuals = resid)
+    return(out) 
+  }
+}
+
+
+# 2. ------------------------------------------------------
+#' # Estimate bx, vx and k with Poisson Likelihood Method 
+#' 
+#' The implemented method of estimated the bx, vx and k coefficients of the 
+#' LinearLink model is based on the approach described in Brouhns et al. 2002
+#' for fitting the Lee-Carter model. 
+#' Code written by Jose Manuel Aburto with minor changes by Marius Pascariu
+#' @source Brouhns et al. 2002
+#' @keywords internal
+#'
+fitw_MLE <- function(log_ex_theta, log_mx, ...){
+  # Normally, deaths and exposes is needed in order to fit the model using 
+  # the Poisson distribution. However, if a vector of mx is available we can 
+  # estimate Dx (deaths) and Ex (exposures) in such a way that the parameters 
+  # are reasonable computed.
+  Dx = t(exp(log_mx)) * 1e6 # Dx estimation
+  Ex = Dx*0 + 1e6           # Ex estimation
+  fit <- PoissonMLE(log_ex_theta, Dx, Ex, ...)
+  
+  bx = fit$bx
+  vx = matrix(fit$vx, ncol = 1)
+  if (min(vx) < 0) { vx = vx + abs(min(vx)) } # Shift up vx curve if negative
+  k_ = as.numeric(fit$k)
+  
+  out <- list(bx = bx, vx = vx, k_ = k_)
+  return(out)
+}
+
+
+#' @keywords internal
+#'
+PoissonMLE <- function(log_ex_theta, Dx, Ex, iter = 500, tol = 1e-04){
+  # dimensions
+  n <- ncol(Dx)
+  # Initialise
+  mat_1    <- matrix(1, nrow = ncol(Dx), ncol = 1)    
+  Fit.init <- log((Dx + 1)/(Ex + 2))
+  Dx_fit   <- Ex * exp(Fit.init)  # Ex * exp(log_mx)
+  alpha    <- Fit.init %*% mat_1 / n
+  
+  vx     <- matrix(1 * alpha, ncol = 1)
+  sum_vx <- sum(vx) 
+  vx     <- vx / sum_vx
+  
+  k <- matrix(seq(n, 1, by = -1), nrow = n, ncol = 1)
+  k <- k - mean(k)
+  k <- k / sqrt(sum(k * k))
+  k <- k * sum_vx
+  
+  # Iteration
+  for (i in 1:iter) {
+    alpha_old = alpha; vx_old = vx; k_old = k
+    #
+    temp   <- Update.alpha(alpha, vx, k, Dx, Ex, Dx_fit)
+    Dx_fit <- temp$Dx_fit
+    alpha  <- temp$alpha
+    #
+    temp   <- Update.vx(alpha, vx, k, Dx, Ex, Dx_fit)
+    Dx_fit <- temp$Dx_fit
+    vx     <- temp$vx
+    #
+    temp   <- Update.k(alpha, vx, k, Dx, Ex, Dx_fit)
+    Dx_fit <- temp$Dx_fit
+    k      <- temp$k
+    crit   <- max(max(abs(alpha - alpha_old)), 
+                  max(abs(vx - vx_old)), 
+                  max(abs(k - k_old)))
+    if (crit <= tol) break
+  }
+  
+  #constraints
+  k  <- k * sum(vx)
+  vx <- vx / sum(vx) # scale to 1
+  
+  log.MU.hat <- alpha %*% t(mat_1) + vx %*% t(k)
+  bx_hat <- rowMeans((log.MU.hat - vx %*% t(k))/log_ex_theta)
+  
+  # output
+  out <- list(bx = as.numeric(bx_hat), 
+              vx = as.numeric(vx), k = as.numeric(k))
+  return(out)
+}
+
+#' Update alpha
+#' @keywords internal
+#'
+Update.alpha <- function(alpha, vx, k, Dx, Ex, Dx_fit){
+  mat_1  <- matrix(1, nrow = ncol(Dx), ncol = 1) 
+  difD   <- Dx - Dx_fit
+  alpha  <- alpha + difD %*% mat_1 / (Dx_fit %*% mat_1)
+  Eta    <- alpha %*% t(mat_1) + vx %*% t(k)
+  Dx_fit <- Ex * exp(Eta)
+  list(alpha = alpha, Dx_fit = Dx_fit)
+}
+
+#' Update vx
+#' @keywords internal
+#'
+Update.vx <- function(alpha, vx, k, Dx, Ex, Dx_fit){
+  mat_1  <- matrix(1, nrow = ncol(Dx), ncol = 1) 
+  difD   <- Dx - Dx_fit  # exp(log_mx) - Dx_fit
+  vx     <- vx + difD %*% k / (Dx_fit %*% (k ^ 2))
+  Eta    <- alpha %*% t(mat_1) + vx %*% t(k)
+  Dx_fit <- Ex * exp(Eta)
+  list(vx = vx, Dx_fit = Dx_fit)
+}
+
+#' Update k
+#' @keywords internal
+#'
+Update.k <- function(alpha, vx, k, Dx, Ex, Dx_fit){
+  mat_1  <- matrix(1, nrow = ncol(Dx), ncol = 1) 
+  difD   <- Dx - Dx_fit
+  k      <- k + t(difD) %*% vx / (t(Dx_fit) %*% (vx ^ 2))
+  k      <- k - mean(k)
+  k      <- k / sqrt(sum(k ^ 2))
+  k      <- matrix(k, ncol = 1)
+  Eta    <- alpha %*% t(mat_1) + vx %*% t(k)
+  Dx_fit <- Ex * exp(Eta)
+  list(k = k, Dx_fit = Dx_fit)
+}
+
+
+# ----------------------------------------------
+
+#' Predict function for a LinearLink object
+#' 
+#' @param object An object of class 'LinearLink'
+#' @param use.vx.rotation Logical argument. If \code{TRUE} the adjustment method
+#' described in Li et al. (2013) paper is applied to the vx coefficients before 
+#' estimated the life table. If \code{FALSE} the fitted vx coefficients are used 
+#' in the estimations of the life table.
+#' @param ex_target A value of life expectancy for which we want to estimate 
+#' the mortality curve
+#' @inheritParams rotated_vx 
+#' @param ... additional arguments affecting the predictions produced
+#' @return Predicted values of the Linear-Link model
+#' @references Li N., Lee R. and Gerland P. (2013). Extending the Lee-Carter 
+#' Method to Model the Rotation of Age Patterns of Mortality Decline 
+#' for Long-Term Projections. Demography 50:2037-2051. 
+#' DOI: \url{http://dx.doi.org/10.1007/s13524-013-0232-2}
+#' @export
+predict.LinearLink <- function(object, ex_target, 
+                               use.vx.rotation = FALSE, ...) {
+  # Choose vx coefficients
+  if (use.vx.rotation == TRUE) {
+    if (object$input$theta > 0) stop("vx rotation works only for theta = 0. Set use.vx.totation = FALSE.", call. = FALSE)
+    vx = rotate_vx(object, ex_target = ex_target, ...) 
+  } else { 
+    vx = coef(object)$vx 
+  }
+  # Data.frame with all coefficients used in prediction
+  coefs <- data.frame(bx = coef(object)$bx, vx = vx, 
+                      row.names = object$input$mx_ages)
+  # Find the right life table
+  pred.values <- compute.lt.optim(x = object$input$mx_ages, 
+                                  coefs = coefs, ex0 = ex_target)
+  pred.values$bx <- coefs$bx
+  pred.values$vx <- coefs$vx
+  return(pred.values)
+}
+
+
+#' Compute rotated vx coefficients
+#' 
+#' This functions computes the rotation of the vx coefficients using the method
+#' presented in Li et al. (2013) paper. 
+#' @param object An object of class 'LinearLink'
+#' @param ex_target A value of life expectancy for which we want to derive the rotated vx
+#' @param e0_u Ultimate value of life expectancy. At this point the rotation 
+#' process reaches its maximum efficiency. Here. e0_u = 80 is taken as the default.  
+#' @param e0_threshold Level of life expectancy where the rotation should begin.
+#' If rotated_vx is computed for ex_target <= e0_threshold then no difference
+#' will be observed.
+#' @param e0_conv Set limit for convergence. For life expectancy a birth the default value is 130.  
+#' @param p_ The power to the smooth-weight function, p_, takes values 
+#' between 0 and 1, which makes the rotation faster at starting times and 
+#' slower at ending times. Here, p = .5 is taken as the default
+#' @source Li et al. (2013) 
+#' @keywords internal
+#' 
+rotate_vx <- function(object, ex_target, 
+                      e0_u = 102, 
+                      e0_threshold = 80,
+                      e0_conv = 130,
+                      p_ = 0.5){
+  vx = coef(object)$vx
+  x  = object$input$mx_ages
+  x1 = max(min(x), 15):65 # young ages
+  x2 = 66:max(x) # old ages
+  
+  vx_u = vx * 0
+  vx_young_ages = mean(vx[x1 + 1]) # select vx corresponding to young ages. 
+  # Only the values between age 15 and 65 are being used.
+  
+  # Derive a logistic shape. The values have to be between 0 and 1, 
+  # they will be scaled.
+  n_vx  = length(vx[x2]) # count age groups in x2
+  n_vx_ext = n_vx + (e0_conv - max(x)) # set limit for convergence at 130
+  x_num = seq(-6, 6, length.out = n_vx_ext) 
+  logit_shape = 1 - exp(x_num) / (1 + exp(x_num)) 
+  vx_old_ages = logit_shape * vx_young_ages # scale values
+  # This is our vx ultimate (vx_u)
+  vx_u[min(x):max(x1 + 1)] <- vx_young_ages
+  vx_u[x2 + 1] <- vx_old_ages[1:n_vx]
+  vx_u <- vx_u/sum(vx_u)  ## rescale
+  # Compute weights
+  w_t  = (ex_target - e0_threshold)/(e0_u - e0_threshold)
+  ws_t = (0.5 * (1 + sin(pi/2 * (2*w_t - 1))) ) ^ p_ 
+  # Compute rotate_vx
+  if ( ex_target < e0_threshold ) { rot_vx = vx }
+  if ( e0_threshold <= ex_target & ex_target < e0_u ) {
+    rot_vx = (1 - ws_t) * vx + ws_t * vx_u
+  }
+  if (ex_target >= e0_u) { rot_vx = vx_u }
+  
+  return(rot_vx)
+}
+
+
+# S Functions
+# Classes and methods
+
+#' @keywords internal
+#' @export
+summary.LinearLink <- function(object, ...) {
+  mi <- object$model_info
+  cl <- object$call
+  dev   <- round(summary(as.vector(as.matrix(object$residuals))), 5)
+  coefs <- data.frame(bx = coef(object)$bx, vx = coef(object)$vx,
+                      row.names = object$input$mx_ages)
+  Hbxvx <- head_tail(coefs, digits = 5, hlength = 6, tlength = 6)
+  Hk    <- head_tail(data.frame(. = '.', k = coef(object)$k),
+                     digits = 5, hlength = 6, tlength = 6)
+  H   <- data.frame(Hbxvx, Hk)
+  dfs <- object$df_spline
+  
+  out <- list(model_info = mi, call = cl, dev = dev, 
+              coef = H, df_spline = dfs)
+  out <- structure(class = "summary.LinearLink", out)
+  return(out)
+}
+
+#' @keywords internal
+#' @export
+print.summary.LinearLink <- function(x, ...) {
+  cat('\nModel:\n'); cat(x$model_info)
+  cat("\n\nCall:\n"); print(x$call)
+  cat('\nDeviance Residuals:\n'); print(x$dev)
+  cat("\nCoefficients:\n"); print(x$coef)
+  cat("\nSpline Smoothing (degrees of freedom): "); cat(x$df_spline)
+}
+
+#' @keywords internal
+#' @export
+print.LinearLink <- function(x, ...){
+  with(x$input,
+       {
+         cat('\nLinear-Link Model (2016): \nln[m(x)] = b(x)ln[e(x)] + kv(x)\n')
+         cat('\nFitted for life expectancy at age:', theta)
+         cat('\nTime interval:', min(mx_years), '-', max(mx_years))
+         cat('\nAge-range:', min(mx_ages), '-', max(mx_ages))
+         cat('\nCountry:', mx_country, '\n')
+         met <- ifelse(method == 'LSE', 'Least Squares (LSE)', 
+                       'Poisson Maximum Likelihood (MLE)')
+         cat('\nFitting Procedure:', met)
+         cat('\nSmoothing:', use.smooth)
+       })
+}

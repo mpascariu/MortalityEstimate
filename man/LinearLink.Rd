@@ -29,19 +29,34 @@ for every 5 year of age.}
 likelihood estimation \code{MLE}.}
 }
 \value{
-A \code{LinearLink} object
+A \code{LinearLink} object containing:
+
+\item{input}{ a list with input objects provided in the function}
+
+\item{coefficients}{ estimated coefficient}
+
+\item{fitted.values}{ fitted values}
+
+\item{residuals}{ estimated residuals}
+
+\item{fitted.life.tables}{ life tables constructed using the fitted values}
+
+\item{df_splines}{ degrees of freedom used in spline smoothing procedure}
+
+\item{model_info}{ a description of the model}
+
+\item{process_date}{ data and time stamp}
 }
 \description{
 Fit Linear-Link model --
 }
 \examples{
-library(MortalityEstimate)
 
 # Select the 1965 - 1990 time interval and fit the Linear-Link model
 ages  <- 0:100 # available ages in our datasets
 years <- 1965:1990 # available years
 sex   <- 'female'
-SWEmx <- HMD.test.data$female$SWE[paste(ages), paste(years)]
+SWEmx <- HMD3mx$female$SWE[paste(ages), paste(years)]
 
 # Fit the Linear-Link using the least square approach (LSE). For poisson 
 # maximum likelihood use \\code{method = 'MLE'}
@@ -54,7 +69,7 @@ fit_LL <- LinearLink(mx = SWEmx,
 fit_LL
 
 summary(fit_LL) # summary
-coef(fit_LL) # cofficients
+coef(fit_LL) # coefficients
 ls(fit_LL) # check the all the output
 
 
@@ -64,7 +79,7 @@ new_e0   <- 84.05
 pred_LL  <- predict(fit_LL, new_e0)
 pred_LL2 <- predict(fit_LL, new_e0, use.vx.rotation = TRUE)
 
-observed_mx <- log(HMD.test.data$female$SWE[, '2014'])
+observed_mx <- log(HMD3mx$female$SWE[, '2014'])
 pred1 <- log(pred_LL$lt$mx)
 pred2 <- log(pred_LL2$lt$mx)
 

@@ -4,7 +4,7 @@
 \alias{lthat.logquad}
 \title{Estimated life table using the log-quadratic model}
 \usage{
-lthat.logquad(coefs, ages, sex, Q5, k)
+lthat.logquad(coefs, x, sex, q0_5, k)
 }
 \description{
 Estimated life table using the log-quadratic model

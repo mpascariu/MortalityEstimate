@@ -1,27 +1,37 @@
 
 #' Fit log-quadratic model using bi-weight method
 #' 
+#' Estimating the log-quadratic model using the bi-weight procedure as 
+#' described in the Appendix of Wilmoth et.al.(2012).
 #' @param data input data. A collection of life tables.
-#' @param sex Specify the sex of the population. Options: \code{"Female", "Male" or "Total"}
+#' @param sex Specify the sex of the population. Options: \code{"female", "male" or "total"}
 #' @param ages Numerical vector containing ages covered in the life tables.
 #' If abridge life tables are supplied in \code{data} then provide the lower 
 #' bounds of the age intervals. Default: \code{c(0, 1, seq(5, 110, by = 5))} 
 #' (corresponding to the HMD format).
-#' @return An \code{wilmoth} object
+#' @return The output is of class \code{wilmoth} with the components:
+#' @return \item{input}{ a list with input objects provided in the function}
+#' @return \item{coefficients}{ estimated coefficient}
+#' @return \item{fitted.values}{ fitted values}
+#' @return \item{model.life.table}{ a model life table}
+#' @return \item{ages_groups}{ a vector containing the names of the resulted intervals}
+#' @references John Wilmoth, Sarah Zureick, Vladimir Canudas-Romo, Mie Inoue & 
+#' Cheryl Sawyer (2012): A flexible two-dimensional mortality model for use in 
+#' indirect estimation, Population Studies: A Journal of Demography, 66:1, 1-28
+#' \url{http://dx.doi.org/10.1080/00324728.2011.611411}
 #' @export  
 #'  
 wilmoth <- function(data, sex, ages = c(0,1,seq(5, 110, by = 5))) {
   
-  if (!(sex %in% c("Female", "Male", "Total"))) stop("sex must be: 'Female', 'Male', or 'Total'", call. = FALSE)
+  if (!(sex %in% c("female", "male", "total"))) stop("sex must be: 'female', 'male', or 'total'", call. = FALSE)
   
   input <- c(as.list(environment()))
   na        <- length(ages)
-  ageG      <- paste0("[", ages,",", c(ages[-1], "+"), ")")
-  ageG[na]  <- paste0("[", ages[na], "+]")
-  data$ageG <- ageG
+  gr_names  <- paste0("[", ages,",", c(ages[-1], "+"), ")")
+  data$gr_names <- gr_names
   
   # 5q0 (vector)
-  q0_5 <- 1 - data[data$ageG == "[5,10)", "lx"] / data[data$ageG == "[0,1)", "lx"]
+  q0_5 <- 1 - data[data$gr_names == "[5,10)", "lx"] / data[data$gr_names == "[0,1)", "lx"]
   # mx (matrix)
   mx_ <- array(data$mx, dim = c(na, nrow(data)/na))
   
@@ -30,7 +40,7 @@ wilmoth <- function(data, sex, ages = c(0,1,seq(5, 110, by = 5))) {
   y.f     <- t(log(mx_))
   bifit.f <- bifit(x.f, y.f, c = 6)
   coef    <- data.frame(t(bifit.f$coef))
-  dimnames(coef) <- list(ageG, c("ax", "bx","cx"))
+  dimnames(coef) <- list(gr_names, c("ax", "bx","cx"))
   # coef[2, ] <- NA
   
   # Compute residuals and fit SVD portion of model
@@ -41,14 +51,14 @@ wilmoth <- function(data, sex, ages = c(0,1,seq(5, 110, by = 5))) {
   # Set values of vx = 0 for ages 0, 1-4 and above 90
   vx <- c(0, NA, svd.f$v) 
   vx[20:24] <- 0
-  coef$vx <- vx
+  coef$vx   <- vx
   
-  fit_mx <- mxhat.logquad(coef, sex, Q5 = median(q0_5))
-  fit_lt <- lt.from.mx(mx = fit_mx, ages, sex, Q5 = median(q0_5))
+  fit_mx <- mxhat.logquad(coef, x = ages, sex, q0_5 = median(q0_5))
+  fit_lt <- lt.from.mx(mx = fit_mx, x = ages, sex, q0_5 = median(q0_5))
   
   out <- list(input = input, coefficients = coef, 
               fitted.values = fit_mx, model.life.table = fit_lt,
-              ages_groups = ageG)
+              ages_groups = gr_names)
   out <- structure(class = 'wilmoth', out)
   out$call <- match.call()
   return(out)
@@ -57,116 +67,120 @@ wilmoth <- function(data, sex, ages = c(0,1,seq(5, 110, by = 5))) {
 
 #' Predict function for wilmoth object
 #' 
+#' Construct a life table with various choices of 2 input parameters 
+#' \code{5q0, k, e0, 45q15, 35q15, 1q0} and a \code{wilmoth} object.
 #' @param object An \code{\link{wilmoth}} object.
-#' @param Q5 5q0
-#' @param k k 
-#' @param e0 life expectancy at birth level
-#' @param QQa 45q15
-#' @param QQb 35q15
-#' @param Q1 1q0
+#' @param q0_5 5q0. The probability that a newborn will die during the subsequent 5 years
+#' @param k k-parameter in the log-quadratic model
+#' @param e0 life expectancy at birth
+#' @param q15_45 45q15. The probability that a life aged 15 will die during the subsequent 45 years
+#' @param q15_35 35q15. The probability that a life aged 15 will die during the subsequent 35 years
+#' @param q0_1 1q0. The probability that a life aged 0 will die during the following year
 #' @param tol tolerance level for convergence. The tolerance level, is relevant 
 #' for case 12 and 13 (QQ and e0 are known)
 #' @param maxit maximum number of iterations allowed. Default: 100.
 #' @param ... additional arguments affecting the predictions produced.
-#' @return life table(s) matching given inputs, and associated values of 
-#' Q5, k, e0, QQa, QQb, and Q1
+#' @return a life table matching given inputs, and associated values of 
+#' \code{5q0, k, e0, 45q15, 35q15,} and \code{1q0}.
+#' @examples # See examples in wilmoth()
+#' @seealso \code{\link{wilmoth}}
 #' @export
 #' 
-predict.wilmoth <- function(object, Q5 = NULL, k = NULL, e0 = NULL, 
-                            QQa = NULL, QQb = NULL, Q1 = NULL, 
+predict.wilmoth <- function(object, q0_5 = NULL, k = NULL, e0 = NULL, 
+                            q15_45 = NULL, q15_35 = NULL, q0_1 = NULL, 
                             tol = 1e-9, maxit = 200, ...) {
   
-  my_case <- find.my.case(Q5, k, e0, QQa, QQb, Q1)
-  cf   <- coef(object)
-  sex  <- object$input$sex
-  ages <- object$input$ages
+  my_case <- find.my.case(q0_5, k, e0, q15_45, q15_35, q0_1)
+  cf  <- coef(object)
+  sex <- object$input$sex
+  x   <- object$input$ages
   
-  # Cases 1-4:  Q5 is known, plus k, e0, QQa or QQb
+  # Cases 1-4:  5q0 is known, plus k, e0, 45q15 or 45q15
   if (my_case == "C1") {
-    tmp <- lthat.logquad(cf, ages, sex, Q5, k)
+    tmp <- lthat.logquad(cf, x, sex, q0_5, k)
   }
   if (my_case %in% c("C2", "C3", "C4")) {
     if (my_case == "C2") fun.k <- function(k) {
-      lthat.logquad(cf, ages, sex, Q5, k)$lt$ex[1] - e0
+      lthat.logquad(cf, x, sex, q0_5, k)$lt$ex[1] - e0
     }
     if (my_case == "C3") fun.k <- function(k) { 
-      lt = lthat.logquad(cf, ages, sex, Q5, k)$lt
-      return(1 - lt["[60,65)", "lx"] / lt["[15,20)", "lx"] - QQa)
+      lt = lthat.logquad(cf, x, sex, q0_5, k)$lt
+      return(1 - lt["[60,65)", "lx"] / lt["[15,20)", "lx"] - q15_45)
     }
     if (my_case == "C4") fun.k <- function(k) { 
-      lt = lthat.logquad(cf, ages, sex, Q5, k)$lt
-      return(1 - lt["[50,55)", "lx"] / lt["[15,20)", "lx"] - QQb)
+      lt = lthat.logquad(cf, x, sex, q0_5, k)$lt
+      return(1 - lt["[50,55)", "lx"] / lt["[15,20)", "lx"] - q15_35)
     }
     
     root <- uniroot(f = fun.k, interval = c(-10,10))$root
-    tmp  <- lthat.logquad(cf, ages, sex, Q5, k = root) 
+    tmp  <- lthat.logquad(cf, x, sex, q0_5, k = root) 
   }
   
-  # Cases 5-8:  Q1 is known, plus k, e0, QQa or QQb;
-  #             after finding Q5 (assume k=0, but it doesn't matter), these become Cases 1-4
+  # Cases 5-8:  1q0 is known, plus k, e0, 45q15 or 35q15;
+  #             after finding 5q0 (assume k=0, but it doesn't matter), these become Cases 1-4
   if (my_case %in% c("C5","C6","C7","C8") ) {
-    fun.Q5  <- function(Q5) lthat.logquad(cf, ages, sex, Q5, k = 0)$lt$qx[1] - Q1
-    root <- uniroot(f = fun.Q5, interval = c(1e-5, 0.8))$root
+    fun.q0_5  <- function(q0_5) lthat.logquad(cf, x, sex, q0_5, k = 0)$lt$qx[1] - q0_1
+    root <- uniroot(f = fun.q0_5, interval = c(1e-5, 0.8))$root
   }
-  if (my_case == "C5") tmp <- predict(object, Q5 = root, k = k, tol = tol, maxit = maxit, ...)
-  if (my_case == "C6") tmp <- predict(object, Q5 = root, e0 = e0, tol = tol, maxit = maxit, ...)
-  if (my_case == "C7") tmp <- predict(object, Q5 = root, QQa = QQa, tol = tol, maxit = maxit, ...)
-  if (my_case == "C8") tmp <- predict(object, Q5 = root, QQb = QQb, tol = tol, maxit = maxit, ...)
+  if (my_case == "C5") tmp <- predict(object, q0_5 = root, k = k, tol = tol, maxit = maxit, ...)
+  if (my_case == "C6") tmp <- predict(object, q0_5 = root, e0 = e0, tol = tol, maxit = maxit, ...)
+  if (my_case == "C7") tmp <- predict(object, q0_5 = root, q15_45 = q15_45, tol = tol, maxit = maxit, ...)
+  if (my_case == "C8") tmp <- predict(object, q0_5 = root, q15_35 = q15_35, tol = tol, maxit = maxit, ...)
   
-  # Cases 9-11:  k is known, plus e0, QQa or QQb; 
-  # must find Q5
+  # Cases 9-11:  k is known, plus e0, 45q15 or 35q15; 
+  # must find 5q0
   if (my_case %in% c("C9", "C10", "C11")) {
-    if (my_case == "C9") fun.Q5 = function(Q5) { 
-      lthat.logquad(cf, ages, sex, Q5, k)$lt$ex[1] - e0 
+    if (my_case == "C9") fun.q0_5 = function(q0_5) { 
+      lthat.logquad(cf, x, sex, q0_5, k)$lt$ex[1] - e0 
     }
-    if (my_case == "C10") fun.Q5 = function(Q5) { 
-      lt <- lthat.logquad(cf, ages, sex, Q5, k)$lt
-      return(1 - lt["[60,65)", "lx"] / lt["[15,20)", "lx"] - QQa)
+    if (my_case == "C10") fun.q0_5 = function(q0_5) { 
+      lt <- lthat.logquad(cf, x, sex, q0_5, k)$lt
+      return(1 - lt["[60,65)", "lx"] / lt["[15,20)", "lx"] - q15_45)
     }
-    if (my_case == "C11") fun.Q5 <- function(Q5) {
-      lt <- lthat.logquad(cf, ages, sex, Q5, k)$lt
-      return(1 - lt["[50,55)", "lx"] / lt["[15,20)", "lx"] - QQb)
+    if (my_case == "C11") fun.q0_5 <- function(q0_5) {
+      lt <- lthat.logquad(cf, x, sex, q0_5, k)$lt
+      return(1 - lt["[50,55)", "lx"] / lt["[15,20)", "lx"] - q15_35)
     }
     
-    root <- uniroot(fun.Q5, c(1e-4,0.8))$root
-    tmp  <- lthat.logquad(cf, ages, sex, Q5 = root, k)
+    root <- uniroot(fun.q0_5, c(1e-4,0.8))$root
+    tmp  <- lthat.logquad(cf, x, sex, q0_5 = root, k)
   }
   
-  # Case 12 and 13: QQ and e0 are known; must find both Q5 and k
+  # Case 12 and 13: QQ and e0 are known; must find both 5q0 and k
   if (my_case %in% c("C12", "C13")) {
-    k <- Q5 <- 0
+    k <- q0_5 <- 0
     iter <- crit <- 1
     
     while (crit > tol & iter <= maxit) {
       k.old  <- k
-      Q5.old <- Q5
-      Q5 <- predict(object, k = k, e0 = e0, tol = tol, maxit = maxit, ...)$Q5 # Get Q5 from e0 assuming k
-      # Get k from QQa or QQb asuming Q5
-      if (my_case == "C12") tmp = predict(object, Q5 = Q5, QQa = QQa, tol = tol, maxit = maxit, ...)
-      if (my_case == "C13") tmp = predict(object, Q5 = Q5, QQb = QQb, tol = tol, maxit = maxit, ...)
+      q0_5.old <- q0_5
+      q0_5 <- predict(object, k = k, e0 = e0, tol = tol, maxit = maxit, ...)$q0_5 # Get 5q0 from e0 assuming k
+      # Get k from 45q15 or 35q15 asuming 5q0
+      if (my_case == "C12") tmp = predict(object, q0_5 = q0_5, q15_45 = q15_45, tol = tol, maxit = maxit, ...)
+      if (my_case == "C13") tmp = predict(object, q0_5 = q0_5, q15_35 = q15_35, tol = tol, maxit = maxit, ...)
       k  <- tmp$k
-      crit = sum(abs(c(k, Q5) - c(k.old, Q5.old)))
+      crit = sum(abs(c(k, q0_5) - c(k.old, q0_5.old)))
       iter = iter + 1
     }
     if (iter > maxit) warning("number of iterations reached maximum without convergence", call. = F)
   }
   
-  # Extract lt, lt.exact, Q5, and k from tmp
-  lt  <- tmp$lt
-  Q5  <- tmp$Q5
-  k   <- tmp$k
-  # Extract e0, QQa, QQb, and Q1 from final (exact) life table
-  e0  <- lt$ex[1]
-  Q1  <- lt$qx[1]
-  QQa <- 1 - lt["[60,65)", "lx"] / lt["[15,20)", "lx"]
-  QQb <- 1 - lt["[50,55)", "lx"] / lt["[15,20)", "lx"]
+  # Extract lt, lt.exact, 5q0, and k from tmp
+  lt   <- tmp$lt
+  q0_5 <- tmp$q0_5
+  k    <- tmp$k
+  # Extract e0, 45q15, 35q15, and 1q0 from final (exact) life table
+  e0     <- lt$ex[1]
+  q0_1   <- lt$qx[1]
+  q15_45 <- 1 - lt["[60,65)", "lx"] / lt["[15,20)", "lx"]
+  q15_35 <- 1 - lt["[50,55)", "lx"] / lt["[15,20)", "lx"]
   
-  # mx1x1 <- mxfun(coefs, sex, Q5, k, x = 0.5:110.5) 
+  # mx1x1 <- mxfun(coefs, sex, q0_5, k, x = 0.5:110.5) 
   # names(mx1x1) <- 0:110
   
   # Return life table plus values of the 6 possible inputs
-  out <- list(lt = lt, Q5 = Q5, k = k, 
-              e0 = e0, QQa = QQa, QQb = QQb, Q1 = Q1)#, mx1x1 = mx1x1)
+  out = list(lt = lt, indices = data.frame(k, q0_1, q0_5, q15_35, q15_45, e0))
+  out = structure(class = "predict.wilmoth", out)
   return(out)
 }
 
@@ -225,14 +239,15 @@ bifit <- function(x, y, c = 6, tol = 1e-6,
 #' @inheritParams lthat.logquad
 #' @keywords internal
 #' 
-mxhat.logquad <- function(coefs, sex, Q5, k = 0) {
-	mx <- with(as.list(coefs), exp(ax + bx*log(Q5) + cx*log(Q5)^2 + vx*k))
+mxhat.logquad <- function(coefs, x, sex, q0_5, k = 0) {
+  h  <- log(q0_5)
+	mx <- with(as.list(coefs), exp(ax + bx*h + cx*h^2 + vx*k))
 	
 	# Force 4q1 (and thus 4m1) to be consistent with 1q0 and 5q0
-	a4 <- coale.demeny.ax(mx[1], sex)[2]
-	Q1 <- mx[1] / (1 + (1 - a4)*mx[1] )
-	Q4 <- 1 - (1 - Q5)/(1 - Q1)
-	mx[2] <- Q4 / (4 - (4 - a4)*Q4 )
+	a4    <- coale.demeny.ax(x, mx = mx, sex)[2]
+	q0_1  <- mx[1] / (1 + (1 - a4)*mx[1])
+	q1_4  <- 1 - (1 - q0_5)/(1 - q0_1)
+	mx[2] <- q1_4 / (4 - (4 - a4)*q1_4)
   	
 	names(mx) <- rownames(coefs)
 	return(mx) 
@@ -242,76 +257,45 @@ mxhat.logquad <- function(coefs, sex, Q5, k = 0) {
 #' Estimated life table using the log-quadratic model
 #' @keywords internal
 #' 
-lthat.logquad <- function(coefs, ages, sex, Q5, k) {
-	mxhat  <- mxhat.logquad(coefs, sex, Q5, k)
-	lt     <- lt.from.mx(mx = mxhat, ages, sex, Q5)
-	out    <- list(lt = lt, Q5 = Q5, k = k)
+lthat.logquad <- function(coefs, x, sex, q0_5, k) {
+	mxhat  <- mxhat.logquad(coefs, x, sex, q0_5, k)
+	lt     <- lt.from.mx(mx = mxhat, x, sex, q0_5)
+	out    <- list(lt = lt, q0_5 = q0_5, k = k)
 	return(out) 
 }
 
 
-#' Find ax indicator using the Coale-Demeny coefficients
-#' 
-#' ax - the point in the age internal where 50% of the deaths have already occurred
-#' @keywords internal
-#' 
-coale.demeny.ax <- function(m0, sex) {
-	if (sum(m0 <= 0) > 0) stop("m0 must be greater than 0", call. = F)
-  
-  a0M   <- ifelse(m0 >= 0.107, 0.330, 0.045 + 2.684*m0)
-  a1_4M <- ifelse(m0 >= 0.107, 0.330, 1.651 - 2.816*m0)
-  a0F   <- ifelse(m0 >= 0.107, 0.350, 0.053 + 2.800*m0)
-  a1_4F <- ifelse(m0 >= 0.107, 0.350, 1.522 - 1.518*m0)
-  a0T   <- (a0M + a0F)/2
-  a1_4T <- (a1_4M + a1_4F)/2
-	  
-  out <- matrix(c(a0F, a1_4F, a0M, a1_4M, a0T, a1_4T), ncol = 2, byrow = T)
-  dimnames(out) <- list(c("Female", "Male", "Total"), c("a0", "a1_4"))
-	return(out[sex, ]) 
-}
+
 
 #' Construct a life table from a vector of death rates
 #' 
 #' @param mx numeric vector of death dates
-#' @param ages numeric vector of ages.
+#' @param x numeric vector of ages.
 #' @param sex sex. Possible values: \code{"female", "male"}, or \code{"total"}.
-#' @param Q5 Q5
+#' @param q0_5 5q0
 #' @param lx0 radix. Default: 100 000.
-#' @return 
-#' @export
+#' @keywords internal
 #' 
-lt.from.mx <- function(mx, ages, sex, Q5 = NULL, lx0 = 10^5) {
-  d_names <- list(Age_Group = names(mx), c("mx","qx","ax","lx","dx","Lx","Tx","ex"))
+lt.from.mx <- function(mx, x, sex, q0_5 = NULL, lx0 = 10^5) {
+  N       <- length(mx)
+  nx      <- c(diff(x), Inf)
+  qx      <- 1 - exp(-nx*mx) # this is CFM assumtion
+  qx[N]   <- 1
+  ax      <- nx + 1/mx - nx/qx 
+  ax[1:2] <- coale.demeny.ax(x, mx, sex)[1:2] # Below age 5
   
-  N  <- length(mx)
-  nx <- c(diff(ages), Inf)
-  qx <- 1 - exp(-nx*mx)
-  ax <- nx + 1/mx - nx/qx 
-  # Below age 5
-  ax[1:2] <- coale.demeny.ax(mx[1], sex)
-  qx[1] <- nx[1]*mx[1] / (1 + (nx[1] - ax[1])*mx[1])
-  # If Q5 is given, 4q1 is derived from 1q0 and 5q0 and 4m1 is re-computed; 
-  # otherwise, 4q1 is derived directly from 4m1
-  if (is.null(Q5)) {
-    qx[2] <- nx[2]*mx[2] / (1 + (nx[2] - ax[2])*mx[2])
-  } else {
-    qx[2] <- 1 - (1 - Q5)/(1 - qx[1])
+  # this is UDD assumption. we can not have both
+  # qx[1:2] <- nx[1:2]*mx[1:2] / (1 + (nx[1:2] - ax[1:2])*mx[1:2]) 
+  
+  # 5q0 is given. 
+  # 4q1 is derived from 1q0 and 5q0 => 4m1 is re-computed 
+  if (!is.null(q0_5)) {
+    qx[2] <- 1 - (1 - q0_5)/(1 - qx[1])
     mx[2] <- qx[2] / (nx[2] - (nx[2] - ax[2])*qx[2] ) 
   }
   
-  # Open age interval
-  qx[N] <- 1
-  ax[N] <- 1/mx[N]
-  # Make life table
-  lx <- lx0 * c(1, cumprod(1 - qx)[1:(N - 1)])
-  dx <- qx * lx
-  Lx <- nx*lx - (nx - ax)*dx 
-  Lx[N] <- dx[N]/mx[N]
-  Tx <- rev(cumsum(rev(Lx)))
-  ex <- Tx/lx
-  lt <- data.frame(mx, qx, ax, lx, dx, Lx, Tx, ex)
-  dimnames(lt) <- d_names
-  return(lt)
+  LT  <- lt.core(x, mx, qx, ax, lx0)$lt.exact
+  return(LT)
 }
 
 
@@ -319,16 +303,16 @@ lt.from.mx <- function(mx, ages, sex, Q5 = NULL, lx0 = 10^5) {
 #' It also performes some checks
 #' @keywords internal
 #' 
-find.my.case <- function(Q5, k, e0, QQa, QQb, Q1) {
-  # Test that at least of one of Q1 and Q5 is null
-  my_case <- check.is.null(Q5, k, e0, QQa, QQb, Q1)
+find.my.case <- function(q0_5, k, e0, q15_45, q15_35, q0_1) {
+  # Test that at least of one of 1q0 and 5q0 is null
+  my_case <- check.is.null(q0_5, k, e0, q15_45, q15_35, q0_1)
   
-  if (sum(my_case[c(1, 6)]) == 0) stop("cannot have both Q1 and Q5 as inputs", call. = FALSE)
-  # Test that at least of one of QQa and QQb is null
-  if (sum(my_case[c(4, 5)]) == 0) stop("cannot have both QQa = 45q15 and QQb = 35q15 as inputs", call. = FALSE)
+  if (sum(my_case[c(1, 6)]) == 0) stop("cannot have both 'q0_1' and 'q0_5' as inputs", call. = FALSE)
+  # Test that at least of one of 45q15 and 35q15 is null
+  if (sum(my_case[c(4, 5)]) == 0) stop("cannot have both 'q15_45' and 'q15_35' as inputs", call. = FALSE)
   # Test that exactly two inputs are non-null
   if (sum(my_case) != 4) stop("must have exactly two inputs", call. = FALSE)
-  # There are 13 cases:  "6 choose 2" = 15, but we disallow two cases (Q1 and Q5, or QQa and QQb)
+  # There are 13 cases:  "6 choose 2" = 15, but we disallow two cases (1q0 and 5q0, or 45q15 and 35q15)
   if (all(my_case == c(F,F,T,T,T,T))) case = "C1" 
   if (all(my_case == c(F,T,F,T,T,T))) case = "C2" 
   if (all(my_case == c(F,T,T,F,T,T))) case = "C3" 
@@ -342,7 +326,6 @@ find.my.case <- function(Q5, k, e0, QQa, QQb, Q1) {
   if (all(my_case == c(T,F,T,T,F,T))) case = "C11" 
   if (all(my_case == c(T,T,F,F,T,T))) case = "C12" 
   if (all(my_case == c(T,T,F,T,F,T))) case = "C13" 
-  
   return(case)
 }
 

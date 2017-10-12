@@ -4,8 +4,8 @@
 \alias{lifetable}
 \title{Life table function}
 \usage{
-lifetable(x, Dx = NULL, Ex = NULL, mx = NULL, qx = NULL, lx0 = 1e+05,
-  ax0 = 0.1)
+lifetable(x, Dx = NULL, Ex = NULL, mx = NULL, qx = NULL,
+  sex = "total", lx0 = 1e+05)
 }
 \arguments{
 \item{x}{Vector of ages}
@@ -20,25 +20,34 @@ Ex is the mid-year population aged x to x+1}
 
 \item{qx}{1-year probability of dying between age x and x+1}
 
-\item{lx0}{Radix}
+\item{sex}{sex of the population considered here. This argument affects the 
+first two values in the life table ax column. The values are computed based 
+on Coale-Demeny method and are sligthly different for males than for females.}
 
-\item{ax0}{average time spent between age 0 and age 1 of those how died 
-in age 0. For x > 0 we assume a uniform distribution of deaths (UDD).}
+\item{lx0}{Radix. Default: 100 000}
 }
 \value{
-Life Tables
+life tables
 }
 \description{
 Function to create a life table with input variables: (age, Dx, Ex) 
 or (age, mx) or (age, qx)
 }
 \examples{
-library(MortalityEstimate)
 
-F_mx <- HMD.test.data$female$SWE
+# Example 1 --- Full life table --------------
+F_mx <- HMD3mx$female$SWE
 ages <- as.numeric(rownames(F_mx))
-year <- 1970
-mx <- F_mx[, paste(year)]
+mx   <- F_mx[, paste(1970)]
 
-lifetable(x = ages, mx = mx)$lt
+LT = lifetable(x = ages, mx = mx, sex = "female")
+LT
+
+# Example 2 --- Abridge life table ------------
+x  = c(0, 1, seq(5, 110, by = 5))
+mx = c(0.05384, 0.00504, 0.00157, 0.00120, 0.00186, 0.00286, 0.00347, 0.00395, 
+       0.00486, 0.00527, 0.00686, 0.00939, 0.01295, 0.01957, 0.03106, 0.04931, 
+       0.08461, 0.12988, 0.18076, 0.23542, 0.30853, 0.39036, 0.47887, 0.55141)
+lt = lifetable(x, mx = mx, sex = "female")
+lt
 }
