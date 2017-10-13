@@ -27,11 +27,17 @@ on Coale-Demeny method and are sligthly different for males than for females.}
 \item{lx0}{Radix. Default: 100 000}
 }
 \value{
-life tables
+The output is of class \code{lifetable} with the components:
+
+\item{lt.exact}{ computed life table}
+
+\item{lt}{ computed life table with rounded values}
+
+\item{process_date}{ time stamp}
 }
 \description{
-Function to create a life table with input variables: \code{(x, Dx, Ex)} 
-or \code{(x, mx)} or \code{(x, qx)}.
+Function to create a life table with various choices of 2 input vectors: 
+\code{(x, Dx, Ex)} or \code{(x, mx)} or \code{(x, qx)}.
 }
 \examples{
 

@@ -4,12 +4,10 @@
 \alias{mxhat.logquad}
 \title{Estimate mx using the log-quadratic model}
 \usage{
-mxhat.logquad(coefs, x, sex, q0_5, k)
+mxhat.logquad(coefs, x, q0_5, k)
 }
 \arguments{
 \item{x}{numeric vector of ages.}
-
-\item{sex}{sex. Possible values: \code{"female", "male"}, or \code{"total"}.}
 
 \item{q0_5}{5q0}
 }

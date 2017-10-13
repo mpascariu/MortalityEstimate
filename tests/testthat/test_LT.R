@@ -1,4 +1,4 @@
-rm(list = ls())
+# rm(list = ls())
 
 F_mx <- HMD3mx$female$SWE
 ages <- as.numeric(rownames(F_mx))

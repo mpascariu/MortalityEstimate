@@ -94,7 +94,7 @@ LinearLink <- function(x, mx, y,
   # Data preparation
   mx_input   <- as.matrix(mx)
   dimnames(mx_input) <- list(x, y)
-  model_info <- "Linear-Link (2016): ln m[x] = b[x] ln e[x] + k v[x]"
+  model_info <- "Linear-Link (2016): log m[x] = b[x] log e[x] + k v[x]"
   # Compute multiple life tables (in order to get ex)
   LT <- data.frame()
   for (i in 1:ncol(mx)) {
@@ -507,16 +507,16 @@ print.summary.LinearLink <- function(x, ...) {
 #' @keywords internal
 #' @export
 print.LinearLink <- function(x, ...){
+  cat(x$model_info, "\n")
   with(x$input,
        {
-         cat('\nLinear-Link Model (2016): \nln[m(x)] = b(x)ln[e(x)] + kv(x)\n')
-         cat('\nFitted for life expectancy at age:', theta)
-         cat('\nTime interval:', min(y), '-', max(y))
-         cat('\nAge-range:', min(x), '-', max(x))
-         cat('\nCountry:', country, '\n')
-         met <- ifelse(method == 'LSE', 'Least Squares (LSE)', 
-                       'Poisson Maximum Likelihood (MLE)')
-         cat('\nFitting Procedure:', met)
-         cat('\nSmoothing:', use.smooth)
+        cat('\nFitted for life expectancy at age:', theta)
+        cat('\nTime interval:', min(y), '-', max(y))
+        cat('\nAge-range:', min(x), '-', max(x))
+        cat('\nCountry:', country, '\n')
+        met <- ifelse(method == 'LSE', 'Least Squares (LSE)', 
+                     'Poisson Maximum Likelihood (MLE)')
+        cat('\nFitting Procedure:', met)
+        cat('\nSmoothing:', use.smooth)
        })
 }

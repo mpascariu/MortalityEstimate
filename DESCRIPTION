@@ -1,7 +1,7 @@
 Package: MortalityEstimate
 Type: Package
 Title: MortalityEstimate: Indirect methods for estimating age-specific death rates
-Version: 0.7.1
+Version: 0.7.2
 Author: Marius Pascariu,
   Vladimir Canudas-Romo,
   Jose Manuel Aburto,

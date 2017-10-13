@@ -4,42 +4,106 @@
 \alias{wilmothLT}
 \title{Estimate wilmoth life table}
 \usage{
-wilmothLT(object, q0_5 = NULL, k = NULL, e0 = NULL, q15_45 = NULL,
-  q15_35 = NULL, q0_1 = NULL, tol = 1e-09, maxit = 200, ...)
+wilmothLT(object, q0_5 = NULL, q0_1 = NULL, q15_45 = NULL,
+  q15_35 = NULL, e0 = NULL, k = NULL, lx0 = 10^5, tol = 1e-09,
+  maxit = 200, ...)
 }
 \arguments{
 \item{object}{An \code{\link{wilmoth}} object.}
 
 \item{q0_5}{5q0. The probability that a newborn will die during the subsequent 5 years}
 
-\item{k}{k-parameter in the log-quadratic model}
-
-\item{e0}{life expectancy at birth}
+\item{q0_1}{1q0. The probability that a life aged 0 will die during the following year}
 
 \item{q15_45}{45q15. The probability that a life aged 15 will die during the subsequent 45 years}
 
 \item{q15_35}{35q15. The probability that a life aged 15 will die during the subsequent 35 years}
 
-\item{q0_1}{1q0. The probability that a life aged 0 will die during the following year}
+\item{e0}{life expectancy at birth}
+
+\item{k}{k-parameter in the log-quadratic model}
+
+\item{lx0}{life table radix. Default: 10^5.}
 
 \item{tol}{tolerance level for convergence. The tolerance level, is relevant 
-for case 12 and 13 (QQ and e0 are known)}
+for case 12 and 13 (e0 and 45q15 or 35q15 are known)}
 
 \item{maxit}{maximum number of iterations allowed. Default: 100.}
 
 \item{...}{additional arguments affecting the predictions produced.}
 }
 \value{
-a life table matching given inputs, and associated values of 
-\code{5q0, k, e0, 45q15, 35q15,} and \code{1q0}.
+The output is of class \code{wilmothLT} with the components:
+
+\item{lt}{a life table matching given inputs}
+
+\item{values}{ associated values of \code{5q0, k, e0, 45q15, 35q15,} 
+and \code{1q0}.}
 }
 \description{
-Construct a life table based on the log-quadratic (wilmoth) estimates
+Construct a life table based on the Log-Quadratic (wilmoth) estimates
 with various choices of 2 input parameters:  
-\code{5q0, k, e0, 45q15, 35q15, 1q0}.
+\code{5q0, k, e0, 45q15, 35q15, 1q0}. There are 13 possible combinations 
+(see examples below).
+}
+\details{
+Notation: due to limitations of the R language the death
+probability \code{nqx} is written \code{qx_n}, where \code{x} and \code{n} are integers.
 }
 \examples{
-# checck wilmoth examples
+
+# DATA
+sex = "female"
+HMD719f <- HMD719[HMD719$sex == sex, ]
+
+# Fit model
+x <- c(0,1, seq(5, 110, by = 5))
+W <- wilmoth(x, LT = HMD719f, sex = sex)
+
+# Build life tables with various choices of 2 input parameters
+# and estimated model 'W'
+
+# case 1: Using 5q0 and k
+L1 <- wilmothLT(W, q0_5 = 0.05, k = 0.1)
+L1
+ls(L1)
+ 
+# case 2: Using 5q0 and e0
+L2 <- wilmothLT(W, q0_5 = 0.05, e0 = 65)
+
+# case 3: Using 5q0 and 45q15
+L3 <- wilmothLT(W, q0_5 = 0.05, q15_45 = 0.2)
+
+# case 4: Using 5q0 and 35q15
+L4 <- wilmothLT(W, q0_5 = 0.05, q15_35 = 0.125)
+
+# case 5: Using 1q0 and k
+L5 <- wilmothLT(W, q0_1 = 0.01, k = 0.1)
+
+# case 6: Using 1q0 and e0
+L6 <- wilmothLT(W, q0_1 = 0.01, e0 = 65)
+
+# case 7: Using 1q0 and 45q15
+L7 <- wilmothLT(W, q0_1 = 0.05, q15_45 = 0.2)
+
+# case 8: Using 1q0 and 35q15
+L8 <- wilmothLT(W, q0_1 = 0.05, q15_35 = 0.125)
+
+# case 9: Using k and e0
+L9 <- wilmothLT(W, k = 0.01, e0 = 65)
+
+# case 10: Using k and 45q15
+L10 <- wilmothLT(W, k = 0.01, q15_45 = 0.2)
+
+# case 11: Using k and 35q15
+L11 <- wilmothLT(W, k = 0.01, q15_35 = 0.125)
+
+# case 12: Using 45q15 and e0
+L12 <- wilmothLT(W, q15_45 = 0.125, e0 = 65)
+
+# case 13: Using 35q15 and e0
+L13 <- wilmothLT(W, q15_35 = 0.15, e0 = 65)
+
 }
 \seealso{
 \code{\link{wilmoth}}

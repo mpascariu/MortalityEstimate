@@ -1,7 +1,7 @@
 #' Life table function
 #' 
-#' Function to create a life table with input variables: \code{(x, Dx, Ex)} 
-#' or \code{(x, mx)} or \code{(x, qx)}.
+#' Function to create a life table with various choices of 2 input vectors: 
+#' \code{(x, Dx, Ex)} or \code{(x, mx)} or \code{(x, qx)}.
 #' @param x Vector of ages
 #' @param Dx Vector containing death counts. An element of the vector, Dx, 
 #' represents the number of deaths during the year to persons aged x to x+1 
@@ -13,7 +13,10 @@
 #' first two values in the life table ax column. The values are computed based 
 #' on Coale-Demeny method and are sligthly different for males than for females. 
 #' @param lx0 Radix. Default: 100 000
-#' @return life tables
+#' @return The output is of class \code{lifetable} with the components:
+#' @return \item{lt.exact}{ computed life table}
+#' @return \item{lt}{ computed life table with rounded values}
+#' @return \item{process_date}{ time stamp}
 #' @examples 
 #' 
 #' # Example 1 --- Full life table --------------
@@ -49,7 +52,7 @@ lifetable <- function(x, Dx = NULL, Ex = NULL, mx = NULL,
   
   ax  <- coale.demeny.ax(x, mx, qx, sex)
   LT  <- lt.core(x, mx, qx, ax, lx0)
-  out <- list(input = input, lt = LT$lt, lt.exact = LT$lt.exact, process_date = date())
+  out <- list(lt = LT$lt, lt.exact = LT$lt.exact, process_date = date())
   out <- structure(class = "lifetable", out)
   return(out)
 }
@@ -92,12 +95,16 @@ mx_qx <- function(x, ux, out = "qx"){
   N     <- length(x)
   nx    <- c(diff(x), Inf)
   if (out == "qx") {
-    out_ = 1 - exp(-nx*ux)
-    out_[x >= 100 & ux == 0] <- 1
-    out_[N] <- 1
+    eta = 1 - exp(-nx*ux)
+    eta[x >= 100 & ux == 0] <- 1
+    eta[N] <- 1
   }
-  if (out == "mx") out_ = log(1 - ux)/nx 
-  return(out_)
+  if (out == "mx") {
+    eta = -log(1 - ux)/nx
+    # here if qx[N] = 1 then mx[N] = NaN therefore we apply a simple extrapolation method
+    if (ux[N] == 1) eta[N] = eta[N - 1]^2 / eta[N - 2]
+  }
+  return(eta)
 }
 
 #' Find ax indicator using the Coale-Demeny coefficients

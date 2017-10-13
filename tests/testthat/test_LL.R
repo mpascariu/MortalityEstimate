@@ -1,4 +1,4 @@
-rm(list = ls())
+# rm(list = ls())
 
 ages  <- 0:100 
 years <- 1965:1990
@@ -19,4 +19,6 @@ test_that("LinearLink Tests", {
   expect_false(is.null(coef(mdl)))
 })
 
+
+W2 = wilmoth(x = ages, mx = SWEmx, sex = sex)
 

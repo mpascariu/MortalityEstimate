@@ -4,30 +4,32 @@
 \alias{wilmoth}
 \title{Fit Log-Quadratic model}
 \usage{
-wilmoth(data, sex, ages = c(0, 1, seq(5, 110, by = 5)))
+wilmoth(x, mx = NULL, LT = NULL, sex)
 }
 \arguments{
-\item{data}{input data. A collection of life tables.}
+\item{x}{Numerical vector containing ages covered in the life tables.
+If abridge life tables are supplied in \code{data} then provide the lower 
+bounds of the age intervals.}
+
+\item{mx}{input data. A data.frame / matrix with death rates.}
+
+\item{LT}{input data. A collection of life tables. If \code{mx} is provided 
+\code{LT} is not necessary and viceversa.}
 
 \item{sex}{Specify the sex of the population. Options: \code{"female", "male" or "total"}}
-
-\item{ages}{Numerical vector containing ages covered in the life tables.
-If abridge life tables are supplied in \code{data} then provide the lower 
-bounds of the age intervals. Default: \code{c(0, 1, seq(5, 110, by = 5))} 
-(corresponding to the HMD format).}
 }
 \value{
 The output is of class \code{wilmoth} with the components:
 
 \item{input}{ a list with input objects provided in the function}
 
-\item{coefficients}{ estimated coefficient}
+\item{coefficients}{ estimated coefficients}
 
 \item{fitted.values}{ fitted values}
 
-\item{model.life.table}{ a model life table}
+\item{residuals}{ residuals}
 
-\item{model_info}{ Model details (equqtion). The relationship between 
+\item{model_info}{ Model details (equation). The relationship between 
 the death rate at age x, mx, and the probability of dying between birth and 
 age 5.}
 }
@@ -42,12 +44,9 @@ sex = "female"
 HMD719f <- HMD719[HMD719$sex == sex, ]
 
 # Fit model
-W <- wilmoth(data = HMD719f, sex)
+x <- c(0,1, seq(5, 110, by = 5))
+W <- wilmoth(x, LT = HMD719f, sex = sex)
 
-# Build life tables with various choices of 2 input parameters ---
-# (case 1) Using 5q0 and k
-WLT_1 <- wilmothLT(W, q0_5 = 0.05, k = 0.1)
-WLT_1
 }
 \references{
 John Wilmoth, Sarah Zureick, Vladimir Canudas-Romo, Mie Inoue & 
