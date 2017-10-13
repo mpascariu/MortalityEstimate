@@ -30,8 +30,8 @@ on Coale-Demeny method and are sligthly different for males than for females.}
 life tables
 }
 \description{
-Function to create a life table with input variables: (age, Dx, Ex) 
-or (age, mx) or (age, qx)
+Function to create a life table with input variables: \code{(x, Dx, Ex)} 
+or \code{(x, mx)} or \code{(x, qx)}.
 }
 \examples{
 
@@ -45,9 +45,9 @@ LT
 
 # Example 2 --- Abridge life table ------------
 x  = c(0, 1, seq(5, 110, by = 5))
-mx = c(0.05384, 0.00504, 0.00157, 0.00120, 0.00186, 0.00286, 0.00347, 0.00395, 
-       0.00486, 0.00527, 0.00686, 0.00939, 0.01295, 0.01957, 0.03106, 0.04931, 
-       0.08461, 0.12988, 0.18076, 0.23542, 0.30853, 0.39036, 0.47887, 0.55141)
+mx = c(.053, .005, .001, .0012, .0018, .002, .003, .004, 
+       .004, .005, .006, .0093, .0129, .019, .031, .049, 
+       .084, .129, .180, .2354, .3085, .390, .478, .551)
 lt = lifetable(x, mx = mx, sex = "female")
 lt
 }

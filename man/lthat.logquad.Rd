@@ -4,7 +4,18 @@
 \alias{lthat.logquad}
 \title{Estimated life table using the log-quadratic model}
 \usage{
-lthat.logquad(coefs, x, sex, q0_5, k)
+lthat.logquad(coefs, x, sex, q0_5, k, lx0 = 10^5)
+}
+\arguments{
+\item{x}{numeric vector of ages.}
+
+\item{sex}{sex. Possible values: \code{"female", "male"}, or \code{"total"}.}
+
+\item{q0_5}{5q0}
+
+\item{lx0}{radix. Default: 100 000.}
+
+\item{mx}{numeric vector of death dates}
 }
 \description{
 Estimated life table using the log-quadratic model

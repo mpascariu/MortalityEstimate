@@ -2,7 +2,7 @@
 % Please edit documentation in R/fun_Wilmoth.R
 \name{wilmoth}
 \alias{wilmoth}
-\title{Fit log-quadratic model using bi-weight method}
+\title{Fit Log-Quadratic model}
 \usage{
 wilmoth(data, sex, ages = c(0, 1, seq(5, 110, by = 5)))
 }
@@ -27,15 +27,34 @@ The output is of class \code{wilmoth} with the components:
 
 \item{model.life.table}{ a model life table}
 
-\item{ages_groups}{ a vector containing the names of the resulted intervals}
+\item{model_info}{ Model details (equqtion). The relationship between 
+the death rate at age x, mx, and the probability of dying between birth and 
+age 5.}
 }
 \description{
 Estimating the log-quadratic model using the bi-weight procedure as 
 described in the Appendix of Wilmoth et.al.(2012).
+}
+\examples{
+
+# DATA
+sex = "female"
+HMD719f <- HMD719[HMD719$sex == sex, ]
+
+# Fit model
+W <- wilmoth(data = HMD719f, sex)
+
+# Build life tables with various choices of 2 input parameters ---
+# (case 1) Using 5q0 and k
+WLT_1 <- wilmothLT(W, q0_5 = 0.05, k = 0.1)
+WLT_1
 }
 \references{
 John Wilmoth, Sarah Zureick, Vladimir Canudas-Romo, Mie Inoue & 
 Cheryl Sawyer (2012): A flexible two-dimensional mortality model for use in 
 indirect estimation, Population Studies: A Journal of Demography, 66:1, 1-28
 \url{http://dx.doi.org/10.1080/00324728.2011.611411}
+}
+\seealso{
+\code{\link{wilmothLT}}
 }

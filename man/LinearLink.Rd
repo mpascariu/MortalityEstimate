@@ -2,20 +2,20 @@
 % Please edit documentation in R/fun_LinearLink.R
 \name{LinearLink}
 \alias{LinearLink}
-\title{Fit Linear-Link model --}
+\title{Fit Linear-Link model}
 \usage{
-LinearLink(mx, mx_ages, mx_years, mx_country = "...", theta = 0,
-  use.smooth = TRUE, method = "MLE")
+LinearLink(x, mx, y, country = "...", theta = 0, use.smooth = TRUE,
+  method = "MLE")
 }
 \arguments{
+\item{x}{vector of ages corresponding to the mx matrix}
+
 \item{mx}{Death rates matrix with age as row and time as column}
 
-\item{mx_ages}{vector of ages corresponding to the mx matrix}
+\item{y}{vector of years corresponding to the mx matrix}
 
-\item{mx_years}{vector of years corresponding to the mx matrix}
-
-\item{mx_country}{The name of the country that the data corresponds to.
-The name will be adopted in the output tables. It is optional.}
+\item{country}{Optional. The name of the country that the data 
+corresponds to. The name is adopted in the output tables.}
 
 \item{theta}{Age to be fitted}
 
@@ -48,7 +48,7 @@ A \code{LinearLink} object containing:
 \item{process_date}{ data and time stamp}
 }
 \description{
-Fit Linear-Link model --
+Fit Linear-Link model
 }
 \examples{
 
@@ -60,10 +60,10 @@ SWEmx <- HMD3mx$female$SWE[paste(ages), paste(years)]
 
 # Fit the Linear-Link using the least square approach (LSE). For poisson 
 # maximum likelihood use \\code{method = 'MLE'}
-fit_LL <- LinearLink(mx = SWEmx, 
-                     mx_ages = ages, 
-                     mx_years = years,
-                     mx_country = 'SWEDEN', 
+fit_LL <- LinearLink(x = ages, 
+                     mx = SWEmx, 
+                     y = years,
+                     country = 'SWEDEN', 
                      theta = 0, 
                      method = 'LSE')
 fit_LL
@@ -76,8 +76,8 @@ ls(fit_LL) # check the all the output
 # Derive a mortality curve (life table) from a value of
 # life expectancy at birth in 2014, say 84.05
 new_e0   <- 84.05
-pred_LL  <- predict(fit_LL, new_e0)
-pred_LL2 <- predict(fit_LL, new_e0, use.vx.rotation = TRUE)
+pred_LL  <- LinearLinkLT(fit_LL, new_e0)
+pred_LL2 <- LinearLinkLT(fit_LL, new_e0, use.vx.rotation = TRUE)
 
 observed_mx <- log(HMD3mx$female$SWE[, '2014'])
 pred1 <- log(pred_LL$lt$mx)
@@ -94,8 +94,8 @@ legend('bottomright', col = c(1, 2, 3), pch = c(16, NA, NA),
 
 # Let's see what happens when we want to estimate for e0 = 90
 new_e0   <- 90
-pred_LL  <- predict(fit_LL, new_e0)
-pred_LL2 <- predict(fit_LL, new_e0, use.vx.rotation = TRUE)
+pred_LL  <- LinearLinkLT(fit_LL, new_e0)
+pred_LL2 <- LinearLinkLT(fit_LL, new_e0, use.vx.rotation = TRUE)
 
 pred1 <- log(pred_LL$lt.exact$mx)
 pred2 <- log(pred_LL2$lt.exact$mx)

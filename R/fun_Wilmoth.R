@@ -1,5 +1,5 @@
 
-#' Fit log-quadratic model using bi-weight method
+#' Fit Log-Quadratic model
 #' 
 #' Estimating the log-quadratic model using the bi-weight procedure as 
 #' described in the Appendix of Wilmoth et.al.(2012).
@@ -14,20 +14,37 @@
 #' @return \item{coefficients}{ estimated coefficient}
 #' @return \item{fitted.values}{ fitted values}
 #' @return \item{model.life.table}{ a model life table}
-#' @return \item{ages_groups}{ a vector containing the names of the resulted intervals}
+#' @return \item{model_info}{ Model details (equqtion). The relationship between 
+#' the death rate at age x, mx, and the probability of dying between birth and 
+#' age 5.}
 #' @references John Wilmoth, Sarah Zureick, Vladimir Canudas-Romo, Mie Inoue & 
 #' Cheryl Sawyer (2012): A flexible two-dimensional mortality model for use in 
 #' indirect estimation, Population Studies: A Journal of Demography, 66:1, 1-28
 #' \url{http://dx.doi.org/10.1080/00324728.2011.611411}
+#' @seealso \code{\link{wilmothLT}}
+#' @examples 
+#' 
+#' # DATA
+#' sex = "female"
+#' HMD719f <- HMD719[HMD719$sex == sex, ]
+#' 
+#' # Fit model
+#' W <- wilmoth(data = HMD719f, sex)
+#' 
+#' # Build life tables with various choices of 2 input parameters ---
+#' # (case 1) Using 5q0 and k
+#' WLT_1 <- wilmothLT(W, q0_5 = 0.05, k = 0.1)
+#' WLT_1
 #' @export  
 #'  
 wilmoth <- function(data, sex, ages = c(0,1,seq(5, 110, by = 5))) {
   
   if (!(sex %in% c("female", "male", "total"))) stop("sex must be: 'female', 'male', or 'total'", call. = FALSE)
   
-  input <- c(as.list(environment()))
-  na        <- length(ages)
-  gr_names  <- paste0("[", ages,",", c(ages[-1], "+"), ")")
+  info    <- "log m[x] = a[x] + b[x] h + c[x] h^2 + kv[x]"
+  input    <- c(as.list(environment()))
+  na       <- length(ages)
+  gr_names <- paste0("[", ages,",", c(ages[-1], "+"), ")")
   data$gr_names <- gr_names
   
   # 5q0 (vector)
@@ -53,22 +70,24 @@ wilmoth <- function(data, sex, ages = c(0,1,seq(5, 110, by = 5))) {
   vx[20:24] <- 0
   coef$vx   <- vx
   
-  fit_mx <- mxhat.logquad(coef, x = ages, sex, q0_5 = median(q0_5))
-  fit_lt <- lt.from.mx(mx = fit_mx, x = ages, sex, q0_5 = median(q0_5))
+  H <- median(q0_5)
+  fit_mx <- mxhat.logquad(coef, x = ages, sex, q0_5 = H, k = 0)
+  fit_lt <- lthat.logquad(coef, x = ages, sex, q0_5 = H, k = 0)$lt
   
   out <- list(input = input, coefficients = coef, 
-              fitted.values = fit_mx, model.life.table = fit_lt,
-              ages_groups = gr_names)
+              fitted.values = fit_mx, model.life.table = fit_lt, 
+              model.info = info)
   out <- structure(class = 'wilmoth', out)
   out$call <- match.call()
   return(out)
 }
 
 
-#' Predict function for wilmoth object
+#' Estimate wilmoth life table
 #' 
-#' Construct a life table with various choices of 2 input parameters 
-#' \code{5q0, k, e0, 45q15, 35q15, 1q0} and a \code{wilmoth} object.
+#' Construct a life table based on the log-quadratic (wilmoth) estimates
+#' with various choices of 2 input parameters:  
+#' \code{5q0, k, e0, 45q15, 35q15, 1q0}.
 #' @param object An \code{\link{wilmoth}} object.
 #' @param q0_5 5q0. The probability that a newborn will die during the subsequent 5 years
 #' @param k k-parameter in the log-quadratic model
@@ -82,11 +101,12 @@ wilmoth <- function(data, sex, ages = c(0,1,seq(5, 110, by = 5))) {
 #' @param ... additional arguments affecting the predictions produced.
 #' @return a life table matching given inputs, and associated values of 
 #' \code{5q0, k, e0, 45q15, 35q15,} and \code{1q0}.
-#' @examples # See examples in wilmoth()
 #' @seealso \code{\link{wilmoth}}
+#' @examples 
+#' # checck wilmoth examples
 #' @export
 #' 
-predict.wilmoth <- function(object, q0_5 = NULL, k = NULL, e0 = NULL, 
+wilmothLT <- function(object, q0_5 = NULL, k = NULL, e0 = NULL, 
                             q15_45 = NULL, q15_35 = NULL, q0_1 = NULL, 
                             tol = 1e-9, maxit = 200, ...) {
   
@@ -116,16 +136,17 @@ predict.wilmoth <- function(object, q0_5 = NULL, k = NULL, e0 = NULL,
     tmp  <- lthat.logquad(cf, x, sex, q0_5, k = root) 
   }
   
-  # Cases 5-8:  1q0 is known, plus k, e0, 45q15 or 35q15;
-  #             after finding 5q0 (assume k=0, but it doesn't matter), these become Cases 1-4
+  # Cases 5-8:  
+  # 1q0 is known, plus k, e0, 45q15 or 35q15;
+  # after finding 5q0 (assume k=0, but it doesn't matter), these become Cases 1-4
   if (my_case %in% c("C5","C6","C7","C8") ) {
     fun.q0_5  <- function(q0_5) lthat.logquad(cf, x, sex, q0_5, k = 0)$lt$qx[1] - q0_1
     root <- uniroot(f = fun.q0_5, interval = c(1e-5, 0.8))$root
   }
-  if (my_case == "C5") tmp <- predict(object, q0_5 = root, k = k, tol = tol, maxit = maxit, ...)
-  if (my_case == "C6") tmp <- predict(object, q0_5 = root, e0 = e0, tol = tol, maxit = maxit, ...)
-  if (my_case == "C7") tmp <- predict(object, q0_5 = root, q15_45 = q15_45, tol = tol, maxit = maxit, ...)
-  if (my_case == "C8") tmp <- predict(object, q0_5 = root, q15_35 = q15_35, tol = tol, maxit = maxit, ...)
+  if (my_case == "C5") tmp <- wilmothLT(object, q0_5 = root, k = k, tol = tol, maxit = maxit, ...)
+  if (my_case == "C6") tmp <- wilmothLT(object, q0_5 = root, e0 = e0, tol = tol, maxit = maxit, ...)
+  if (my_case == "C7") tmp <- wilmothLT(object, q0_5 = root, q15_45 = q15_45, tol = tol, maxit = maxit, ...)
+  if (my_case == "C8") tmp <- wilmothLT(object, q0_5 = root, q15_35 = q15_35, tol = tol, maxit = maxit, ...)
   
   # Cases 9-11:  k is known, plus e0, 45q15 or 35q15; 
   # must find 5q0
@@ -156,8 +177,8 @@ predict.wilmoth <- function(object, q0_5 = NULL, k = NULL, e0 = NULL,
       q0_5.old <- q0_5
       q0_5 <- predict(object, k = k, e0 = e0, tol = tol, maxit = maxit, ...)$q0_5 # Get 5q0 from e0 assuming k
       # Get k from 45q15 or 35q15 asuming 5q0
-      if (my_case == "C12") tmp = predict(object, q0_5 = q0_5, q15_45 = q15_45, tol = tol, maxit = maxit, ...)
-      if (my_case == "C13") tmp = predict(object, q0_5 = q0_5, q15_35 = q15_35, tol = tol, maxit = maxit, ...)
+      if (my_case == "C12") tmp = wilmothLT(object, q0_5 = q0_5, q15_45 = q15_45, tol = tol, maxit = maxit, ...)
+      if (my_case == "C13") tmp = wilmothLT(object, q0_5 = q0_5, q15_35 = q15_35, tol = tol, maxit = maxit, ...)
       k  <- tmp$k
       crit = sum(abs(c(k, q0_5) - c(k.old, q0_5.old)))
       iter = iter + 1
@@ -180,7 +201,7 @@ predict.wilmoth <- function(object, q0_5 = NULL, k = NULL, e0 = NULL,
   
   # Return life table plus values of the 6 possible inputs
   out = list(lt = lt, indices = data.frame(k, q0_1, q0_5, q15_35, q15_45, e0))
-  out = structure(class = "predict.wilmoth", out)
+  out = structure(class = "wilmothLT", out)
   return(out)
 }
 
@@ -239,53 +260,36 @@ bifit <- function(x, y, c = 6, tol = 1e-6,
 #' @inheritParams lthat.logquad
 #' @keywords internal
 #' 
-mxhat.logquad <- function(coefs, x, sex, q0_5, k = 0) {
+mxhat.logquad <- function(coefs, x, sex, q0_5, k) {
   h  <- log(q0_5)
 	mx <- with(as.list(coefs), exp(ax + bx*h + cx*h^2 + vx*k))
+	qx <- mx_qx(x, mx, out = "qx")
 	
 	# Force 4q1 (and thus 4m1) to be consistent with 1q0 and 5q0
-	a4    <- coale.demeny.ax(x, mx = mx, sex)[2]
+	a4    <- coale.demeny.ax(x, mx, qx, sex)[2]
 	q0_1  <- mx[1] / (1 + (1 - a4)*mx[1])
 	q1_4  <- 1 - (1 - q0_5)/(1 - q0_1)
 	mx[2] <- q1_4 / (4 - (4 - a4)*q1_4)
-  	
+	
 	names(mx) <- rownames(coefs)
 	return(mx) 
 }
 
 
 #' Estimated life table using the log-quadratic model
-#' @keywords internal
 #' 
-lthat.logquad <- function(coefs, x, sex, q0_5, k) {
-	mxhat  <- mxhat.logquad(coefs, x, sex, q0_5, k)
-	lt     <- lt.from.mx(mx = mxhat, x, sex, q0_5)
-	out    <- list(lt = lt, q0_5 = q0_5, k = k)
-	return(out) 
-}
-
-
-
-
-#' Construct a life table from a vector of death rates
-#' 
-#' @param mx numeric vector of death dates
 #' @param x numeric vector of ages.
+#' @param mx numeric vector of death dates
 #' @param sex sex. Possible values: \code{"female", "male"}, or \code{"total"}.
 #' @param q0_5 5q0
 #' @param lx0 radix. Default: 100 000.
 #' @keywords internal
 #' 
-lt.from.mx <- function(mx, x, sex, q0_5 = NULL, lx0 = 10^5) {
-  N       <- length(mx)
-  nx      <- c(diff(x), Inf)
-  qx      <- 1 - exp(-nx*mx) # this is CFM assumtion
-  qx[N]   <- 1
-  ax      <- nx + 1/mx - nx/qx 
-  ax[1:2] <- coale.demeny.ax(x, mx, sex)[1:2] # Below age 5
-  
-  # this is UDD assumption. we can not have both
-  # qx[1:2] <- nx[1:2]*mx[1:2] / (1 + (nx[1:2] - ax[1:2])*mx[1:2]) 
+lthat.logquad <- function(coefs, x, sex, q0_5, k, lx0 = 10^5) {
+  mx <- mxhat.logquad(coefs, x, sex, q0_5, k)
+  nx <- c(diff(x), Inf)
+  qx <- mx_qx(x, mx, out = "qx")
+  ax <- coale.demeny.ax(x, mx, qx, sex) # Below age 5
   
   # 5q0 is given. 
   # 4q1 is derived from 1q0 and 5q0 => 4m1 is re-computed 
@@ -295,7 +299,8 @@ lt.from.mx <- function(mx, x, sex, q0_5 = NULL, lx0 = 10^5) {
   }
   
   LT  <- lt.core(x, mx, qx, ax, lx0)$lt.exact
-  return(LT)
+  out <- list(lt = LT, q0_5 = q0_5, k = k)
+  return(out)
 }
 
 
@@ -336,3 +341,17 @@ check.is.null <- function(...) {
   ls = list(...)
   unlist(lapply(ls, is.null))
 }
+
+# ----------------------------------------------
+# S3 functions
+
+#' @keywords internal
+#' @export
+print.wilmoth <- function(x, ...){
+  cat("\nThe Log-Quadratic model:\n")
+  cat(x$model.info, "\n")
+}
+
+#' @keywords internal
+#' @export
+summary.wilmoth <- function(object, ...) print.wilmoth(x = object, ...)

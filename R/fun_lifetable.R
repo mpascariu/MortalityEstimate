@@ -1,7 +1,7 @@
 #' Life table function
 #' 
-#' Function to create a life table with input variables: (age, Dx, Ex) 
-#' or (age, mx) or (age, qx)
+#' Function to create a life table with input variables: \code{(x, Dx, Ex)} 
+#' or \code{(x, mx)} or \code{(x, qx)}.
 #' @param x Vector of ages
 #' @param Dx Vector containing death counts. An element of the vector, Dx, 
 #' represents the number of deaths during the year to persons aged x to x+1 
@@ -26,9 +26,9 @@
 #' 
 #' # Example 2 --- Abridge life table ------------
 #' x  = c(0, 1, seq(5, 110, by = 5))
-#' mx = c(0.05384, 0.00504, 0.00157, 0.00120, 0.00186, 0.00286, 0.00347, 0.00395, 
-#'        0.00486, 0.00527, 0.00686, 0.00939, 0.01295, 0.01957, 0.03106, 0.04931, 
-#'        0.08461, 0.12988, 0.18076, 0.23542, 0.30853, 0.39036, 0.47887, 0.55141)
+#' mx = c(.053, .005, .001, .0012, .0018, .002, .003, .004, 
+#'        .004, .005, .006, .0093, .0129, .019, .031, .049, 
+#'        .084, .129, .180, .2354, .3085, .390, .478, .551)
 #' lt = lifetable(x, mx = mx, sex = "female")
 #' lt
 #' @export
@@ -42,19 +42,15 @@ lifetable <- function(x, Dx = NULL, Ex = NULL, mx = NULL,
   if (!is.null(Dx)) Dx[is.na(Dx)] <- 0
   
   if (is.null(mx)) {
-    if (!is.null(Dx)) mx = Dx/Ex else mx = mx_qx(qx, x, out = "mx")
+    if (!is.null(Dx)) mx = Dx/Ex else mx = mx_qx(x, qx, out = "mx")
   }
   
-  if (is.null(qx)) qx = mx_qx(mx, x, out = "qx")
+  if (is.null(qx)) qx = mx_qx(x, mx, out = "qx")
   
-  N       <- length(x)
-  nx      <- c(diff(x), Inf)
-  ax      <- nx + 1/mx - nx/qx
-  ax[1:2] <- coale.demeny.ax(x, mx = mx, sex)[1:2]
-  ax[N]   <- 1/mx[N]
-  LT      <- lt.core(x, mx, qx, ax, lx0)
-  out     <- list(input = input, lt = LT$lt, lt.exact = LT$lt.exact, process_date = date())
-  out     <- structure(class = "lifetable", out)
+  ax  <- coale.demeny.ax(x, mx, qx, sex)
+  LT  <- lt.core(x, mx, qx, ax, lx0)
+  out <- list(input = input, lt = LT$lt, lt.exact = LT$lt.exact, process_date = date())
+  out <- structure(class = "lifetable", out)
   return(out)
 }
 
@@ -91,7 +87,7 @@ lt.core <- function(x, mx, qx, ax, lx0) {
 #' mortality assumption (CFM).
 #' @param ux a vector of mx or qx
 #' @keywords internal
-mx_qx <- function(ux, x, out = "qx"){
+mx_qx <- function(x, ux, out = "qx"){
   if (!(out %in% c("qx", "mx"))) stop("out must be: 'qx' or 'mx'", call. = FALSE)
   N     <- length(x)
   nx    <- c(diff(x), Inf)
@@ -109,13 +105,14 @@ mx_qx <- function(ux, x, out = "qx"){
 #' ax - the point in the age internal where 50% of the deaths have already occurred
 #' @keywords internal
 #' 
-coale.demeny.ax <- function(x, mx, sex) {
+coale.demeny.ax <- function(x, mx, qx, sex) {
+  if (mx[1] < 0) stop("'m[1]' must be greater than 0", call. = F)
+  
   nx <- c(diff(x), Inf)
   N  <- length(x)
   f  <- nx[1:2] / c(1, 4)
   m0 <- mx[1]
-  ax <- nx/2
-  if (sum(m0 <= 0) > 0) stop("'m[1]' must be greater than 0", call. = F)
+  ax <- nx + 1/mx - nx/qx
   
   a0M <- ifelse(m0 >= 0.107, 0.330, 0.045 + 2.684*m0)
   a1M <- ifelse(m0 >= 0.107, 0.330, 1.651 - 2.816*m0)

@@ -4,7 +4,7 @@
 \alias{mx_qx}
 \title{mx to qx}
 \usage{
-mx_qx(ux, x, out = "qx")
+mx_qx(x, ux, out = "qx")
 }
 \arguments{
 \item{ux}{a vector of mx or qx}

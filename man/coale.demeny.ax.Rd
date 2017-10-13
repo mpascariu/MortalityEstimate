@@ -4,7 +4,7 @@
 \alias{coale.demeny.ax}
 \title{Find ax indicator using the Coale-Demeny coefficients}
 \usage{
-coale.demeny.ax(x, mx, sex)
+coale.demeny.ax(x, mx, qx, sex)
 }
 \description{
 ax - the point in the age internal where 50% of the deaths have already occurred
