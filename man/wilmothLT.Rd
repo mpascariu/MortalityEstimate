@@ -2,7 +2,7 @@
 % Please edit documentation in R/fun_Wilmoth.R
 \name{wilmothLT}
 \alias{wilmothLT}
-\title{Estimate wilmoth life table}
+\title{Estimate wilmoth model life table}
 \usage{
 wilmothLT(object, q0_5 = NULL, q0_1 = NULL, q15_45 = NULL,
   q15_35 = NULL, e0 = NULL, k = NULL, lx0 = 10^5, tol = 1e-09,

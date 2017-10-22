@@ -4,7 +4,7 @@
 #' Estimating the log-quadratic model using the bi-weight procedure as 
 #' described in the Appendix of Wilmoth et.al.(2012).
 #' @param x Numerical vector containing ages covered in the life tables.
-#' If abridge life tables are supplied in \code{data} then provide the lower 
+#' If abridge life tables are supplied in \code{'LT'} then provide the lower 
 #' bounds of the age intervals.
 #' @param mx input data. A data.frame / matrix with death rates.
 #' @param LT input data. A collection of life tables. If \code{mx} is provided 
@@ -85,7 +85,7 @@ wilmoth <- function(x, mx = NULL, LT = NULL, sex) {
 }
 
 
-#' Estimate wilmoth life table
+#' Estimate wilmoth model life table
 #' 
 #' Construct a life table based on the Log-Quadratic (wilmoth) estimates
 #' with various choices of 2 input parameters:  

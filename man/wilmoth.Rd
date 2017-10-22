@@ -8,7 +8,7 @@ wilmoth(x, mx = NULL, LT = NULL, sex)
 }
 \arguments{
 \item{x}{Numerical vector containing ages covered in the life tables.
-If abridge life tables are supplied in \code{data} then provide the lower 
+If abridge life tables are supplied in \code{'LT'} then provide the lower 
 bounds of the age intervals.}
 
 \item{mx}{input data. A data.frame / matrix with death rates.}

@@ -39,8 +39,9 @@
 lifetable <- function(x, Dx = NULL, Ex = NULL, mx = NULL, 
                       qx = NULL, sex = "total", lx0 = 1e+05){
   input <- c(as.list(environment()))
-  if (!is.null(mx)) mx[is.na(mx)] <- 0
-  if (!is.null(qx)) qx[is.na(qx)] <- 0
+  if (!is.null(mx)) mx[is.na(mx) & x >= 100] <- max(mx, na.rm = T)
+  if (!is.null(qx)) qx[length(qx)] <- 1
+  if (!is.null(qx)) qx[is.na(qx) & x >= 100] <- max(qx, na.rm = T)
   if (!is.null(Ex)) Ex[is.na(Ex) | Ex == 0] <- 0.01
   if (!is.null(Dx)) Dx[is.na(Dx)] <- 0
   
@@ -96,13 +97,16 @@ mx_qx <- function(x, ux, out = "qx"){
   nx    <- c(diff(x), Inf)
   if (out == "qx") {
     eta = 1 - exp(-nx*ux)
-    eta[x >= 100 & ux == 0] <- 1
-    eta[N] <- 1
+    eta[is.na(ux)] <- 1
+    eta[x >= 100 & ux == 0]  <- 1
+    if (max(x) > 100) eta[N] <- 1
   }
   if (out == "mx") {
     eta = -log(1 - ux)/nx
+    eta[is.infinite(eta)] <- max(eta[!is.infinite(eta)], na.rm = T)
+    eta[is.na(eta)] <- max(eta, na.rm = T)
     # here if qx[N] = 1 then mx[N] = NaN therefore we apply a simple extrapolation method
-    if (ux[N] == 1) eta[N] = eta[N - 1]^2 / eta[N - 2]
+    eta[N] = eta[N - 1]^2 / eta[N - 2]
   }
   return(eta)
 }
