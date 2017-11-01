@@ -2,7 +2,7 @@
 % Please edit documentation in R/fun_LinearLink.R
 \name{rotate_vx}
 \alias{rotate_vx}
-\title{Compute rotated vx coefficients}
+\title{Compute Rotated vx Coefficients}
 \source{
 Li et al. (2013)
 }

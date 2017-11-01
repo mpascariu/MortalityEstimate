@@ -1,4 +1,4 @@
-#' Fit Linear-Link model
+#' Fit Linear-Link Model
 #' 
 #' @param x vector of ages corresponding to the mx matrix
 #' @param mx Death rates matrix with age as row and time as column
@@ -31,55 +31,25 @@
 #' sex   <- 'female'
 #' SWEmx <- HMD3mx$female$SWE[paste(ages), paste(years)]
 #' 
-#' # Fit the Linear-Link using the least square approach (LSE). For poisson 
-#' # maximum likelihood use \code{method = 'MLE'}
-#' fit_LL <- LinearLink(x = ages, 
-#'                      mx = SWEmx, 
-#'                      y = years,
-#'                      country = 'SWEDEN', 
-#'                      theta = 0, 
-#'                      method = 'LSE')
-#' fit_LL
-#' 
-#' summary(fit_LL) # summary
-#' coef(fit_LL) # coefficients
-#' ls(fit_LL) # check the all the output
+#' # Fit the Linear-Link using the least square approach (LSE).
+#' M <- LinearLink(x  = ages,
+#'                 mx = SWEmx,
+#'                 y  = years,
+#'                 country = 'SWEDEN',
+#'                 theta   = 0,
+#'                 method  = 'LSE')
+#' M
+#' summary(M)
+#' coef(M)
+#' ls(M)
 #' 
 #' 
 #' # Derive a mortality curve (life table) from a value of
 #' # life expectancy at birth in 2014, say 84.05
-#' new_e0   <- 84.05
-#' pred_LL  <- LinearLinkLT(fit_LL, new_e0)
-#' pred_LL2 <- LinearLinkLT(fit_LL, new_e0, use.vx.rotation = TRUE)
-#' 
-#' observed_mx <- log(HMD3mx$female$SWE[, '2014'])
-#' pred1 <- log(pred_LL$lt$mx)
-#' pred2 <- log(pred_LL2$lt$mx)
-#' 
-#' plot(observed_mx, pch = 16, cex = 1.3, 
-#'      main = 'Observed and estimated \n age-specific death rates')
-#' lines(pred1, lwd = 2, col = 2)
-#' lines(pred2, lwd = 2, col = 3)
-#' legend('bottomright', col = c(1, 2, 3), pch = c(16, NA, NA), 
-#'        lty = c(NA, 1, 1), lwd = 2, bty = 'n', 
-#'        legend = c('Observed', 'Estimated w fitted vx', 
-#'                   'Estimated w rotated vx'))
-#' 
-#' # Let's see what happens when we want to estimate for e0 = 90
-#' new_e0   <- 90
-#' pred_LL  <- LinearLinkLT(fit_LL, new_e0)
-#' pred_LL2 <- LinearLinkLT(fit_LL, new_e0, use.vx.rotation = TRUE)
-#' 
-#' pred1 <- log(pred_LL$lt.exact$mx)
-#' pred2 <- log(pred_LL2$lt.exact$mx)
-#' 
-#' plot(pred1, lwd = 2, col = 2, type = 'l', cex = 1.3, 
-#'      main = 'Estimated mortality curves')
-#' lines(pred2, lwd = 2, col = 3)
-#' legend('bottomright', col = c(2, 3), lty = 1, lwd = 2, bty = 'n', 
-#'        legend = c('Estimated mx w fitted vx', 'Estimated mx w rotated vx'))
-#' # We have two different curves that return life expectancy at birth = 90 years 
-#' 
+#' e0 <- 84.05
+#' LT1 <- LinearLinkLT(M, ex = e0)
+#' LT2 <- LinearLinkLT(M, ex = e0, use.vx.rotation = TRUE) 
+#'
 LinearLink <- function(x, mx, y,
                        country = '...', theta = 0,
                        use.smooth = TRUE, method = 'MLE'){
@@ -89,7 +59,7 @@ LinearLink <- function(x, mx, y,
   check_input_LL(input) # Check consistency in input arguments
   cat('\n   Fitting Linear-Link model\n')
   pb <- startpb(0, length(y)) # Start the clock!
-  on.exit(closepb(pb)) # Stop clock on exit.
+  on.exit(closepb(pb))        # Stop clock on exit.
   #-------------------------------------------------
   # Data preparation
   mx_input   <- as.matrix(mx)
@@ -98,17 +68,15 @@ LinearLink <- function(x, mx, y,
   # Compute multiple life tables (in order to get ex)
   LT <- data.frame()
   for (i in 1:ncol(mx)) {
-    LT_i <- lifetable(x = x, mx = mx_input[, i])$lt
+    LT_i <- LifeTable(x, mx = mx_input[, i])$lt
     LT_i <- cbind(country = country, year = y[i], LT_i,
                   ex0 = LT_i[LT_i$x == theta, 'ex'], Ex = 1)
     LT_i <- LT_i[complete.cases(LT_i), ]
     LT   <- rbind(LT, LT_i)
   }
   #-------------------------------------------------
-  # Step 1 - Takes place before entering this function.
-  # For example in Kannisto function.
-  #-------------------------------------------------
-  # Step 2-3  - Estimate bx and vx
+  # Step 1   - Takes place before entering this function.
+  # Step 2-3 - Estimate bx and vx
   log_ex_theta <- log(LT[LT$x == theta, 'ex'])
   log_mx       <- t(log(mx_input))
   if (method == 'LSE') fit_link <- fitw_LSE(log_ex_theta, log_mx)
@@ -134,14 +102,15 @@ LinearLink <- function(x, mx, y,
   tab_ex   <- LT[LT$x == theta, c('year', 'ex')]
   LT_optim <- NULL
   for (i in 1:length(y)) {
-    optim_obj   <- compute.lt.optim(x, coeffs, tab_ex[i, 2])
-    LT_optim_i  <- cbind(country = country, year = tab_ex[i, 1], optim_obj$lt)
-    LT_optim    <- rbind(LT_optim, LT_optim_i)
-    k_[i]       <- optim_obj$k
+    optim_obj  <- compute.lt.optim(x, coeffs, tab_ex[i, 2])
+    LT_optim_i <- cbind(country = country, year = tab_ex[i, 1], optim_obj$lt)
+    LT_optim   <- rbind(LT_optim, LT_optim_i)
+    k_[i]      <- optim_obj$k
     setpb(pb, i)
   }
-  fitted_mx <- reshape(data = LT_optim[, 1:4], direction = 'wide',
-                       idvar = c('country','x'), timevar = 'year')[, -(1:2)]
+  fitted_mx <- reshape(data = LT_optim[, c("country", "year", "x", "mx")], 
+                       direction = 'wide', idvar = c('country', 'x'), 
+                       timevar = 'year')[, -(1:2)]
   dimnames(fitted_mx) <- list(x, y)
   residuals    <- mx_input - fitted_mx
   coefficients <- list(bx = coeffs$bx, vx = coeffs$vx, k = k_)
@@ -172,9 +141,8 @@ check_input_LL <- function(input){
 #'
 compute.lt.given.k <- function(x, coefs, ex0, k = 0) {
   mxhat <- exp(coefs[, 1]*log(ex0) + coefs[, 2]*k)
-  LT    <- lifetable(x, mx = mxhat)
-  out   <- list(lt = LT$lt, lt.exact = LT$lt.exact)
-  return(out)
+  LT    <- MortalityLaws::LifeTable(x, mx = mxhat)$lt
+  return(LT)
 }
 
 
@@ -188,13 +156,13 @@ compute.lt.given.k <- function(x, coefs, ex0, k = 0) {
 #' 
 compute.lt.optim <- function(x, coefs, ex0){
   penalty <- function(k_init){
-    ex_k = compute.lt.given.k(x, coefs, ex0, k = k_init)$lt.exact$ex[1]
-    out  = abs(ex_k - ex0)
-    return(out)
+    ex.hat = compute.lt.given.k(x, coefs, ex0, k = k_init)$ex[1]
+    return(abs(ex.hat - ex0))
   }
+  
   k.optim <- optim(0, penalty, method = "Brent", upper = 150, lower = -250)$par
-  LT      <- compute.lt.given.k(x, coefs, ex0, k = k.optim)
-  out     <- list(k = k.optim, lt = LT$lt, lt.exact = LT$lt.exact)
+  lt      <- compute.lt.given.k(x, coefs, ex0, k = k.optim)
+  out     <- list(k = k.optim, lt = lt)
   return(out)
 }
 
@@ -302,15 +270,15 @@ PoissonMLE <- function(log_ex_theta, Dx, Ex, iter = 500, tol = 1e-04){
   for (i in 1:iter) {
     alpha_old = alpha; vx_old = vx; k_old = k
     #
-    temp   <- Update.alpha(alpha, vx, k, Dx, Ex, Dx_fit)
+    temp   <- Update.alpha(alpha, vx, k, Dx, Ex, Dx_fit, mat_1)
     Dx_fit <- temp$Dx_fit
     alpha  <- temp$alpha
     #
-    temp   <- Update.vx(alpha, vx, k, Dx, Ex, Dx_fit)
+    temp   <- Update.vx(alpha, vx, k, Dx, Ex, Dx_fit, mat_1)
     Dx_fit <- temp$Dx_fit
     vx     <- temp$vx
     #
-    temp   <- Update.k(alpha, vx, k, Dx, Ex, Dx_fit)
+    temp   <- Update.k(alpha, vx, k, Dx, Ex, Dx_fit, mat_1)
     Dx_fit <- temp$Dx_fit
     k      <- temp$k
     crit   <- max(max(abs(alpha - alpha_old)), 
@@ -334,9 +302,7 @@ PoissonMLE <- function(log_ex_theta, Dx, Ex, iter = 500, tol = 1e-04){
 
 #' Update alpha
 #' @keywords internal
-#'
-Update.alpha <- function(alpha, vx, k, Dx, Ex, Dx_fit){
-  mat_1  <- matrix(1, nrow = ncol(Dx), ncol = 1) 
+Update.alpha <- function(alpha, vx, k, Dx, Ex, Dx_fit, mat_1){
   difD   <- Dx - Dx_fit
   alpha  <- alpha + difD %*% mat_1 / (Dx_fit %*% mat_1)
   Eta    <- alpha %*% t(mat_1) + vx %*% t(k)
@@ -346,9 +312,7 @@ Update.alpha <- function(alpha, vx, k, Dx, Ex, Dx_fit){
 
 #' Update vx
 #' @keywords internal
-#'
-Update.vx <- function(alpha, vx, k, Dx, Ex, Dx_fit){
-  mat_1  <- matrix(1, nrow = ncol(Dx), ncol = 1) 
+Update.vx <- function(alpha, vx, k, Dx, Ex, Dx_fit, mat_1){
   difD   <- Dx - Dx_fit  # exp(log_mx) - Dx_fit
   vx     <- vx + difD %*% k / (Dx_fit %*% (k ^ 2))
   Eta    <- alpha %*% t(mat_1) + vx %*% t(k)
@@ -358,9 +322,7 @@ Update.vx <- function(alpha, vx, k, Dx, Ex, Dx_fit){
 
 #' Update k
 #' @keywords internal
-#'
-Update.k <- function(alpha, vx, k, Dx, Ex, Dx_fit){
-  mat_1  <- matrix(1, nrow = ncol(Dx), ncol = 1) 
+Update.k <- function(alpha, vx, k, Dx, Ex, Dx_fit, mat_1){
   difD   <- Dx - Dx_fit
   k      <- k + t(difD) %*% vx / (t(Dx_fit) %*% (vx ^ 2))
   k      <- k - mean(k)
@@ -374,7 +336,7 @@ Update.k <- function(alpha, vx, k, Dx, Ex, Dx_fit){
 
 # ----------------------------------------------
 
-#' Estimate LinearLink life table
+#' Estimate LinearLink Life Table
 #' 
 #' Construct a life table based on the Linear-Link estimates and a given value 
 #' of life expectancy at age theta.
@@ -383,7 +345,7 @@ Update.k <- function(alpha, vx, k, Dx, Ex, Dx_fit){
 #' described in Li et al. (2013) paper is applied to the vx coefficients before 
 #' estimated the life table. If \code{FALSE} the fitted vx coefficients are used 
 #' in the estimations of the life table.
-#' @param ex_target A value of life expectancy for which we want to estimate 
+#' @param ex A value of life expectancy for which we want to estimate 
 #' the mortality curve
 #' @inheritParams rotated_vx 
 #' @param ... additional arguments affecting the predictions produced
@@ -393,28 +355,25 @@ Update.k <- function(alpha, vx, k, Dx, Ex, Dx_fit){
 #' for Long-Term Projections. Demography 50:2037-2051. 
 #' DOI: \url{http://dx.doi.org/10.1007/s13524-013-0232-2}
 #' @export
-LinearLinkLT <- function(object, ex_target, 
-                         use.vx.rotation = FALSE, ...) {
+LinearLinkLT <- function(object, ex, use.vx.rotation = FALSE, ...) {
   # Choose vx coefficients
   if (use.vx.rotation == TRUE) {
-    if (object$input$theta > 0) stop("vx rotation works only for theta = 0. Set use.vx.totation = FALSE.", call. = FALSE)
-    vx = rotate_vx(object, ex_target = ex_target, ...) 
+    if (object$input$theta > 0) stop("Currently vx rotation is implemented only for theta = 0. Set use.vx.totation = FALSE.", call. = FALSE)
+    vx = rotate_vx(object, ex_target = ex, ...) 
   } else { 
     vx = coef(object)$vx 
   }
   # Data.frame with all coefficients used in prediction
-  coefs <- data.frame(bx = coef(object)$bx, vx = vx, 
-                      row.names = object$input$x)
+  coefs <- data.frame(bx = coef(object)$bx, vx = vx, row.names = object$input$x)
   # Find the right life table
-  pred.values <- compute.lt.optim(x = object$input$x, 
-                                  coefs = coefs, ex0 = ex_target)
+  pred.values <- compute.lt.optim(x = object$input$x, coefs = coefs, ex0 = ex)
   pred.values$bx <- coefs$bx
   pred.values$vx <- coefs$vx
   return(pred.values)
 }
 
 
-#' Compute rotated vx coefficients
+#' Compute Rotated vx Coefficients
 #' 
 #' This functions computes the rotation of the vx coefficients using the method
 #' presented in Li et al. (2013) paper. 

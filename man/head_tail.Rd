@@ -2,13 +2,22 @@
 % Please edit documentation in R/fun_Utils.R
 \name{head_tail}
 \alias{head_tail}
-\title{Summary function - display head and tail in a single data.frame
-The code for this function was first written for 'psych' R package}
+\title{Summary function - display head and tail in a single data.frame}
 \usage{
-head_tail(x, hlength = 4, tlength = 4, digits = 2, ellipsis = TRUE)
+head_tail(x, hlength = 4, tlength = 4, digits = 4, ellipsis = TRUE)
+}
+\arguments{
+\item{x}{A matrix or data frame or free text}
+
+\item{hlength}{The number of lines at the beginning to show}
+
+\item{tlength}{The number of lines at the end to show}
+
+\item{digits}{Round off the data to digits}
+
+\item{ellipsis}{separate the head and tail with dots}
 }
 \description{
 Summary function - display head and tail in a single data.frame
-The code for this function was first written for 'psych' R package
 }
 \keyword{internal}

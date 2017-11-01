@@ -4,7 +4,7 @@
 \alias{Update.alpha}
 \title{Update alpha}
 \usage{
-Update.alpha(alpha, vx, k, Dx, Ex, Dx_fit)
+Update.alpha(alpha, vx, k, Dx, Ex, Dx_fit, mat_1)
 }
 \description{
 Update alpha

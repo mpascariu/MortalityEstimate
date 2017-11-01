@@ -1,5 +1,5 @@
 
-#' Fit Log-Quadratic model
+#' Fit Log-Quadratic Model
 #' 
 #' Estimating the log-quadratic model using the bi-weight procedure as 
 #' described in the Appendix of Wilmoth et.al.(2012).
@@ -25,6 +25,7 @@
 #' @seealso \code{\link{wilmothLT}}
 #' @examples 
 #' 
+#' \dontrun{
 #' # DATA
 #' sex = "female"
 #' HMD719f <- HMD719[HMD719$sex == sex, ]
@@ -32,9 +33,8 @@
 #' # Fit model
 #' x <- c(0,1, seq(5, 110, by = 5))
 #' W <- wilmoth(x, LT = HMD719f, sex = sex)
-#'
+#' }
 #' @export  
-#'  
 wilmoth <- function(x, mx = NULL, LT = NULL, sex) {
   if (!(sex %in% c("female", "male", "total"))) stop("sex must be: 'female', 'male', or 'total'", call. = FALSE)
   
@@ -50,8 +50,8 @@ wilmoth <- function(x, mx = NULL, LT = NULL, sex) {
   }
   if (!is.null(mx)) {
     mx_mat <- mx
-    lx_mat <- apply(X = mx_mat, 2, FUN = function(k) lifetable(x, mx = k, sex = sex)$lt.exact$lx)
-    ex_mat <- apply(X = mx_mat, 2, FUN = function(k) lifetable(x, mx = k, sex = sex)$lt.exact$ex)
+    lx_mat <- apply(X = mx_mat, 2, FUN = function(k) LifeTable(x, mx = k, sex = sex)$lt$lx)
+    ex_mat <- apply(X = mx_mat, 2, FUN = function(k) LifeTable(x, mx = k, sex = sex)$lt$ex)
   }
   rownames(lx_mat) = rownames(mx_mat) = rownames(ex_mat) <- x
   
@@ -85,9 +85,9 @@ wilmoth <- function(x, mx = NULL, LT = NULL, sex) {
 }
 
 
-#' Estimate wilmoth model life table
+#' Estimate Wilmoth Model Life Table
 #' 
-#' Construct a life table based on the Log-Quadratic (wilmoth) estimates
+#' Construct a model life table based on the Log-Quadratic(wilmoth) estimates
 #' with various choices of 2 input parameters:  
 #' \code{5q0, k, e0, 45q15, 35q15, 1q0}. There are 13 possible combinations 
 #' (see examples below).
@@ -166,7 +166,6 @@ wilmoth <- function(x, mx = NULL, LT = NULL, sex) {
 #' L13 <- wilmothLT(W, q15_35 = 0.15, e0 = 65)
 #' 
 #' @export
-#' 
 wilmothLT <- function(object, q0_5 = NULL, q0_1 = NULL, q15_45 = NULL, 
                       q15_35 = NULL, e0 = NULL, k = NULL, 
                       lx0 = 10^5, tol = 1e-9, maxit = 200, ...) {
@@ -337,7 +336,6 @@ mxhat.logquad <- function(coefs, x, q0_5, k) {
   	qx[2] <- 1 - (1 - q0_5)/(1 - qx[1])
   	mx[2] <- mx_qx(x, qx, out = "mx")[2]
 	}
-	
 	return(mx) 
 }
 
@@ -350,20 +348,16 @@ mxhat.logquad <- function(coefs, x, q0_5, k) {
 #' @param q0_5 5q0
 #' @param lx0 radix. Default: 100 000.
 #' @keywords internal
-#' 
 lthat.logquad <- function(coefs, x, sex, q0_5, k, lx0) {
   mx <- mxhat.logquad(coefs, x, q0_5, k)
-  qx <- mx_qx(x, mx, out = "qx")
-  ax <- coale.demeny.ax(x, mx, qx, sex)
-  LT <- lt.core(x, mx, qx, ax, lx0)$lt.exact
+  LT <- LifeTable(x, mx = mx, sex = sex, lx0 = lx0)$lt
   
   e0     <- LT$ex[1]
   q0_1   <- LT$qx[1]
   q15_45 <- 1 - LT[LT$x == 60, "lx"] / LT[LT$x == 15, "lx"]
   q15_35 <- 1 - LT[LT$x == 50, "lx"] / LT[LT$x == 15, "lx"]
   values <- data.frame(k, q0_1, q0_5, q15_35, q15_45, e0, row.names = "")
-  
-  out <- list(lt = LT, values = values)
+  out    <- list(lt = LT, values = values)
   return(out)
 }
 

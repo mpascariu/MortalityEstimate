@@ -2,14 +2,14 @@
 % Please edit documentation in R/fun_LinearLink.R
 \name{LinearLinkLT}
 \alias{LinearLinkLT}
-\title{Estimate LinearLink life table}
+\title{Estimate LinearLink Life Table}
 \usage{
-LinearLinkLT(object, ex_target, use.vx.rotation = FALSE, ...)
+LinearLinkLT(object, ex, use.vx.rotation = FALSE, ...)
 }
 \arguments{
 \item{object}{An object of class 'LinearLink'}
 
-\item{ex_target}{A value of life expectancy for which we want to estimate 
+\item{ex}{A value of life expectancy for which we want to estimate 
 the mortality curve}
 
 \item{use.vx.rotation}{Logical argument. If \code{TRUE} the adjustment method

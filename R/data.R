@@ -1,6 +1,6 @@
 # Data in the package
 
-#' Death rates for female and male populations in US, France and Sweden 
+#' Death Rates for Female and Male Populations in USA, France and Sweden 
 #'
 #' Dataset containing list containing 6 matrices with death rates for 
 #' female and male populations in USA, France and Sweden between 1965 and 2014. 
@@ -10,7 +10,7 @@
 "HMD3mx"
 
 
-#' 719 life tables from HMD 
+#' 719 Life Tables from HMD 
 #' 
 #' Data used in the Wilmoth et. al. (2012) article. Today this dataset is outdated,
 #' download the actual data free of charge from \url{http://www.mortality.org}. 
@@ -22,11 +22,13 @@
 "HMD719"
 
 
-#' Import Packages and functions
+#' Import Packages and Functions
 #'
 #' @importFrom stats complete.cases lsfit optim 
 #' smooth.spline coef reshape fitted poisson median predict uniroot
 #' @importFrom pbapply startpb closepb setpb
+#' @importFrom MortalityLaws LifeTable
+#' @importFrom utils head tail
 #' @name foo_imports
 #' @keywords internal
 NULL

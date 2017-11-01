@@ -2,7 +2,7 @@
 % Please edit documentation in R/fun_Wilmoth.R
 \name{wilmothLT}
 \alias{wilmothLT}
-\title{Estimate wilmoth model life table}
+\title{Estimate Wilmoth Model Life Table}
 \usage{
 wilmothLT(object, q0_5 = NULL, q0_1 = NULL, q15_45 = NULL,
   q15_35 = NULL, e0 = NULL, k = NULL, lx0 = 10^5, tol = 1e-09,
@@ -41,7 +41,7 @@ The output is of class \code{wilmothLT} with the components:
 and \code{1q0}.}
 }
 \description{
-Construct a life table based on the Log-Quadratic (wilmoth) estimates
+Construct a model life table based on the Log-Quadratic(wilmoth) estimates
 with various choices of 2 input parameters:  
 \code{5q0, k, e0, 45q15, 35q15, 1q0}. There are 13 possible combinations 
 (see examples below).

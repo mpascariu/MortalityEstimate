@@ -4,7 +4,7 @@
 \alias{Update.vx}
 \title{Update vx}
 \usage{
-Update.vx(alpha, vx, k, Dx, Ex, Dx_fit)
+Update.vx(alpha, vx, k, Dx, Ex, Dx_fit, mat_1)
 }
 \description{
 Update vx

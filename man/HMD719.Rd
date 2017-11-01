@@ -3,7 +3,7 @@
 \docType{data}
 \name{HMD719}
 \alias{HMD719}
-\title{719 life tables from HMD}
+\title{719 Life Tables from HMD}
 \format{An object of class \code{data.frame} with 51768 rows and 12 columns.}
 \source{
 Human Mortality Database, \url{http://www.mortality.org}. (2012)

@@ -2,7 +2,7 @@
 % Please edit documentation in R/fun_LinearLink.R
 \name{LinearLink}
 \alias{LinearLink}
-\title{Fit Linear-Link model}
+\title{Fit Linear-Link Model}
 \usage{
 LinearLink(x, mx, y, country = "...", theta = 0, use.smooth = TRUE,
   method = "MLE")
@@ -48,7 +48,7 @@ A \code{LinearLink} object containing:
 \item{process_date}{ data and time stamp}
 }
 \description{
-Fit Linear-Link model
+Fit Linear-Link Model
 }
 \examples{
 
@@ -58,53 +58,23 @@ years <- 1965:1990 # available years
 sex   <- 'female'
 SWEmx <- HMD3mx$female$SWE[paste(ages), paste(years)]
 
-# Fit the Linear-Link using the least square approach (LSE). For poisson 
-# maximum likelihood use \\code{method = 'MLE'}
-fit_LL <- LinearLink(x = ages, 
-                     mx = SWEmx, 
-                     y = years,
-                     country = 'SWEDEN', 
-                     theta = 0, 
-                     method = 'LSE')
-fit_LL
-
-summary(fit_LL) # summary
-coef(fit_LL) # coefficients
-ls(fit_LL) # check the all the output
+# Fit the Linear-Link using the least square approach (LSE).
+M <- LinearLink(x  = ages,
+                mx = SWEmx,
+                y  = years,
+                country = 'SWEDEN',
+                theta   = 0,
+                method  = 'LSE')
+M
+summary(M)
+coef(M)
+ls(M)
 
 
 # Derive a mortality curve (life table) from a value of
 # life expectancy at birth in 2014, say 84.05
-new_e0   <- 84.05
-pred_LL  <- LinearLinkLT(fit_LL, new_e0)
-pred_LL2 <- LinearLinkLT(fit_LL, new_e0, use.vx.rotation = TRUE)
-
-observed_mx <- log(HMD3mx$female$SWE[, '2014'])
-pred1 <- log(pred_LL$lt$mx)
-pred2 <- log(pred_LL2$lt$mx)
-
-plot(observed_mx, pch = 16, cex = 1.3, 
-     main = 'Observed and estimated \\n age-specific death rates')
-lines(pred1, lwd = 2, col = 2)
-lines(pred2, lwd = 2, col = 3)
-legend('bottomright', col = c(1, 2, 3), pch = c(16, NA, NA), 
-       lty = c(NA, 1, 1), lwd = 2, bty = 'n', 
-       legend = c('Observed', 'Estimated w fitted vx', 
-                  'Estimated w rotated vx'))
-
-# Let's see what happens when we want to estimate for e0 = 90
-new_e0   <- 90
-pred_LL  <- LinearLinkLT(fit_LL, new_e0)
-pred_LL2 <- LinearLinkLT(fit_LL, new_e0, use.vx.rotation = TRUE)
-
-pred1 <- log(pred_LL$lt.exact$mx)
-pred2 <- log(pred_LL2$lt.exact$mx)
-
-plot(pred1, lwd = 2, col = 2, type = 'l', cex = 1.3, 
-     main = 'Estimated mortality curves')
-lines(pred2, lwd = 2, col = 3)
-legend('bottomright', col = c(2, 3), lty = 1, lwd = 2, bty = 'n', 
-       legend = c('Estimated mx w fitted vx', 'Estimated mx w rotated vx'))
-# We have two different curves that return life expectancy at birth = 90 years 
+e0 <- 84.05
+LT1 <- LinearLinkLT(M, ex = e0)
+LT2 <- LinearLinkLT(M, ex = e0, use.vx.rotation = TRUE) 
 
 }

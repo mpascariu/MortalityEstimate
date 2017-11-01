@@ -2,8 +2,8 @@
 % Please edit documentation in R/data.R
 \name{foo_imports}
 \alias{foo_imports}
-\title{Import Packages and functions}
+\title{Import Packages and Functions}
 \description{
-Import Packages and functions
+Import Packages and Functions
 }
 \keyword{internal}

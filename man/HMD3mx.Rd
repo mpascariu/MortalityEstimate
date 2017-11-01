@@ -3,7 +3,7 @@
 \docType{data}
 \name{HMD3mx}
 \alias{HMD3mx}
-\title{Death rates for female and male populations in US, France and Sweden}
+\title{Death Rates for Female and Male Populations in USA, France and Sweden}
 \format{An object of class \code{list} of length 2.}
 \source{
 Human Mortality Database, \url{http://www.mortality.org}.

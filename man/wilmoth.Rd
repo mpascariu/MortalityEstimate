@@ -2,7 +2,7 @@
 % Please edit documentation in R/fun_Wilmoth.R
 \name{wilmoth}
 \alias{wilmoth}
-\title{Fit Log-Quadratic model}
+\title{Fit Log-Quadratic Model}
 \usage{
 wilmoth(x, mx = NULL, LT = NULL, sex)
 }
@@ -39,6 +39,7 @@ described in the Appendix of Wilmoth et.al.(2012).
 }
 \examples{
 
+\dontrun{
 # DATA
 sex = "female"
 HMD719f <- HMD719[HMD719$sex == sex, ]
@@ -46,7 +47,7 @@ HMD719f <- HMD719[HMD719$sex == sex, ]
 # Fit model
 x <- c(0,1, seq(5, 110, by = 5))
 W <- wilmoth(x, LT = HMD719f, sex = sex)
-
+}
 }
 \references{
 John Wilmoth, Sarah Zureick, Vladimir Canudas-Romo, Mie Inoue & 
