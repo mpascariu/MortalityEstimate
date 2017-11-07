@@ -13,9 +13,6 @@ compute.lt.optim(x, coefs, ex0)
 
 \item{ages}{ages}
 }
-\value{
-Results
-}
 \description{
 Function to optimize a life table
 }

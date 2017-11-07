@@ -4,7 +4,18 @@
 \alias{fitw_LSE}
 \title{Estimate bx using least square method and vx with SVD}
 \usage{
-fitw_LSE(log_ex_theta, log_mx, ...)
+fitw_LSE(log_ex_theta, log_mx, nu = 1, nv = 1)
+}
+\arguments{
+\item{log_ex_theta}{Life expecatncy at age theta (log values)}
+
+\item{log_mx}{death rates (log values)}
+
+\item{nu}{The number of left singular vectors to be computed in SVD method. 
+This must between 0 and n = nrow(x). See \code{\link{svd}}.}
+
+\item{nv}{the number of right singular vectors to be computed. 
+This must be between 0 and p = ncol(x). See \code{\link{svd}}.}
 }
 \description{
 Estimate bx using least square method and vx with SVD

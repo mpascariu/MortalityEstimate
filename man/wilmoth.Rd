@@ -4,38 +4,48 @@
 \alias{wilmoth}
 \title{Fit Log-Quadratic Model}
 \usage{
-wilmoth(x, mx = NULL, LT = NULL, sex)
+wilmoth(x, mx = NULL, LT = NULL, sex = NULL, show = TRUE,
+  control = list())
 }
 \arguments{
-\item{x}{Numerical vector containing ages covered in the life tables.
-If abridge life tables are supplied in \code{'LT'} then provide the lower 
-bounds of the age intervals.}
+\item{x}{Numerical vector containing ages corresponding to the input data 
+(in 'mx' or 'LT').}
 
-\item{mx}{input data. A data.frame / matrix with death rates.}
+\item{mx}{Input data. A data.frame / matrix with death rates.}
 
-\item{LT}{input data. A collection of life tables. If \code{mx} is provided 
-\code{LT} is not necessary and viceversa.}
+\item{LT}{Input data. A collection of life tables. If \code{mx} is provided 
+\code{LT} is not necessary and vice versa.}
 
-\item{sex}{Specify the sex of the population. Options: \code{"female", "male" or "total"}}
+\item{sex}{Specify the sex of the population. Default: \code{NULL}.
+This argument affects the first two values in the life table 'ax' column; 
+and implicitly the infant mortality. If sex is specified, the values are 
+computed based on Coale-Demeny method and are slightly different for males 
+than for females. 
+Options: \code{NULL, "female", "male" or "total"}.}
+
+\item{show}{Choose whether to display a progress bar during the fitting process. 
+Logical. Default: TRUE.}
+
+\item{control}{List with additional parameters. See \code{\link{wilmoth.control}}.}
 }
 \value{
 The output is of class \code{wilmoth} with the components:
 
-\item{input}{ a list with input objects provided in the function}
+\item{input}{ A list with input objects provided in the function}
 
-\item{coefficients}{ estimated coefficients}
+\item{coefficients}{ Estimated coefficients}
 
-\item{fitted.values}{ fitted values}
+\item{fitted.values}{ Fitted values}
 
-\item{residuals}{ residuals}
+\item{residuals}{ Deviance residuals}
 
 \item{model_info}{ Model details (equation). The relationship between 
-the death rate at age x, mx, and the probability of dying between birth and 
+the death rate at age x, and the probability of dying between birth and 
 age 5.}
 }
 \description{
-Estimating the log-quadratic model using the bi-weight procedure as 
-described in the Appendix of Wilmoth et.al.(2012).
+Estimate the Log-Quadratic model. The implemented estimation using the 
+bi-weight procedure is described in the Appendix of Wilmoth et.al.(2012).
 }
 \examples{
 
@@ -51,9 +61,9 @@ W <- wilmoth(x, LT = HMD719f, sex = sex)
 }
 \references{
 John Wilmoth, Sarah Zureick, Vladimir Canudas-Romo, Mie Inoue & 
-Cheryl Sawyer (2012): A flexible two-dimensional mortality model for use in 
-indirect estimation, Population Studies: A Journal of Demography, 66:1, 1-28
-\url{http://dx.doi.org/10.1080/00324728.2011.611411}
+Cheryl Sawyer (2012): \href{http://dx.doi.org/10.1080/00324728.2011.611411}{
+A flexible two-dimensional mortality model for use in 
+indirect estimation}. Population Studies: A Journal of Demography, 66:1, 1-28.
 }
 \seealso{
 \code{\link{wilmothLT}}

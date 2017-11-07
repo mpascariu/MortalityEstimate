@@ -1,33 +1,5 @@
 # Function borrowed from MortalityLaws R package that are not exported yet.
 
-
-#' Convert 'mx' into 'qx' and viceversa.
-#'
-#' Function to convert mx into qx and back, using the constant force of 
-#' mortality assumption (CFM).
-#' @param ux a vector of mx or qx
-#' @keywords internal
-mx_qx <- function(x, ux, out = "qx"){
-  if (!(out %in% c("qx", "mx"))) stop("out must be: 'qx' or 'mx'", call. = FALSE)
-  N     <- length(x)
-  nx    <- c(diff(x), Inf)
-  if (out == "qx") {
-    eta = 1 - exp(-nx*ux)
-    eta[is.na(ux)] <- 1
-    eta[x >= 100 & ux == 0]  <- 1
-    if (max(x) > 100) eta[N] <- 1
-  }
-  if (out == "mx") {
-    eta = -log(1 - ux)/nx
-    eta[is.infinite(eta)] <- max(eta[!is.infinite(eta)], na.rm = T)
-    eta[is.na(eta)] <- max(eta, na.rm = T)
-    # here if qx[N] = 1 then mx[N] = NaN therefore we apply a simple extrapolation method
-    eta[N] = eta[N - 1]^2 / eta[N - 2]
-  }
-  return(eta)
-}
-
-
 #' Summary function - display head and tail in a single data.frame
 #' @param x A matrix or data frame or free text
 #' @param hlength The number of lines at the beginning to show
@@ -59,3 +31,29 @@ head_tail <- function(x, hlength = 4, tlength = 4, digits = 4, ellipsis = TRUE){
   return(out)
 }
 
+
+#' Convert 'mx' into 'qx' and viceversa.
+#'
+#' Function to convert mx into qx and back, using the constant force of 
+#' mortality assumption (CFM).
+#' @param ux a vector of mx or qx
+#' @keywords internal
+mx_qx <- function(x, ux, out = "qx"){
+  if (!(out %in% c("qx", "mx"))) stop("out must be: 'qx' or 'mx'", call. = FALSE)
+  N     <- length(x)
+  nx    <- c(diff(x), Inf)
+  if (out == "qx") {
+    eta = 1 - exp(-nx*ux)
+    eta[is.na(ux)] <- 1
+    eta[x >= 100 & ux == 0]  <- 1
+    if (max(x) > 100) eta[N] <- 1
+  }
+  if (out == "mx") {
+    eta = -log(1 - ux)/nx
+    eta[is.infinite(eta)] <- max(eta[!is.infinite(eta)], na.rm = T)
+    eta[is.na(eta)] <- max(eta, na.rm = T)
+    # here if qx[N] = 1 then mx[N] = NaN therefore we apply a simple extrapolation method
+    eta[N] = eta[N - 1]^2 / eta[N - 2]
+  }
+  return(eta)
+}

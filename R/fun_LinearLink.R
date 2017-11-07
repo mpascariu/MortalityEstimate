@@ -1,8 +1,8 @@
 #' Fit Linear-Link Model
 #' 
-#' @param x vector of ages corresponding to the mx matrix
+#' @param x Numerical vector containing ages corresponding to the input data (mx)
 #' @param mx Death rates matrix with age as row and time as column
-#' @param y vector of years corresponding to the mx matrix
+#' @param y Vector of years corresponding to the mx matrix
 #' @param country Optional. The name of the country that the data 
 #' corresponds to. The name is adopted in the output tables.
 #' @param theta Age to be fitted
@@ -14,14 +14,14 @@
 #' @param method Optimizing method. Least squared approach \code{LSE} or Poisson 
 #' likelihood estimation \code{MLE}.
 #' @return A \code{LinearLink} object containing:
-#' @return \item{input}{ a list with input objects provided in the function}
-#' @return \item{coefficients}{ estimated coefficient}
-#' @return \item{fitted.values}{ fitted values}
-#' @return \item{residuals}{ estimated residuals}
-#' @return \item{fitted.life.tables}{ life tables constructed using the fitted values}
-#' @return \item{df_splines}{ degrees of freedom used in spline smoothing procedure}
-#' @return \item{model_info}{ a description of the model}
-#' @return \item{process_date}{ data and time stamp}
+#' @return \item{input}{ A list with input objects provided in the function}
+#' @return \item{coefficients}{ Estimated coefficient}
+#' @return \item{fitted.values}{ Fitted values}
+#' @return \item{residuals}{ Estimated deviance residuals}
+#' @return \item{fitted.life.tables}{ Life tables constructed using the fitted values}
+#' @return \item{df_splines}{ Degrees of freedom used in spline smoothing procedure}
+#' @return \item{model_info}{ A description of the model}
+#' @return \item{process_date}{ Data and time stamp}
 #' @export
 #' @examples 
 #' 
@@ -55,8 +55,8 @@ LinearLink <- function(x, mx, y,
                        use.smooth = TRUE, method = 'MLE'){
   #-------------------------------------------------
   input <- c(as.list(environment()))
+  check.LinearLink.input(input)
   
-  check_input_LL(input) # Check consistency in input arguments
   cat('\n   Fitting Linear-Link model\n')
   pb <- startpb(0, length(y)) # Start the clock!
   on.exit(closepb(pb))        # Stop clock on exit.
@@ -124,26 +124,22 @@ LinearLink <- function(x, mx, y,
   return(out)
 }
 
-
+#' Check consistency in input arguments
+#' @param input a list containing the input objects of the LinearLink function
 #' @keywords internal
-#' 
-check_input_LL <- function(input){
+check.LinearLink.input <- function(input){
   with(input, {
-    if (nrow(mx) != length(x) ) {stop('\nMismatch mx <-> x')}
-    if (ncol(mx) != length(y) ) {stop('\nMismatch mx <-> y')}
-    if (theta > 50 & method == 'LSE') {print('For theta > 50 the MLE method has been observed to be more reliable.')}
+    if (nrow(mx) != length(x)) stop("\nnrow(mx) must be equal to length(x)", call. = F)
+    if (ncol(mx) != length(y)) stop("\nncol(mx) must be equal to length(y)", call. = F)
+    if (theta > 50 & method == 'LSE') {
+      message("For theta > 50 the MLE method has been observed to be more reliable.")
+    }
     if (!(method %in% c('LSE', 'MLE'))) {
-      stop(paste("Method", method, "not available. Try 'LSE' or 'MLE' "))}
+      stop(paste("Method", method, "not available. Try 'LSE' or 'MLE' "), call. = F)
+    }
   })
 }
 
-#' @keywords internal
-#'
-compute.lt.given.k <- function(x, coefs, ex0, k = 0) {
-  mxhat <- exp(coefs[, 1]*log(ex0) + coefs[, 2]*k)
-  LT    <- MortalityLaws::LifeTable(x, mx = mxhat)$lt
-  return(LT)
-}
 
 
 #' Function to optimize a life table
@@ -151,18 +147,19 @@ compute.lt.given.k <- function(x, coefs, ex0, k = 0) {
 #' @param ages ages
 #' @param coefs coefficients
 #' @param ex0 life expectancy
-#' @return Results
 #' @keywords internal
-#' 
 compute.lt.optim <- function(x, coefs, ex0){
-  penalty <- function(k_init){
-    ex.hat = compute.lt.given.k(x, coefs, ex0, k = k_init)$ex[1]
-    return(abs(ex.hat - ex0))
+  penalty <- function(k){
+    mx.hat  = exp(coefs[, 1]*log(ex0) + coefs[, 2]*k)
+    ex0.hat = LifeTable(x, mx = mx.hat)$lt$ex[1]
+    out     = abs(ex0.hat - ex0)
+    return(out)
   }
   
-  k.optim <- optim(0, penalty, method = "Brent", upper = 150, lower = -250)$par
-  lt      <- compute.lt.given.k(x, coefs, ex0, k = k.optim)
-  out     <- list(k = k.optim, lt = lt)
+  k.hat  <- optim(0, penalty, method = "Brent", upper = 150, lower = -250)$par
+  mx.hat <- exp(coefs[, 1]*log(ex0) + coefs[, 2]*k.hat)
+  lt.hat <- LifeTable(x, mx = mx.hat)$lt
+  out    <- list(k = k.hat, lt = lt.hat)
   return(out)
 }
 
@@ -173,31 +170,41 @@ compute.lt.optim <- function(x, coefs, ex0){
 
 # 1. ------------------------------------------------------
 #' Estimate bx using least square method and vx with SVD
+#' 
+#' @param log_ex_theta Life expecatncy at age theta (log values)
+#' @param log_mx death rates (log values)
+#' @inheritParams wilmoth.control
 #' @keywords internal
 #'
-fitw_LSE <- function(log_ex_theta, log_mx, ...){
+fitw_LSE <- function(log_ex_theta, log_mx, nu = 1, nv = 1){
   # Step 2 - Fit bx
-  fit = FUN.bifit(x = log_ex_theta, y = log_mx)
-  bx  = as.numeric(fit$coef)
+  fit <- LSEfit(x = log_ex_theta, y = log_mx)
+  bx  <- as.numeric(fit$coef)
   # Step 3 - Compute residuals and fit SVD portion of model
   fitted_log_mx <- log_ex_theta %*% t(bx)
-  dimnames(fitted_log_mx) <- dimnames(log_mx)
-  resid_log_mx <- fitted_log_mx - log_mx
+  resid_log_mx  <- fitted_log_mx - log_mx
+  dimnames(fitted_log_mx) <- dimnames(resid_log_mx) <- dimnames(log_mx)
   resid_log_mx[resid_log_mx == Inf] <- unique(sort(resid_log_mx, decreasing = T))[2]
-  vx  <- svd(resid_log_mx, 1, 1)$v
-  if (min(vx) < 0) { vx = vx + abs(min(vx)) } # Shift up vx curve if negative
+  vx  <- svd(resid_log_mx, nu, nv)$v
+  if (min(vx) < 0) { 
+    # Shift upwards the vx curve if negative values found
+    vx <- vx + abs(min(vx)) 
+  }
   vx  <- vx / sum(vx) # scale to 1
   k_  <- rep(NA, length(log_ex_theta))
   out <- list(bx = bx, vx = vx, k_ = k_)
   return(out)
 }
 
-#'@keywords internal
-#'
-FUN.bifit <- function(x, y) {
-  
+#' Find the Least Squares Fit
+#' 
+#' @inheritParams bifit
+#' @inheritParams wilmoth.control
+#' @keywords internal
+LSEfit <- function(x, y, intercept = F, tol.lsfit = 1e-07) {
+  wt   <- NULL
   if (is.vector(y)) {
-    z <- lsfit(x, y, intercept = FALSE)
+    z <- lsfit(x, y, wt, intercept, tol.lsfit)
     z.resid  <- z$resid
     coef.new <- z$coef
     return(list(coef = coef.new, residuals = z.resid)) }
@@ -207,7 +214,7 @@ FUN.bifit <- function(x, y) {
     for (j in 1:ncol(y)) {
       y.j   <- y[, j] 
       y.j[y.j == -Inf] = -10
-      z     <- FUN.bifit(x, y.j)
+      z     <- LSEfit(x, y.j, intercept, tol.lsfit)
       resid <- cbind(resid, z$resid)
       coef  <- cbind(coef, z$coef) 
     }
@@ -334,7 +341,6 @@ Update.k <- function(alpha, vx, k, Dx, Ex, Dx_fit, mat_1){
 }
 
 
-# ----------------------------------------------
 
 #' Estimate LinearLink Life Table
 #' 

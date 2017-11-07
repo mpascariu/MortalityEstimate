@@ -11,7 +11,7 @@ wilmothLT(object, q0_5 = NULL, q0_1 = NULL, q15_45 = NULL,
 \arguments{
 \item{object}{An \code{\link{wilmoth}} object.}
 
-\item{q0_5}{5q0. The probability that a newborn will die during the subsequent 5 years}
+\item{q0_5}{5q0. The probability that a new-born will die during the subsequent 5 years}
 
 \item{q0_1}{1q0. The probability that a life aged 0 will die during the following year}
 
@@ -19,36 +19,36 @@ wilmothLT(object, q0_5 = NULL, q0_1 = NULL, q15_45 = NULL,
 
 \item{q15_35}{35q15. The probability that a life aged 15 will die during the subsequent 35 years}
 
-\item{e0}{life expectancy at birth}
+\item{e0}{Life expectancy at birth}
 
 \item{k}{k-parameter in the log-quadratic model}
 
-\item{lx0}{life table radix. Default: 10^5.}
+\item{lx0}{Life table radix. Default: 10^5.}
 
-\item{tol}{tolerance level for convergence. The tolerance level, is relevant 
+\item{tol}{Tolerance level for convergence. The tolerance level, is relevant 
 for case 12 and 13 (e0 and 45q15 or 35q15 are known)}
 
-\item{maxit}{maximum number of iterations allowed. Default: 100.}
+\item{maxit}{Maximum number of iterations allowed. Default: 100.}
 
-\item{...}{additional arguments affecting the predictions produced.}
+\item{...}{Additional arguments affecting the predictions produced.}
 }
 \value{
 The output is of class \code{wilmothLT} with the components:
 
-\item{lt}{a life table matching given inputs}
+\item{lt}{ Life table matching given inputs}
 
-\item{values}{ associated values of \code{5q0, k, e0, 45q15, 35q15,} 
-and \code{1q0}.}
+\item{values}{ Associated values of \code{q0_5, q0_1, q15_45, q15_35, e0} 
+and \code{k}.}
 }
 \description{
-Construct a model life table based on the Log-Quadratic(wilmoth) estimates
-with various choices of 2 input parameters:  
-\code{5q0, k, e0, 45q15, 35q15, 1q0}. There are 13 possible combinations 
-(see examples below).
+Construct model life tables based on the Log-Quadratic (wilmoth) estimates
+with various choices of 2 input parameters: \code{q0_5, q0_1, q15_45, q15_35, e0} 
+and \code{k}. There are 13 possible combinations (see examples below).
 }
 \details{
-Notation: due to limitations of the R language the death
-probability \code{nqx} is written \code{qx_n}, where \code{x} and \code{n} are integers.
+Due to limitations of the R language the notation for probability of 
+dying \code{nqx} is written \code{qx_n}, where \code{x} and \code{n} are integers.
+For example \code{45q15} is represented as \code{q45_15}.
 }
 \examples{
 

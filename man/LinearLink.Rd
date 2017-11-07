@@ -8,11 +8,11 @@ LinearLink(x, mx, y, country = "...", theta = 0, use.smooth = TRUE,
   method = "MLE")
 }
 \arguments{
-\item{x}{vector of ages corresponding to the mx matrix}
+\item{x}{Numerical vector containing ages corresponding to the input data (mx)}
 
 \item{mx}{Death rates matrix with age as row and time as column}
 
-\item{y}{vector of years corresponding to the mx matrix}
+\item{y}{Vector of years corresponding to the mx matrix}
 
 \item{country}{Optional. The name of the country that the data 
 corresponds to. The name is adopted in the output tables.}
@@ -31,21 +31,21 @@ likelihood estimation \code{MLE}.}
 \value{
 A \code{LinearLink} object containing:
 
-\item{input}{ a list with input objects provided in the function}
+\item{input}{ A list with input objects provided in the function}
 
-\item{coefficients}{ estimated coefficient}
+\item{coefficients}{ Estimated coefficient}
 
-\item{fitted.values}{ fitted values}
+\item{fitted.values}{ Fitted values}
 
-\item{residuals}{ estimated residuals}
+\item{residuals}{ Estimated deviance residuals}
 
-\item{fitted.life.tables}{ life tables constructed using the fitted values}
+\item{fitted.life.tables}{ Life tables constructed using the fitted values}
 
-\item{df_splines}{ degrees of freedom used in spline smoothing procedure}
+\item{df_splines}{ Degrees of freedom used in spline smoothing procedure}
 
-\item{model_info}{ a description of the model}
+\item{model_info}{ A description of the model}
 
-\item{process_date}{ data and time stamp}
+\item{process_date}{ Data and time stamp}
 }
 \description{
 Fit Linear-Link Model
