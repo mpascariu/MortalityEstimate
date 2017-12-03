@@ -25,6 +25,10 @@ test.LinearLink <- function(X){
 test.LinearLink(M1)
 test.LinearLink(M2)
 
+M1$fitted.life.tables[is.na(M1$fitted.life.tables$ex), ]
+
+M1$fitted.life.tables[99:101, ]
+
 
 P1 <- LinearLinkLT(M1, ex = 85)
 P2 <- LinearLinkLT(M2, ex = 85)

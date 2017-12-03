@@ -1,27 +1,27 @@
 #' Fit Linear-Link Model
 #' 
-#' @param x Numerical vector containing ages corresponding to the input data (mx)
-#' @param mx Death rates matrix with age as row and time as column
-#' @param y Vector of years corresponding to the mx matrix
+#' @param x Numerical vector containing ages corresponding to the input data (mx).
+#' @param mx Death rates matrix with age as row and time as column.
+#' @param y Vector of years corresponding to the mx matrix.
 #' @param country Optional. The name of the country that the data 
 #' corresponds to. The name is adopted in the output tables.
-#' @param theta Age to be fitted
+#' @param theta Age to be fitted.
 #' @param use.smooth Logical variable indicating whether the spline smoothing is 
 #' applied or not to the estimated coefficients (bx and vx). The smoothing 
 #' can be applied in order to avoid jumps in the mortality rates from one 
 #' age to another. This using splines. One degree of freedom is allocated 
 #' for every 5 year of age.
 #' @param method Optimizing method. Least squared approach \code{LSE} or Poisson 
-#' likelihood estimation \code{MLE}.
+#' likelihood estimation \code{MLE}. Default: \code{LSE}.
 #' @return A \code{LinearLink} object containing:
-#' @return \item{input}{ A list with input objects provided in the function}
-#' @return \item{coefficients}{ Estimated coefficient}
-#' @return \item{fitted.values}{ Fitted values}
-#' @return \item{residuals}{ Estimated deviance residuals}
+#' @return \item{input}{List with input objects provided in the function}
+#' @return \item{coefficients}{Estimated coefficient}
+#' @return \item{fitted.values}{Fitted values}
+#' @return \item{residuals}{Estimated deviance residuals}
 #' @return \item{fitted.life.tables}{ Life tables constructed using the fitted values}
-#' @return \item{df_splines}{ Degrees of freedom used in spline smoothing procedure}
-#' @return \item{model_info}{ A description of the model}
-#' @return \item{process_date}{ Data and time stamp}
+#' @return \item{df_splines}{Degrees of freedom used in spline smoothing procedure}
+#' @return \item{model_info}{Description of the model}
+#' @return \item{process_date}{Data and time stamp}
 #' @export
 #' @examples 
 #' 
@@ -52,7 +52,7 @@
 #'
 LinearLink <- function(x, mx, y,
                        country = '...', theta = 0,
-                       use.smooth = TRUE, method = 'MLE'){
+                       use.smooth = TRUE, method = 'LSE'){
   #-------------------------------------------------
   input <- c(as.list(environment()))
   check.LinearLink.input(input)
@@ -116,7 +116,7 @@ LinearLink <- function(x, mx, y,
   coefficients <- list(bx = coeffs$bx, vx = coeffs$vx, k = k_)
   #-----------------------------------
   # Output
-  out = list(input = input, coefficients = coefficients, fitted.values = fitted_mx,
+  out = list(input = input, coefficients = coefficients, fitted = fitted_mx,
              residuals = residuals, fitted.life.tables = LT_optim,
              df_spline = df_spline, model_info = model_info, process_date = date())
   out = structure(class = 'LinearLink', out)
@@ -150,9 +150,9 @@ check.LinearLink.input <- function(input){
 #' @keywords internal
 compute.lt.optim <- function(x, coefs, ex0){
   penalty <- function(k){
-    mx.hat  = exp(coefs[, 1]*log(ex0) + coefs[, 2]*k)
-    ex0.hat = LifeTable(x, mx = mx.hat)$lt$ex[1]
-    out     = abs(ex0.hat - ex0)
+    mx.hat  <- exp(coefs[, 1]*log(ex0) + coefs[, 2]*k)
+    ex0.hat <- LifeTable(x, mx = mx.hat)$lt$ex[1]
+    out     <- abs(ex0.hat - ex0)
     return(out)
   }
   
@@ -202,25 +202,22 @@ fitw_LSE <- function(log_ex_theta, log_mx, nu = 1, nv = 1){
 #' @inheritParams wilmoth.control
 #' @keywords internal
 LSEfit <- function(x, y, intercept = F, tol.lsfit = 1e-07) {
-  wt   <- NULL
   if (is.vector(y)) {
-    z <- lsfit(x, y, wt, intercept, tol.lsfit)
-    z.resid  <- z$resid
-    coef.new <- z$coef
-    return(list(coef = coef.new, residuals = z.resid)) }
-  
+    z   <- lsfit(x, y, wt = NULL, intercept, tol.lsfit)
+    out <- list(coef = z$coef, residuals = z$resid)
+  }
   if (is.matrix(y)) {
     resid <- coef <- NULL
     for (j in 1:ncol(y)) {
-      y.j   <- y[, j] 
-      y.j[y.j == -Inf] = -10
-      z     <- LSEfit(x, y.j, intercept, tol.lsfit)
+      Y     <- y[, j] 
+      Y[Y == -Inf] <- -10
+      z     <- LSEfit(x, Y, intercept, tol.lsfit)
       resid <- cbind(resid, z$resid)
       coef  <- cbind(coef, z$coef) 
     }
     out <- list(coef = coef, residuals = resid)
-    return(out) 
   }
+  return(out) 
 }
 
 
@@ -239,15 +236,13 @@ fitw_MLE <- function(log_ex_theta, log_mx, ...){
   # the Poisson distribution. However, if a vector of mx is available we can 
   # estimate Dx (deaths) and Ex (exposures) in such a way that the parameters 
   # are reasonable computed.
-  Dx = t(exp(log_mx)) * 1e6 # Dx estimation
-  Ex = Dx*0 + 1e6           # Ex estimation
+  Dx  <- t(exp(log_mx)) * 1e6 # Dx estimation
+  Ex  <- Dx*0 + 1e6           # Ex estimation
   fit <- PoissonMLE(log_ex_theta, Dx, Ex, ...)
-  
-  bx = fit$bx
-  vx = matrix(fit$vx, ncol = 1)
-  if (min(vx) < 0) { vx = vx + abs(min(vx)) } # Shift up vx curve if negative
-  k_ = as.numeric(fit$k)
-  
+  bx  <- fit$bx
+  vx  <- matrix(fit$vx, ncol = 1)
+  if (min(vx) < 0) vx <- vx + abs(min(vx)) # Shift up vx curve if negative
+  k_  <- as.numeric(fit$k)
   out <- list(bx = bx, vx = vx, k_ = k_)
   return(out)
 }
@@ -298,8 +293,9 @@ PoissonMLE <- function(log_ex_theta, Dx, Ex, iter = 500, tol = 1e-04){
   k  <- k * sum(vx)
   vx <- vx / sum(vx) # scale to 1
   
-  log.MU.hat <- alpha %*% t(mat_1) + vx %*% t(k)
-  bx_hat <- rowMeans((log.MU.hat - vx %*% t(k))/log_ex_theta)
+  vxk <- vx %*% t(k)
+  log.MU.hat <- alpha %*% t(mat_1) + vxk
+  bx_hat <- rowMeans((log.MU.hat - vxk)/log_ex_theta)
   
   # output
   out <- list(bx = as.numeric(bx_hat), 
@@ -346,36 +342,41 @@ Update.k <- function(alpha, vx, k, Dx, Ex, Dx_fit, mat_1){
 #' 
 #' Construct a life table based on the Linear-Link estimates and a given value 
 #' of life expectancy at age theta.
-#' @param object An object of class 'LinearLink'
+#' @param object An object of class \code{LinearLink}.
 #' @param use.vx.rotation Logical argument. If \code{TRUE} the adjustment method
 #' described in Li et al. (2013) paper is applied to the vx coefficients before 
 #' estimated the life table. If \code{FALSE} the fitted vx coefficients are used 
 #' in the estimations of the life table.
-#' @param ex A value of life expectancy for which we want to estimate 
-#' the mortality curve
+#' @param ex Value of life expectancy for which we want to estimate 
+#' the mortality curve. Type: numerical scalar.
 #' @inheritParams rotated_vx 
-#' @param ... additional arguments affecting the predictions produced
-#' @return Predicted values of the Linear-Link model
-#' @references Li N., Lee R. and Gerland P. (2013). Extending the Lee-Carter 
+#' @param ... Additional arguments affecting the predictions produced.
+#' @return Predicted values of the Linear-Link model.
+#' @references Li N., Lee R. and Gerland P. (2013). 
+#' \href{http://dx.doi.org/10.1007/s13524-013-0232-2}{Extending the Lee-Carter 
 #' Method to Model the Rotation of Age Patterns of Mortality Decline 
-#' for Long-Term Projections. Demography 50:2037-2051. 
-#' DOI: \url{http://dx.doi.org/10.1007/s13524-013-0232-2}
+#' for Long-Term Projections.} Demography 50:2037-2051.
 #' @export
 LinearLinkLT <- function(object, ex, use.vx.rotation = FALSE, ...) {
   # Choose vx coefficients
+  x  <- object$input$x
+  bx <- coef(object)$bx
   if (use.vx.rotation == TRUE) {
-    if (object$input$theta > 0) stop("Currently vx rotation is implemented only for theta = 0. Set use.vx.totation = FALSE.", call. = FALSE)
+    if (object$input$theta > 0) {
+      stop("Currently vx rotation is implemented only for theta = 0.",
+           " Set use.vx.totation = FALSE.", call. = FALSE)
+    }
     vx = rotate_vx(object, ex_target = ex, ...) 
   } else { 
     vx = coef(object)$vx 
   }
   # Data.frame with all coefficients used in prediction
-  coefs <- data.frame(bx = coef(object)$bx, vx = vx, row.names = object$input$x)
+  coefs <- data.frame(bx = bx, vx = vx, row.names = x)
   # Find the right life table
-  pred.values <- compute.lt.optim(x = object$input$x, coefs = coefs, ex0 = ex)
-  pred.values$bx <- coefs$bx
-  pred.values$vx <- coefs$vx
-  return(pred.values)
+  out <- compute.lt.optim(x, coefs = coefs, ex0 = ex)
+  out$bx <- bx
+  out$vx <- vx
+  return(out)
 }
 
 
@@ -413,25 +414,24 @@ rotate_vx <- function(object, ex_target,
   
   # Derive a logistic shape. The values have to be between 0 and 1, 
   # they will be scaled.
-  n_vx  = length(vx[x2]) # count age groups in x2
-  n_vx_ext = n_vx + (e0_conv - max(x)) # set limit for convergence at 130
-  x_num = seq(-6, 6, length.out = n_vx_ext) 
-  logit_shape = 1 - exp(x_num) / (1 + exp(x_num)) 
-  vx_old_ages = logit_shape * vx_young_ages # scale values
+  n_vx        <- length(vx[x2]) # count age groups in x2
+  n_vx_ext    <- n_vx + (e0_conv - max(x)) # set limit for convergence at 130
+  x_num       <- seq(-6, 6, length.out = n_vx_ext) 
+  logit_shape <- 1 - exp(x_num) / (1 + exp(x_num)) 
+  vx_old_ages <- logit_shape * vx_young_ages # scale values
   # This is our vx ultimate (vx_u)
   vx_u[min(x):max(x1 + 1)] <- vx_young_ages
   vx_u[x2 + 1] <- vx_old_ages[1:n_vx]
   vx_u <- vx_u/sum(vx_u)  ## rescale
   # Compute weights
-  w_t  = (ex_target - e0_threshold)/(e0_u - e0_threshold)
-  ws_t = (0.5 * (1 + sin(pi/2 * (2*w_t - 1))) ) ^ p_ 
+  w_t  <- (ex_target - e0_threshold)/(e0_u - e0_threshold)
+  ws_t <- (0.5 * (1 + sin(pi/2 * (2*w_t - 1))) ) ^ p_ 
   # Compute rotate_vx
-  if ( ex_target < e0_threshold ) { rot_vx = vx }
+  if ( ex_target < e0_threshold ) rot_vx <- vx 
   if ( e0_threshold <= ex_target & ex_target < e0_u ) {
-    rot_vx = (1 - ws_t) * vx + ws_t * vx_u
+    rot_vx <- (1 - ws_t) * vx + ws_t * vx_u
   }
-  if (ex_target >= e0_u) { rot_vx = vx_u }
-  
+  if (ex_target >= e0_u) rot_vx <- vx_u 
   return(rot_vx)
 }
 
@@ -442,8 +442,8 @@ rotate_vx <- function(object, ex_target,
 #' @keywords internal
 #' @export
 summary.LinearLink <- function(object, ...) {
-  mi <- object$model_info
-  cl <- object$call
+  mi    <- object$model_info
+  cl    <- object$call
   dev   <- round(summary(as.vector(as.matrix(object$residuals))), 5)
   coefs <- data.frame(bx = coef(object)$bx, vx = coef(object)$vx,
                       row.names = object$input$x)
@@ -452,7 +452,6 @@ summary.LinearLink <- function(object, ...) {
                      digits = 5, hlength = 6, tlength = 6)
   H   <- data.frame(Hbxvx, Hk)
   dfs <- object$df_spline
-  
   out <- list(model_info = mi, call = cl, dev = dev, 
               coef = H, df_spline = dfs)
   out <- structure(class = "summary.LinearLink", out)

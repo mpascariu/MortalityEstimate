@@ -5,19 +5,19 @@
 \title{Fit Linear-Link Model}
 \usage{
 LinearLink(x, mx, y, country = "...", theta = 0, use.smooth = TRUE,
-  method = "MLE")
+  method = "LSE")
 }
 \arguments{
-\item{x}{Numerical vector containing ages corresponding to the input data (mx)}
+\item{x}{Numerical vector containing ages corresponding to the input data (mx).}
 
-\item{mx}{Death rates matrix with age as row and time as column}
+\item{mx}{Death rates matrix with age as row and time as column.}
 
-\item{y}{Vector of years corresponding to the mx matrix}
+\item{y}{Vector of years corresponding to the mx matrix.}
 
 \item{country}{Optional. The name of the country that the data 
 corresponds to. The name is adopted in the output tables.}
 
-\item{theta}{Age to be fitted}
+\item{theta}{Age to be fitted.}
 
 \item{use.smooth}{Logical variable indicating whether the spline smoothing is 
 applied or not to the estimated coefficients (bx and vx). The smoothing 
@@ -26,26 +26,26 @@ age to another. This using splines. One degree of freedom is allocated
 for every 5 year of age.}
 
 \item{method}{Optimizing method. Least squared approach \code{LSE} or Poisson 
-likelihood estimation \code{MLE}.}
+likelihood estimation \code{MLE}. Default: \code{LSE}.}
 }
 \value{
 A \code{LinearLink} object containing:
 
-\item{input}{ A list with input objects provided in the function}
+\item{input}{List with input objects provided in the function}
 
-\item{coefficients}{ Estimated coefficient}
+\item{coefficients}{Estimated coefficient}
 
-\item{fitted.values}{ Fitted values}
+\item{fitted.values}{Fitted values}
 
-\item{residuals}{ Estimated deviance residuals}
+\item{residuals}{Estimated deviance residuals}
 
 \item{fitted.life.tables}{ Life tables constructed using the fitted values}
 
-\item{df_splines}{ Degrees of freedom used in spline smoothing procedure}
+\item{df_splines}{Degrees of freedom used in spline smoothing procedure}
 
-\item{model_info}{ A description of the model}
+\item{model_info}{Description of the model}
 
-\item{process_date}{ Data and time stamp}
+\item{process_date}{Data and time stamp}
 }
 \description{
 Fit Linear-Link Model

@@ -6,9 +6,9 @@ library(MortalityLaws)
 # Test data to be added in the package
 # Import HMD dataset (used for fitting the model)
 
-cntr = c('SWE', 'FRATNP', 'USA')
-HMDuser = "username@email.com"
-HMDpass = "HMDpassword"
+cntr = c("SWE", "FRATNP", "USA")
+HMDuser = "user"
+HMDpass = "pass"
 
 HMD_Dx <- ReadHMD(what = "Dx", countries = cntr,
                   username = HMDuser, password = HMDpass,
@@ -17,11 +17,10 @@ HMD_Ex <- ReadHMD(what = "Ex", countries = cntr,
                   username = HMDuser, password = HMDpass,
                   save = F)$data
 
-
-
 build.mx.wide <- function(HMD.Ex, HMD.Dx, years, ages, sex) {
-  Ext <- HMD.Ex %>% select(country:Age, get(sex)) %>% filter(Year %in% years)
-  Dxt <- HMD.Dx %>% select(country:Age, get(sex)) %>% filter(Year %in% years)
+  Cols <- c("country", "Year", "Age", sex)
+  Ext <- HMD.Ex[, Cols] %>% filter(Year %in% years)
+  Dxt <- HMD.Dx[, Cols] %>% filter(Year %in% years)
   colnames(Ext)[4] <- "Ex"
   colnames(Dxt)[4] <- "Dx"
   mxt  <- left_join(Ext, Dxt, by = c('country', 'Year','Age')) %>% mutate(mx = Dx/Ex)
