@@ -43,3 +43,8 @@ test.LinearLinkLT <- function(P){
 
 test.LinearLinkLT(P1)
 test.LinearLinkLT(P2)
+
+# ----------------------------------------------
+# Test Data
+expect_false(is.null(HMD4mx))
+expect_output(print.MortalityEstimateData(HMD4mx))
