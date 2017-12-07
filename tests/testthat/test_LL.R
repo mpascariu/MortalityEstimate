@@ -3,7 +3,7 @@ rm(list = ls())
 ages  <- 0:100 
 years <- 1965:1990
 sex   <- 'female'
-SWEmx <- HMD3mx$female$SWE[paste(ages), paste(years)]
+SWEmx <- HMD4mx$SWE[paste(ages), paste(years)]
 
 M1 <- LinearLink(x = ages, mx = SWEmx, y  = years,
                  country = 'SWEDEN', theta   = 0, method = 'LSE')

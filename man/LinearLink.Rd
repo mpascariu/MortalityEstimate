@@ -56,7 +56,7 @@ Fit Linear-Link Model
 ages  <- 0:100 # available ages in our datasets
 years <- 1965:1990 # available years
 sex   <- 'female'
-SWEmx <- HMD3mx$female$SWE[paste(ages), paste(years)]
+SWEmx <- HMD4mx$SWE[paste(ages), paste(years)]
 
 # Fit the Linear-Link using the least square approach (LSE).
 M <- LinearLink(x  = ages,

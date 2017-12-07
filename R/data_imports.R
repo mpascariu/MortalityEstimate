@@ -1,4 +1,17 @@
-# Data in the package
+
+#' Import Packages and Functions
+#'
+#' @importFrom stats complete.cases lsfit optim 
+#' smooth.spline coef reshape fitted poisson median predict uniroot
+#' @importFrom pbapply startpb closepb setpb
+#' @importFrom MortalityLaws LifeTable
+#' @importFrom utils head tail
+#' @name foo_imports
+#' @keywords internal
+NULL
+
+
+# Data in the package ----
 
 #' Death Rates for Female and Male Populations in USA, France and Sweden 
 #'
@@ -7,7 +20,24 @@
 #' This data is provided for testing purposes only. It may not be up to date anymore.
 #' Download the actual data free of charge from \url{http://www.mortality.org}.  
 #' @source Human Mortality Database, \url{http://www.mortality.org}.
-"HMD3mx"
+"HMD4mx"
+
+#' Print function for HMD4mx data
+#' 
+#' @param x A \code{MortalityEstimateData} object.
+#' @param ... Further arguments passed to or from other methods.
+#' @export
+#' @keywords internal
+print.MortalityEstimateData <- function(x, ...) {
+  cat("\nMortalityEstimate Test Data\n")
+  cat(" Populations : England and Wales, France, Sweden, USA\n")
+  cat(" Series      : Death rates for females (raw)\n")
+  cat(" Years       : 1965 - 2014\n")
+  cat(" Ages        : 0 - 110\n")
+  cat(" Format      : List containg 4 data frames\n")
+  cat(" Source      : Human Mortality Database\n")
+  cat(" Download    : December 7, 2017")
+}
 
 
 #' 719 Life Tables from HMD 
@@ -22,13 +52,3 @@
 "HMD719"
 
 
-#' Import Packages and Functions
-#'
-#' @importFrom stats complete.cases lsfit optim 
-#' smooth.spline coef reshape fitted poisson median predict uniroot
-#' @importFrom pbapply startpb closepb setpb
-#' @importFrom MortalityLaws LifeTable
-#' @importFrom utils head tail
-#' @name foo_imports
-#' @keywords internal
-NULL
