@@ -8,8 +8,8 @@ wilmoth.control(c = 6, intercept = TRUE, tol.biweight = 1e-06,
   tol.lsfit = 1e-07, lx0 = 10^5, k.int = c(-25, 20), nu = 1, nv = 1)
 }
 \arguments{
-\item{c}{Tuning constant when compute weigthed least squared using 
-Tukey's biweight function. Typically between 6 to 9.}
+\item{c}{Tuning constant when compute weighted least squared using 
+Tukey's biweight function. Typically, between 6 to 9.}
 
 \item{intercept}{logical. Whether or not an intercept term should be used in 
 least squares estimation. See \code{\link{lsfit}}.}

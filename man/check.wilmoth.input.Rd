@@ -2,7 +2,7 @@
 % Please edit documentation in R/fun_Wilmoth.R
 \name{check.wilmoth.input}
 \alias{check.wilmoth.input}
-\title{Check wilmoth argumetns}
+\title{Check wilmoth arguments}
 \usage{
 check.wilmoth.input(input)
 }
@@ -10,6 +10,6 @@ check.wilmoth.input(input)
 \item{input}{a list containing the input objects of the wilmoth function}
 }
 \description{
-Check wilmoth argumetns
+Check wilmoth arguments
 }
 \keyword{internal}

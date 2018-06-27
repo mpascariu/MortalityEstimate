@@ -13,8 +13,8 @@ x matrix should not include a column of ones}
 \item{y}{The responses, possibly a matrix if you want to fit multiple left hand sides.
 y can be matrix if there are multiple left-hand sides}
 
-\item{c}{Tuning constant when compute weigthed least squared using 
-Tukey's biweight function. Typically between 6 to 9.}
+\item{c}{Tuning constant when compute weighted least squared using 
+Tukey's biweight function. Typically, between 6 to 9.}
 
 \item{intercept}{logical. Whether or not an intercept term should be used in 
 least squares estimation. See \code{\link{lsfit}}.}

@@ -128,12 +128,11 @@ wilmoth <- function(x, mx = NULL, LT = NULL, sex = NULL, show = TRUE,
 #' sex = "female"
 #' HMD719f <- HMD719[HMD719$sex == sex, ]
 #' 
-#' # Fit model
+#' # Fit Log-quadratic model
 #' x <- c(0,1, seq(5, 110, by = 5))
 #' W <- wilmoth(x, LT = HMD719f, sex = sex)
 #' 
 #' # Build life tables with various choices of 2 input parameters
-#' # and estimated model 'W'
 #' 
 #' # case 1: Using 5q0 and k
 #' L1 <- wilmothLT(W, q0_5 = 0.05, k = 0.1)
@@ -246,7 +245,7 @@ wilmothLT <- function(object, q0_5 = NULL, q0_1 = NULL, q15_45 = NULL,
       q0_5.old <- q0_5
       # Get new 5q0 from e0 assuming k
       q0_5 <- wilmothLT(object, k = k, e0 = e0, ...)$values$q0_5 
-      # Get k from 45q15 or 35q15 asuming 5q0
+      # Get k from 45q15 or 35q15 assuming 5q0
       if (my_case == "C12") tmp = wilmothLT(object, q0_5 = q0_5, q15_45 = q15_45, ...)
       if (my_case == "C13") tmp = wilmothLT(object, q0_5 = q0_5, q15_35 = q15_35, ...)
       k  <- tmp$values$k
@@ -273,8 +272,8 @@ wilmothLT <- function(object, q0_5 = NULL, q0_1 = NULL, q15_45 = NULL,
 #' x matrix should not include a column of ones
 #' @param y The responses, possibly a matrix if you want to fit multiple left hand sides.
 #' y can be matrix if there are multiple left-hand sides
-#' @param c Tuning constant when compute weigthed least squared using 
-#' Tukey's biweight function. Typically between 6 to 9.
+#' @param c Tuning constant when compute weighted least squared using 
+#' Tukey's biweight function. Typically, between 6 to 9.
 #' @param intercept logical. Whether or not an intercept term should be used in 
 #' least squares estimation. See \code{\link{lsfit}}.
 #' @param tol.biweight Tolerance for convergence of the biweight fit
@@ -374,7 +373,7 @@ lthat.logquad <- function(coefs, x, sex, q0_5, k, lx0) {
 }
 
 
-#' Check wilmoth argumetns
+#' Check wilmoth arguments
 #' 
 #' @param input a list containing the input objects of the wilmoth function
 #' @keywords internal
@@ -440,7 +439,7 @@ wilmoth.control <- function(c = 6,
                             k.int = c(-25, 20),
                             nu = 1,
                             nv = 1)
-  {
+{
   out <- c(as.list(environment()))
   if (tol.biweight <= 0) stop("'tol.biweight' should be greater than 0")
   
@@ -472,5 +471,6 @@ print.wilmoth <- function(x, ...){
 #' @keywords internal
 #' @export
 summary.wilmoth <- function(object, ...) print.wilmoth(x = object, ...)
+
 
 

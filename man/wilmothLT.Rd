@@ -56,12 +56,11 @@ For example \code{45q15} is represented as \code{q45_15}.
 sex = "female"
 HMD719f <- HMD719[HMD719$sex == sex, ]
 
-# Fit model
+# Fit Log-quadratic model
 x <- c(0,1, seq(5, 110, by = 5))
 W <- wilmoth(x, LT = HMD719f, sex = sex)
 
 # Build life tables with various choices of 2 input parameters
-# and estimated model 'W'
 
 # case 1: Using 5q0 and k
 L1 <- wilmothLT(W, q0_5 = 0.05, k = 0.1)

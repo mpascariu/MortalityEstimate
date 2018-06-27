@@ -13,12 +13,13 @@ NULL
 
 # Data in the package ----
 
-#' Death Rates for Female and Male Populations in USA, France and Sweden 
+#' Death Rates for Female Populations in England and Wales, France, Sweden and USA 
 #'
-#' Dataset containing list containing 6 matrices with death rates for 
-#' female and male populations in USA, France and Sweden between 1965 and 2014. 
-#' This data is provided for testing purposes only. It may not be up to date anymore.
-#' Download the actual data free of charge from \url{http://www.mortality.org}.  
+#' Dataset containing containing 4 matrices with death rates for 
+#' female populations in England and Wales, France, Sweden and USA 
+#' between 1965 and 2014. This data is provided for testing purposes only. 
+#' It may not be up to date anymore. Download the actual data free of charge 
+#' from \url{http://www.mortality.org}.  
 #' @source Human Mortality Database, \url{http://www.mortality.org}.
 "HMD4mx"
 
