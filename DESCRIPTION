@@ -1,19 +1,18 @@
 Package: MortalityEstimate
 Type: Package
 Title: Indirect Estimation Methods for Measurement of Demographic Indicators
-Version: 0.9.1
+Version: 0.9.2
 Authors@R: c(
   person("Marius D.", "Pascariu", role = c("aut", "cre"), email = "rpascariu@outlook.com"),
   person("Jose Manuel", "Aburto", role = "aut"),
   person("Ugofilippo", "Basellini", role = "aut"),
   person("Vladimir", "Canudas-Romo", role = "ctb"))
-Maintainer: Marius Pascariu <rpascariu@outlook.com>
 Description: Indirect methods for estimating age-specific death rates.
 License: GPL-3
 LazyData: TRUE
 Depends: R (>= 3.0.0)
 Imports:
-  MortalityLaws,
+  MortalityLaws (>= 1.4.0),
   pbapply
 Suggests:
   testthat

@@ -88,7 +88,7 @@ wilmoth <- function(x, mx = NULL, LT = NULL, sex = NULL, show = TRUE,
   mxresid <- mx_mat - mxfit
   
   out <- list(input = input, coefficients = coef, k = mx_k$k,
-              fitted.values = mxfit, residuals = mxresid, model.info = info)
+              fitted.values = t(mxfit), residuals = t(mxresid), model.info = info)
   out <- structure(class = 'wilmoth', out)
   out$call <- match.call()
   return(out)
