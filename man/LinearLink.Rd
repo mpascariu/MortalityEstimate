@@ -2,7 +2,7 @@
 % Please edit documentation in R/fun_LinearLink.R
 \name{LinearLink}
 \alias{LinearLink}
-\title{Fit Linear-Link Model}
+\title{Fit the Linear-Link Model}
 \usage{
 LinearLink(x, mx, y, country = "...", theta = 0, use.smooth = TRUE,
   method = "LSE")
@@ -30,25 +30,17 @@ likelihood estimation \code{MLE}. Default: \code{LSE}.}
 }
 \value{
 A \code{LinearLink} object containing:
-
-\item{input}{List with input objects provided in the function}
-
-\item{coefficients}{Estimated coefficient}
-
-\item{fitted.values}{Fitted values}
-
-\item{residuals}{Estimated deviance residuals}
-
-\item{fitted.life.tables}{ Life tables constructed using the fitted values}
-
-\item{df_splines}{Degrees of freedom used in spline smoothing procedure}
-
-\item{model_info}{Description of the model}
-
-\item{process_date}{Data and time stamp}
+ \item{input}{List with input objects provided in the function}
+ \item{coefficients}{Estimated coefficient}
+ \item{fitted.values}{Fitted values}
+ \item{residuals}{Estimated deviance residuals}
+ \item{fitted.life.tables}{ Life tables constructed using the fitted values}
+ \item{df_splines}{Degrees of freedom used in spline smoothing procedure}
+ \item{model_info}{Description of the model}
+ \item{process_date}{Data and time stamp}
 }
 \description{
-Fit Linear-Link Model
+Fit the Linear-Link Model
 }
 \examples{
 

@@ -5,7 +5,8 @@
 \title{Auxiliary for Controlling \code{wilmoth} Fitting.}
 \usage{
 wilmoth.control(c = 6, intercept = TRUE, tol.biweight = 1e-06,
-  tol.lsfit = 1e-07, lx0 = 10^5, k.int = c(-25, 20), nu = 1, nv = 1)
+  tol.lsfit = 1e-07, radix = 1e+05, k.int = c(-25, 20), nu = 1,
+  nv = 1)
 }
 \arguments{
 \item{c}{Tuning constant when compute weighted least squared using 
@@ -19,7 +20,7 @@ least squares estimation. See \code{\link{lsfit}}.}
 \item{tol.lsfit}{Tolerance to be used in the matrix decomposition in 
 least squares estimation. See \code{\link{lsfit}}.}
 
-\item{lx0}{Life table radix. Default: 10^5.}
+\item{radix}{Life table radix. Default: 10^5;}
 
 \item{k.int}{a vector containing the end-points of the interval to be 
 searched for k parameter.}

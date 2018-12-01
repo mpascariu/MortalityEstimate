@@ -1,17 +1,11 @@
-
-#' Import Packages and Functions
-#'
-#' @importFrom stats complete.cases lsfit optim 
-#' smooth.spline coef reshape fitted poisson median predict uniroot
-#' @importFrom pbapply startpb closepb setpb
-#' @importFrom MortalityLaws LifeTable
-#' @importFrom utils head tail
-#' @name foo_imports
-#' @keywords internal
-NULL
-
+# --------------------------------------------------- #
+# Author: Marius D. Pascariu
+# License: GNU General Public License v3.0
+# Last update: Sat Dec  1 21:20:51 2018
+# --------------------------------------------------- #
 
 # Data in the package ----
+
 
 #' Death Rates for Female Populations in England and Wales, France, Sweden and USA 
 #'
@@ -51,5 +45,4 @@ print.MortalityEstimateData <- function(x, ...) {
 #' \url{http://dx.doi.org/10.1080/00324728.2011.611411}
 #' @source Human Mortality Database, \url{http://www.mortality.org}. (2012)
 "HMD719"
-
 

@@ -4,7 +4,7 @@
 \alias{find.mx.optim}
 \title{Compute fitted mx}
 \usage{
-find.mx.optim(x, ex, x.f, sex, coef, lx0, k.int, show)
+find.mx.optim(x, ex, x.f, sex, coef, radix, k.int, verbose)
 }
 \arguments{
 \item{x}{Numerical vector containing ages corresponding to the input data 
@@ -23,12 +23,12 @@ Options: \code{NULL, "female", "male" or "total"}.}
 
 \item{coef}{Estimated coefficients (ax, bx, cx) of the Log-Quadratic model.}
 
-\item{lx0}{Life table radix. Default: 10^5.}
+\item{radix}{Life table radix. Default: 10^5;}
 
 \item{k.int}{a vector containing the end-points of the interval to be 
 searched for k parameter.}
 
-\item{show}{Choose whether to display a progress bar during the fitting process. 
+\item{verbose}{Choose whether to display a progress bar during the fitting process. 
 Logical. Default: TRUE.}
 }
 \description{

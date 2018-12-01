@@ -1,4 +1,11 @@
-#' Fit Linear-Link Model
+# --------------------------------------------------- #
+# Author: Marius D. Pascariu
+# License: GNU General Public License v3.0
+# Last update: Sat Dec  1 21:20:10 2018
+# --------------------------------------------------- #
+
+
+#' Fit the Linear-Link Model
 #' 
 #' @param x Numerical vector containing ages corresponding to the input data (mx).
 #' @param mx Death rates matrix with age as row and time as column.
@@ -14,14 +21,14 @@
 #' @param method Optimizing method. Least squared approach \code{LSE} or Poisson 
 #' likelihood estimation \code{MLE}. Default: \code{LSE}.
 #' @return A \code{LinearLink} object containing:
-#' @return \item{input}{List with input objects provided in the function}
-#' @return \item{coefficients}{Estimated coefficient}
-#' @return \item{fitted.values}{Fitted values}
-#' @return \item{residuals}{Estimated deviance residuals}
-#' @return \item{fitted.life.tables}{ Life tables constructed using the fitted values}
-#' @return \item{df_splines}{Degrees of freedom used in spline smoothing procedure}
-#' @return \item{model_info}{Description of the model}
-#' @return \item{process_date}{Data and time stamp}
+#'  \item{input}{List with input objects provided in the function}
+#'  \item{coefficients}{Estimated coefficient}
+#'  \item{fitted.values}{Fitted values}
+#'  \item{residuals}{Estimated deviance residuals}
+#'  \item{fitted.life.tables}{ Life tables constructed using the fitted values}
+#'  \item{df_splines}{Degrees of freedom used in spline smoothing procedure}
+#'  \item{model_info}{Description of the model}
+#'  \item{process_date}{Data and time stamp}
 #' @export
 #' @examples 
 #' 
@@ -129,13 +136,21 @@ LinearLink <- function(x, mx, y,
 #' @keywords internal
 check.LinearLink.input <- function(input){
   with(input, {
-    if (nrow(mx) != length(x)) stop("\nnrow(mx) must be equal to length(x)", call. = F)
-    if (ncol(mx) != length(y)) stop("\nncol(mx) must be equal to length(y)", call. = F)
+    
+    if (nrow(mx) != length(x)) {
+      stop("\nnrow(mx) must be equal to length(x)", call. = FALSE)
+    }
+    
+    if (ncol(mx) != length(y)) {
+      stop("\nncol(mx) must be equal to length(y)", call. = FALSE)
+    }
+    
     if (theta > 50 & method == 'LSE') {
       message("For theta > 50 the MLE method has been observed to be more reliable.")
     }
     if (!(method %in% c('LSE', 'MLE'))) {
-      stop(paste("Method", method, "not available. Try 'LSE' or 'MLE' "), call. = F)
+      stop(paste("Method", method, "not available. Try 'LSE' or 'MLE' "), 
+           call. = FALSE)
     }
   })
 }
@@ -184,7 +199,7 @@ fitw_LSE <- function(log_ex_theta, log_mx, nu = 1, nv = 1){
   fitted_log_mx <- log_ex_theta %*% t(bx)
   resid_log_mx  <- fitted_log_mx - log_mx
   dimnames(fitted_log_mx) <- dimnames(resid_log_mx) <- dimnames(log_mx)
-  resid_log_mx[resid_log_mx == Inf] <- unique(sort(resid_log_mx, decreasing = T))[2]
+  resid_log_mx[resid_log_mx == Inf] <- unique(sort(resid_log_mx, decreasing = TRUE))[2]
   vx  <- svd(resid_log_mx, nu, nv)$v
   if (min(vx) < 0) { 
     # Shift upwards the vx curve if negative values found
@@ -201,11 +216,16 @@ fitw_LSE <- function(log_ex_theta, log_mx, nu = 1, nv = 1){
 #' @inheritParams bifit
 #' @inheritParams wilmoth.control
 #' @keywords internal
-LSEfit <- function(x, y, intercept = F, tol.lsfit = 1e-07) {
+LSEfit <- function(x, 
+                   y, 
+                   intercept = FALSE, 
+                   tol.lsfit = 1e-07) {
+  
   if (is.vector(y)) {
     z   <- lsfit(x, y, wt = NULL, intercept, tol.lsfit)
     out <- list(coef = z$coef, residuals = z$resid)
   }
+  
   if (is.matrix(y)) {
     resid <- coef <- NULL
     for (j in 1:ncol(y)) {
@@ -217,6 +237,7 @@ LSEfit <- function(x, y, intercept = F, tol.lsfit = 1e-07) {
     }
     out <- list(coef = coef, residuals = resid)
   }
+  
   return(out) 
 }
 
@@ -403,6 +424,7 @@ rotate_vx <- function(object, ex_target,
                       e0_threshold = 80,
                       e0_conv = 130,
                       p_ = 0.5){
+  
   vx = coef(object)$vx
   x  = object$input$x
   x1 = max(min(x), 15):65 # young ages

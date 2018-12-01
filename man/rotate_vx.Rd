@@ -7,8 +7,8 @@
 Li et al. (2013)
 }
 \usage{
-rotate_vx(object, ex_target, e0_u = 102, e0_threshold = 80, e0_conv = 130,
-  p_ = 0.5)
+rotate_vx(object, ex_target, e0_u = 102, e0_threshold = 80,
+  e0_conv = 130, p_ = 0.5)
 }
 \arguments{
 \item{object}{An object of class 'LinearLink'}

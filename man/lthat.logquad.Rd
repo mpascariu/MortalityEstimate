@@ -4,7 +4,7 @@
 \alias{lthat.logquad}
 \title{Estimated life table using the log-quadratic model}
 \usage{
-lthat.logquad(coefs, x, sex, q0_5, k, lx0)
+lthat.logquad(coefs, x, sex, q0_5, k, radix)
 }
 \arguments{
 \item{coefs}{Estimated coefficients}
@@ -19,11 +19,12 @@ computed based on Coale-Demeny method and are slightly different for males
 than for females. 
 Options: \code{NULL, "female", "male" or "total"}.}
 
-\item{q0_5}{5q0. The probability that a new-born will die during the subsequent 5 years}
+\item{q0_5}{5q0. The probability that a new-born will die during the 
+subsequent 5 years;}
 
-\item{k}{k-parameter in the log-quadratic model}
+\item{k}{k-parameter in the log-quadratic model;}
 
-\item{lx0}{Life table radix. Default: 10^5.}
+\item{radix}{Life table radix. Default: 10^5;}
 }
 \description{
 Estimated life table using the log-quadratic model

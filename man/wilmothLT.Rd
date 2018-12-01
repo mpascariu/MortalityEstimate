@@ -5,53 +5,55 @@
 \title{Estimate Wilmoth Model Life Table}
 \usage{
 wilmothLT(object, q0_5 = NULL, q0_1 = NULL, q15_45 = NULL,
-  q15_35 = NULL, e0 = NULL, k = NULL, lx0 = 10^5, tol = 1e-09,
+  q15_35 = NULL, e0 = NULL, k = NULL, radix = 1e+05, tol = 1e-09,
   maxit = 200, ...)
 }
 \arguments{
-\item{object}{An \code{\link{wilmoth}} object.}
+\item{object}{An object of class \code{\link{wilmoth}};}
 
-\item{q0_5}{5q0. The probability that a new-born will die during the subsequent 5 years}
+\item{q0_5}{5q0. The probability that a new-born will die during the 
+subsequent 5 years;}
 
-\item{q0_1}{1q0. The probability that a life aged 0 will die during the following year}
+\item{q0_1}{1q0. The probability that a life aged 0 will die during the 
+following year;}
 
-\item{q15_45}{45q15. The probability that a life aged 15 will die during the subsequent 45 years}
+\item{q15_45}{45q15. The probability that a life aged 15 will die during 
+the subsequent 45 years;}
 
-\item{q15_35}{35q15. The probability that a life aged 15 will die during the subsequent 35 years}
+\item{q15_35}{35q15. The probability that a life aged 15 will die during 
+the subsequent 35 years;}
 
-\item{e0}{Life expectancy at birth}
+\item{e0}{Life expectancy at birth;}
 
-\item{k}{k-parameter in the log-quadratic model}
+\item{k}{k-parameter in the log-quadratic model;}
 
-\item{lx0}{Life table radix. Default: 10^5.}
+\item{radix}{Life table radix. Default: 10^5;}
 
 \item{tol}{Tolerance level for convergence. The tolerance level, is relevant 
-for case 12 and 13 (e0 and 45q15 or 35q15 are known)}
+for case 12 and 13 (e0 and 45q15 or 35q15 are known);}
 
-\item{maxit}{Maximum number of iterations allowed. Default: 100.}
+\item{maxit}{Maximum number of iterations allowed. Default: 100;}
 
 \item{...}{Additional arguments affecting the predictions produced.}
 }
 \value{
 The output is of class \code{wilmothLT} with the components:
-
-\item{lt}{ Life table matching given inputs}
-
-\item{values}{ Associated values of \code{q0_5, q0_1, q15_45, q15_35, e0} 
+ \item{lt}{ Life table matching given inputs}
+ \item{values}{ Associated values of \code{q0_5, q0_1, q15_45, q15_35, e0} 
 and \code{k}.}
 }
 \description{
 Construct model life tables based on the Log-Quadratic (wilmoth) estimates
-with various choices of 2 input parameters: \code{q0_5, q0_1, q15_45, q15_35, e0} 
-and \code{k}. There are 13 possible combinations (see examples below).
+with various choices of 2 input parameters: 
+\code{q0_5, q0_1, q15_45, q15_35, e0} and \code{k}. There are 13 possible 
+combinations (see examples below).
 }
 \details{
-Due to limitations of the R language the notation for probability of 
-dying \code{nqx} is written \code{qx_n}, where \code{x} and \code{n} are integers.
-For example \code{45q15} is represented as \code{q45_15}.
+Due to limitations of the R language the notation for probability 
+of dying \code{nqx} is written \code{qx_n}, where \code{x} and \code{n} are 
+integers. For example \code{45q15} is represented as \code{q45_15}.
 }
 \examples{
-
 # DATA
 sex = "female"
 HMD719f <- HMD719[HMD719$sex == sex, ]

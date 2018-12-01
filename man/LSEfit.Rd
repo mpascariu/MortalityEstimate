@@ -4,14 +4,14 @@
 \alias{LSEfit}
 \title{Find the Least Squares Fit}
 \usage{
-LSEfit(x, y, intercept = F, tol.lsfit = 1e-07)
+LSEfit(x, y, intercept = FALSE, tol.lsfit = 1e-07)
 }
 \arguments{
-\item{x}{A matrix whose rows correspond to cases and whose columns correspond to variables.
-x matrix should not include a column of ones}
+\item{x}{A matrix whose rows correspond to cases and whose columns 
+correspond to variables. x matrix should not include a column of ones}
 
-\item{y}{The responses, possibly a matrix if you want to fit multiple left hand sides.
-y can be matrix if there are multiple left-hand sides}
+\item{y}{The responses, possibly a matrix if you want to fit multiple left 
+hand sides. y can be matrix if there are multiple left-hand sides}
 
 \item{intercept}{logical. Whether or not an intercept term should be used in 
 least squares estimation. See \code{\link{lsfit}}.}

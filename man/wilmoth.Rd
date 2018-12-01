@@ -2,9 +2,9 @@
 % Please edit documentation in R/fun_Wilmoth.R
 \name{wilmoth}
 \alias{wilmoth}
-\title{Fit Log-Quadratic Model}
+\title{Fit the Log-Quadratic Model}
 \usage{
-wilmoth(x, mx = NULL, LT = NULL, sex = NULL, show = TRUE,
+wilmoth(x, mx = NULL, LT = NULL, sex = NULL, verbose = TRUE,
   control = list())
 }
 \arguments{
@@ -23,23 +23,18 @@ computed based on Coale-Demeny method and are slightly different for males
 than for females. 
 Options: \code{NULL, "female", "male" or "total"}.}
 
-\item{show}{Choose whether to display a progress bar during the fitting process. 
+\item{verbose}{Choose whether to display a progress bar during the fitting process. 
 Logical. Default: TRUE.}
 
 \item{control}{List with additional parameters. See \code{\link{wilmoth.control}}.}
 }
 \value{
 The output is of class \code{wilmoth} with the components:
-
-\item{input}{ A list with input objects provided in the function}
-
-\item{coefficients}{ Estimated coefficients}
-
-\item{fitted.values}{ Fitted values}
-
-\item{residuals}{ Deviance residuals}
-
-\item{model_info}{ Model details (equation). The relationship between 
+ \item{input}{ A list with input objects provided in the function}
+ \item{coefficients}{ Estimated coefficients}
+ \item{fitted.values}{ Fitted values}
+ \item{residuals}{ Deviance residuals}
+ \item{model.info}{ Model details (equation). The relationship between 
 the death rate at age x, and the probability of dying between birth and 
 age 5.}
 }

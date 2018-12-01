@@ -7,11 +7,11 @@
 bifit(x, y, c, intercept, tol.biweight, tol.lsfit)
 }
 \arguments{
-\item{x}{A matrix whose rows correspond to cases and whose columns correspond to variables.
-x matrix should not include a column of ones}
+\item{x}{A matrix whose rows correspond to cases and whose columns 
+correspond to variables. x matrix should not include a column of ones}
 
-\item{y}{The responses, possibly a matrix if you want to fit multiple left hand sides.
-y can be matrix if there are multiple left-hand sides}
+\item{y}{The responses, possibly a matrix if you want to fit multiple left 
+hand sides. y can be matrix if there are multiple left-hand sides}
 
 \item{c}{Tuning constant when compute weighted least squared using 
 Tukey's biweight function. Typically, between 6 to 9.}
