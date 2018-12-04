@@ -1,7 +1,7 @@
 # --------------------------------------------------- #
 # Author: Marius D. Pascariu
 # License: GNU General Public License v3.0
-# Last update: Sat Dec  1 21:02:30 2018
+# Last update: Tue Dec  4 22:17:06 2018
 # --------------------------------------------------- #
 
 
@@ -14,20 +14,18 @@
 #' @param mx Input data. A data.frame / matrix with death rates.
 #' @param LT Input data. A collection of life tables. If \code{mx} is provided 
 #' \code{LT} is not necessary and vice versa.
-#' @param sex Specify the sex of the population. Default: \code{NULL}.
-#' This argument affects the first two values in the life table 'ax' column; 
-#' and implicitly the infant mortality. If sex is specified, the values are 
-#' computed based on Coale-Demeny method and are slightly different for males 
-#' than for females. 
-#' Options: \code{NULL, "female", "male" or "total"}.
-#' @param verbose Choose whether to display a progress bar during the fitting process. 
-#' Logical. Default: TRUE.
+#' @param verbose Logical. Choose whether to display a progress bar during the 
+#' fitting process. Default: TRUE.
 #' @param control List with additional parameters. See \code{\link{wilmoth.control}}.
 #' @return The output is of class \code{wilmoth} with the components:
-#'  \item{input}{ A list with input objects provided in the function}
-#'  \item{coefficients}{ Estimated coefficients}
-#'  \item{fitted.values}{ Fitted values}
-#'  \item{residuals}{ Deviance residuals}
+#'  \item{input}{A list with input objects provided in the function;}
+#'  \item{call}{An unevaluated function call, that is, an unevaluated 
+#'  expression which consists of the named function applied to the given 
+#'  arguments;}
+#'  \item{coefficients}{Estimated coefficients;}
+#'  \item{k}{The estimated k parameter;}
+#'  \item{fitted.values}{Fitted values of the estimated model;}
+#'  \item{residuals}{Deviance residuals;}
 #'  \item{model.info}{ Model details (equation). The relationship between 
 #' the death rate at age x, and the probability of dying between birth and 
 #' age 5.}
@@ -37,55 +35,56 @@
 #' indirect estimation}. Population Studies: A Journal of Demography, 66:1, 1-28.
 #' @seealso \code{\link{wilmothLT}}
 #' @examples 
-#' 
 #' \dontrun{
 #' # DATA
-#' sex = "female"
-#' HMD719f <- HMD719[HMD719$sex == sex, ]
+#' HMD719f <- HMD719[HMD719$sex == "female", ]
 #' 
 #' # Fit model
 #' x <- c(0,1, seq(5, 110, by = 5))
-#' W <- wilmoth(x, LT = HMD719f, sex = sex)
+#' W <- wilmoth(x, LT = HMD719f)
 #' }
 #' @export  
 wilmoth <- function(x, 
                     mx = NULL, 
                     LT = NULL, 
-                    sex = NULL, 
                     verbose = TRUE, 
                     control = list()) {
   
   control  <- do.call("wilmoth.control", control)
   input    <- c(as.list(environment()))
-  check.wilmoth.input(input)
+  check.wilmoth.input(I = input)
   info     <- "log m[x] = a[x] + b[x] h + c[x] h^2 + k v[x]"
   na       <- length(x)
   gr_names <- paste0("[", x,",", c(x[-1], "+"), ")")
   
-  if (!is.null(LT)) {
-    mx_mat <- array(LT$mx, dim = c(na, nrow(LT)/na))
-  }
-  if (!is.null(mx)) {
-    mx_mat <- mx
-  }
-  
-  lx_mat <- convertFx(x = x, data = mx_mat, from = "mx", to = "lx")
-  ex_mat <- convertFx(x = x, data = mx_mat, from = "mx", to = "ex")
-  
-  rownames(lx_mat) <- rownames(mx_mat) <- rownames(ex_mat) <- x
-  
-  if (verbose) { 
-    N  <- ncol(mx_mat)
+  # Start clock
+  if (verbose) {
+    N <- if (!is.null(mx)) ncol(mx) else nrow(LT)/na
     pb <- startpb(0, N + 1) 
     on.exit(closepb(pb))
     setpb(pb, 1) 
   }
   
+  # Prepare data
+  if (!is.null(LT)) {
+    mxM <- array(LT$mx, dim = c(na, nrow(LT)/na))
+    lxM <- array(LT$lx, dim = c(na, nrow(LT)/na))
+    exM <- array(LT$ex, dim = c(na, nrow(LT)/na))
+    dimnames(lxM) <- dimnames(mxM) <- dimnames(exM) <- list(x, 1:ncol(mxM))
+  }
+  
+  if (!is.null(mx)) {
+    mxM <- as.matrix(mx)
+    dimnames(mxM) <- list(x, 1:ncol(mx))
+    lxM <- as.matrix(convertFx(x = x, data = mxM, from = "mx", to = "lx"))
+    exM <- as.matrix(convertFx(x = x, data = mxM, from = "mx", to = "ex"))
+    dimnames(lxM) <- dimnames(exM) <- dimnames(mxM)
+  }
   
   # Fit log-quadratic portion of model
-  q0_5    <- 1 - lx_mat["5", ] / lx_mat["0", ]
+  q0_5    <- 1 - lxM["5", ] / lxM["0", ]
   x.f     <- cbind(log(q0_5), log(q0_5)^2)
-  y.f     <- t(log(mx_mat))
+  y.f     <- t(log(mxM))
   y.f[y.f == -Inf] = -10
   bifit.f <- with(control, bifit(x = x.f, 
                                  y = y.f, 
@@ -103,16 +102,16 @@ wilmoth <- function(x,
   dimnames(coef)  <- list(gr_names, c("ax", "bx", "cx", "vx"))
   
   mx_k <- with(control, find.mx.optim(x = x, 
-                                      ex = ex_mat, 
+                                      ex = exM, 
                                       x.f = x.f, 
-                                      sex = sex, 
                                       coef = coef, 
                                       radix = radix, 
                                       k.int = k.int, 
                                       verbose = verbose))
   mxfit   <- mx_k$mx
-  mxresid <- mx_mat - mxfit
+  mxresid <- mxM - mxfit
   
+  # Exit
   out <- list(input = input,
               call = match.call(),
               coefficients = coef, 
@@ -159,12 +158,11 @@ wilmoth <- function(x,
 #' @seealso \code{\link{wilmoth}}
 #' @examples 
 #' # DATA
-#' sex = "female"
-#' HMD719f <- HMD719[HMD719$sex == sex, ]
+#' HMD719f <- HMD719[HMD719$sex == "female", ]
 #' 
 #' # Fit Log-quadratic model
 #' x <- c(0,1, seq(5, 110, by = 5))
-#' W <- wilmoth(x, LT = HMD719f, sex = sex)
+#' W <- wilmoth(x = x, LT = HMD719f)
 #' 
 #' # Build life tables with various choices of 2 input parameters
 #' 
@@ -224,34 +222,33 @@ wilmothLT <- function(object,
   
   my_case <- find.my.case(q0_5, q0_1, q15_45, q15_35, e0, k)
   cf      <- coef(object)
-  sex     <- object$input$sex
   x       <- object$input$x
   
   # Cases 1-4:  5q0 is known, plus k, e0, 45q15 or 45q15
   if (my_case == "C1") {
-    tmp <- lthat.logquad(cf, x, sex, q0_5, k, radix)
+    tmp <- lthat.logquad(cf, x, q0_5, k, radix)
   }
   if (my_case %in% c("C2", "C3", "C4")) {
     if (my_case == "C2") fun.k <- function(k) {
-      lthat.logquad(cf, x, sex, q0_5, k, radix)$lt$ex[1] - e0
+      lthat.logquad(cf, x, q0_5, k, radix)$lt$ex[1] - e0
     }
     if (my_case == "C3") fun.k <- function(k) { 
-      lt = lthat.logquad(cf, x, sex, q0_5, k, radix)$lt
+      lt <- lthat.logquad(cf, x, q0_5, k, radix)$lt
       return(1 - lt[lt$x == 60, "lx"] / lt[lt$x == 15, "lx"] - q15_45)
     }
     if (my_case == "C4") fun.k <- function(k) { 
-      lt = lthat.logquad(cf, x, sex, q0_5, k, radix)$lt
+      lt <- lthat.logquad(cf, x, q0_5, k, radix)$lt
       return(1 - lt[lt$x == 50, "lx"] / lt[lt$x == 15, "lx"] - q15_35)
     }
     
     root <- uniroot(f = fun.k, interval = c(-10, 10))$root
-    tmp  <- lthat.logquad(cf, x, sex, q0_5, k = root, radix) 
+    tmp  <- lthat.logquad(cf, x, q0_5, k = root, radix) 
   }
   
   # Cases 5-8: 1q0 is known, plus k, e0, 45q15 or 35q15;
   # after finding 5q0 (assume k=0, but it doesn't matter), these become Cases 1-4
   if (my_case %in% c("C5","C6","C7","C8") ) {
-    fun.q0_5 <- function(q0_5) lthat.logquad(cf, x, sex, q0_5, k = 0, radix)$lt$qx[1] - q0_1
+    fun.q0_5 <- function(q0_5) lthat.logquad(cf, x, q0_5, k = 0, radix)$lt$qx[1] - q0_1
     root <- uniroot(f = fun.q0_5, interval = c(1e-5, 0.8))$root
   }
   if (my_case == "C5") tmp <- wilmothLT(object, q0_5 = root, k = k, ...)
@@ -263,18 +260,18 @@ wilmothLT <- function(object,
   # must find 5q0
   if (my_case %in% c("C9", "C10", "C11")) {
     if (my_case == "C9") fun.q0_5 = function(q0_5) { 
-      lthat.logquad(cf, x, sex, q0_5, k, radix)$lt$ex[1] - e0 
+      lthat.logquad(cf, x, q0_5, k, radix)$lt$ex[1] - e0 
     }
     if (my_case == "C10") fun.q0_5 = function(q0_5) { 
-      lt <- lthat.logquad(cf, x, sex, q0_5, k, radix)$lt
+      lt <- lthat.logquad(cf, x, q0_5, k, radix)$lt
       return(1 - lt[lt$x == 60, "lx"] / lt[lt$x == 15, "lx"] - q15_45)
     }
     if (my_case == "C11") fun.q0_5 <- function(q0_5) {
-      lt <- lthat.logquad(cf, x, sex, q0_5, k, radix)$lt
+      lt <- lthat.logquad(cf, x, q0_5, k, radix)$lt
       return(1 - lt[lt$x == 50, "lx"] / lt[lt$x == 15, "lx"] - q15_35)
     }
     root <- uniroot(f = fun.q0_5, interval = c(1e-4, 0.8))$root
-    tmp  <- lthat.logquad(cf, x, sex, q0_5 = root, k, radix)
+    tmp  <- lthat.logquad(cf, x, q0_5 = root, k, radix)
   }
   
   # Case 12 and 13: e0 and 45q15 or 35q15 are known; must find both 5q0 and k
@@ -291,8 +288,8 @@ wilmothLT <- function(object,
       if (my_case == "C12") tmp = wilmothLT(object, q0_5 = q0_5, q15_45 = q15_45, ...)
       if (my_case == "C13") tmp = wilmothLT(object, q0_5 = q0_5, q15_35 = q15_35, ...)
       k  <- tmp$values$k
-      crit = sum(abs(c(k, q0_5) - c(k.old, q0_5.old)))
-      iter = iter + 1
+      crit <- sum(abs(c(k, q0_5) - c(k.old, q0_5.old)))
+      iter <- iter + 1
     }
     if (iter > maxit) {
       warning("number of iterations reached maximum without convergence", 
@@ -331,7 +328,8 @@ bifit <- function(x,
                   tol.lsfit) {
   
   if (is.vector(y)) {
-    coef.old <- iter <- 0
+    coef.old <- 0
+    iter <- 0
     coef <- 1 
     wt   <- NULL
     
@@ -396,7 +394,6 @@ bifit <- function(x,
 find.mx.optim <- function(x, 
                           ex, 
                           x.f, 
-                          sex, 
                           coef, 
                           radix, 
                           k.int, 
@@ -411,9 +408,9 @@ find.mx.optim <- function(x,
     if (verbose) setpb(pb, i + 1)
     q0_5     <- exp(x.f[i, 1])
     e0t      <- ex[1, i]
-    fun.k    <- function(k) round(lthat.logquad(coef, x, sex, q0_5, k, radix)$values$e0 - e0t, 4)
+    fun.k    <- function(k) round(lthat.logquad(coef, x, q0_5, k, radix)$values$e0 - e0t, 4)
     k[i]     <- uniroot(f = fun.k, interval = k.int)$root
-    fit[, i] <- lthat.logquad(coef, x, sex, q0_5, k = k[i], radix)$lt$mx
+    fit[, i] <- lthat.logquad(coef, x, q0_5, k = k[i], radix)$lt$mx
   }
   
   # Exit
@@ -431,7 +428,6 @@ find.mx.optim <- function(x,
 #' @export
 lthat.logquad <- function(coefs, 
                           x, 
-                          sex, 
                           q0_5, 
                           k, 
                           radix) {
@@ -444,7 +440,7 @@ lthat.logquad <- function(coefs,
   mx[2] <- mx_qx(x, qx, out = "mx")[2]
   names(mx) = names(qx) <- rownames(coefs)
   
-  LT     <- LifeTable(x, mx = mx, sex = sex, lx0 = radix)$lt
+  LT     <- LifeTable(x = x, mx = mx, lx0 = radix)$lt
   e0     <- LT$ex[1]
   q0_1   <- LT$qx[1]
   q15_45 <- 1 - LT[LT$x == 60, "lx"] / LT[LT$x == 15, "lx"]
@@ -461,21 +457,17 @@ lthat.logquad <- function(coefs,
 #' 
 #' @param input a list containing the input objects of the wilmoth function
 #' @keywords internal
-check.wilmoth.input <- function(input) {
-  with(input, {
-    
-    if (!(sex %in% c("female", "male", "total") || is.null(sex)) ) {
-      stop("sex must be: NULL, 'female', 'male', or 'total'", call. = FALSE)
+check.wilmoth.input <- function(I) {
+  
+  if (!is.numeric(I$x)) {
+    stop("'x' must be of class 'numeric'", call. = FALSE)
+  }
+  
+  if (!is.null(I$mx)) {
+    if (length(I$x) != nrow(I$mx)) {
+      stop("length(x) must be identical with nrow(mx)", call. = FALSE)
     }
-    
-    if (!is.numeric(x)) stop("'x' must be of class 'numeric'", call. = FALSE)
-    
-    if (!is.null(mx)) {
-      if (length(x) == nrow(mx)) {
-        stop("length(x) must be identical with nrow(mx)", call. = FALSE)
-      }
-    }  
-  })
+  }  
 }
 
 #' Function that determines the case/problem we have to solve

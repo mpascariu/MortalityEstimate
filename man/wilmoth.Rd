@@ -4,8 +4,7 @@
 \alias{wilmoth}
 \title{Fit the Log-Quadratic Model}
 \usage{
-wilmoth(x, mx = NULL, LT = NULL, sex = NULL, verbose = TRUE,
-  control = list())
+wilmoth(x, mx = NULL, LT = NULL, verbose = TRUE, control = list())
 }
 \arguments{
 \item{x}{Numerical vector containing ages corresponding to the input data 
@@ -16,24 +15,21 @@ wilmoth(x, mx = NULL, LT = NULL, sex = NULL, verbose = TRUE,
 \item{LT}{Input data. A collection of life tables. If \code{mx} is provided 
 \code{LT} is not necessary and vice versa.}
 
-\item{sex}{Specify the sex of the population. Default: \code{NULL}.
-This argument affects the first two values in the life table 'ax' column; 
-and implicitly the infant mortality. If sex is specified, the values are 
-computed based on Coale-Demeny method and are slightly different for males 
-than for females. 
-Options: \code{NULL, "female", "male" or "total"}.}
-
-\item{verbose}{Choose whether to display a progress bar during the fitting process. 
-Logical. Default: TRUE.}
+\item{verbose}{Logical. Choose whether to display a progress bar during the 
+fitting process. Default: TRUE.}
 
 \item{control}{List with additional parameters. See \code{\link{wilmoth.control}}.}
 }
 \value{
 The output is of class \code{wilmoth} with the components:
- \item{input}{ A list with input objects provided in the function}
- \item{coefficients}{ Estimated coefficients}
- \item{fitted.values}{ Fitted values}
- \item{residuals}{ Deviance residuals}
+ \item{input}{A list with input objects provided in the function;}
+ \item{call}{An unevaluated function call, that is, an unevaluated 
+ expression which consists of the named function applied to the given 
+ arguments;}
+ \item{coefficients}{Estimated coefficients;}
+ \item{k}{The estimated k parameter;}
+ \item{fitted.values}{Fitted values of the estimated model;}
+ \item{residuals}{Deviance residuals;}
  \item{model.info}{ Model details (equation). The relationship between 
 the death rate at age x, and the probability of dying between birth and 
 age 5.}
@@ -43,15 +39,13 @@ Estimate the Log-Quadratic model. The implemented estimation using the
 bi-weight procedure is described in the Appendix of Wilmoth et.al.(2012).
 }
 \examples{
-
 \dontrun{
 # DATA
-sex = "female"
-HMD719f <- HMD719[HMD719$sex == sex, ]
+HMD719f <- HMD719[HMD719$sex == "female", ]
 
 # Fit model
 x <- c(0,1, seq(5, 110, by = 5))
-W <- wilmoth(x, LT = HMD719f, sex = sex)
+W <- wilmoth(x, LT = HMD719f)
 }
 }
 \references{

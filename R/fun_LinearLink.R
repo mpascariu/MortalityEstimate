@@ -1,7 +1,7 @@
 # --------------------------------------------------- #
 # Author: Marius D. Pascariu
 # License: GNU General Public License v3.0
-# Last update: Sat Dec  1 21:20:10 2018
+# Last update: Tue Dec  4 22:43:29 2018
 # --------------------------------------------------- #
 
 
@@ -57,9 +57,13 @@
 #' LT1 <- LinearLinkLT(M, ex = e0)
 #' LT2 <- LinearLinkLT(M, ex = e0, use.vx.rotation = TRUE) 
 #'
-LinearLink <- function(x, mx, y,
-                       country = '...', theta = 0,
-                       use.smooth = TRUE, method = 'LSE'){
+LinearLink <- function(x, 
+                       mx, 
+                       y,
+                       country = '...', 
+                       theta = 0,
+                       use.smooth = TRUE, 
+                       method = 'LSE'){
   #-------------------------------------------------
   input <- c(as.list(environment()))
   check.LinearLink.input(input)
@@ -123,11 +127,16 @@ LinearLink <- function(x, mx, y,
   coefficients <- list(bx = coeffs$bx, vx = coeffs$vx, k = k_)
   #-----------------------------------
   # Output
-  out = list(input = input, coefficients = coefficients, fitted = fitted_mx,
-             residuals = residuals, fitted.life.tables = LT_optim,
-             df_spline = df_spline, model_info = model_info, process_date = date())
+  out = list(input = input,
+             call = match.call(),
+             coefficients = coefficients, 
+             fitted = fitted_mx,
+             residuals = residuals, 
+             fitted.life.tables = LT_optim,
+             df_spline = df_spline, 
+             model_info = model_info, 
+             process_date = date())
   out = structure(class = 'LinearLink', out)
-  out$call <- match.call()
   return(out)
 }
 
@@ -165,10 +174,9 @@ check.LinearLink.input <- function(input){
 #' @keywords internal
 compute.lt.optim <- function(x, coefs, ex0){
   penalty <- function(k){
-    mx.hat  <- exp(coefs[, 1]*log(ex0) + coefs[, 2]*k)
+    mx.hat  <- exp(coefs[, 1] * log(ex0) + coefs[, 2] * k)
     ex0.hat <- LifeTable(x, mx = mx.hat)$lt$ex[1]
-    out     <- abs(ex0.hat - ex0)
-    return(out)
+    abs(ex0.hat - ex0)
   }
   
   k.hat  <- optim(0, penalty, method = "Brent", upper = 150, lower = -250)$par
@@ -207,7 +215,11 @@ fitw_LSE <- function(log_ex_theta, log_mx, nu = 1, nv = 1){
   }
   vx  <- vx / sum(vx) # scale to 1
   k_  <- rep(NA, length(log_ex_theta))
-  out <- list(bx = bx, vx = vx, k_ = k_)
+  
+  #Exit
+  out <- list(bx = bx, 
+              vx = vx, 
+              k_ = k_)
   return(out)
 }
 
@@ -222,8 +234,13 @@ LSEfit <- function(x,
                    tol.lsfit = 1e-07) {
   
   if (is.vector(y)) {
-    z   <- lsfit(x, y, wt = NULL, intercept, tol.lsfit)
-    out <- list(coef = z$coef, residuals = z$resid)
+    z   <- lsfit(x = x, 
+                 y = y, 
+                 wt = NULL, 
+                 intercept = intercept, 
+                 tolerance = tol.lsfit)
+    coef  <- z$coef
+    resid <- z$resid
   }
   
   if (is.matrix(y)) {
@@ -235,9 +252,9 @@ LSEfit <- function(x,
       resid <- cbind(resid, z$resid)
       coef  <- cbind(coef, z$coef) 
     }
-    out <- list(coef = coef, residuals = resid)
   }
   
+  out <- list(coef = coef, residuals = resid)
   return(out) 
 }
 
@@ -271,11 +288,16 @@ fitw_MLE <- function(log_ex_theta, log_mx, ...){
 
 #' @keywords internal
 #'
-PoissonMLE <- function(log_ex_theta, Dx, Ex, iter = 500, tol = 1e-04){
+PoissonMLE <- function(log_ex_theta, 
+                       Dx, 
+                       Ex, 
+                       iter = 500, 
+                       tol = 1e-04){
+  
   # dimensions
   n <- ncol(Dx)
   # Initialise
-  mat_1    <- matrix(1, nrow = ncol(Dx), ncol = 1)    
+  mat_1    <- matrix(1, nrow = n, ncol = 1)    
   Fit.init <- log((Dx + 1)/(Ex + 2))
   Dx_fit   <- Ex * exp(Fit.init)  # Ex * exp(log_mx)
   alpha    <- Fit.init %*% mat_1 / n
@@ -320,7 +342,8 @@ PoissonMLE <- function(log_ex_theta, Dx, Ex, iter = 500, tol = 1e-04){
   
   # output
   out <- list(bx = as.numeric(bx_hat), 
-              vx = as.numeric(vx), k = as.numeric(k))
+              vx = as.numeric(vx), 
+              k = as.numeric(k))
   return(out)
 }
 
@@ -378,16 +401,23 @@ Update.k <- function(alpha, vx, k, Dx, Ex, Dx_fit, mat_1){
 #' Method to Model the Rotation of Age Patterns of Mortality Decline 
 #' for Long-Term Projections.} Demography 50:2037-2051.
 #' @export
-LinearLinkLT <- function(object, ex, use.vx.rotation = FALSE, ...) {
+LinearLinkLT <- function(object, 
+                         ex, 
+                         use.vx.rotation = FALSE, 
+                         ...) {
+  
   # Choose vx coefficients
   x  <- object$input$x
   bx <- coef(object)$bx
+  
   if (use.vx.rotation == TRUE) {
+    
     if (object$input$theta > 0) {
       stop("Currently vx rotation is implemented only for theta = 0.",
            " Set use.vx.totation = FALSE.", call. = FALSE)
     }
     vx = rotate_vx(object, ex_target = ex, ...) 
+    
   } else { 
     vx = coef(object)$vx 
   }
@@ -397,6 +427,7 @@ LinearLinkLT <- function(object, ex, use.vx.rotation = FALSE, ...) {
   out <- compute.lt.optim(x, coefs = coefs, ex0 = ex)
   out$bx <- bx
   out$vx <- vx
+  
   return(out)
 }
 
@@ -419,7 +450,8 @@ LinearLinkLT <- function(object, ex, use.vx.rotation = FALSE, ...) {
 #' @source Li et al. (2013) 
 #' @keywords internal
 #' 
-rotate_vx <- function(object, ex_target, 
+rotate_vx <- function(object, 
+                      ex_target, 
                       e0_u = 102, 
                       e0_threshold = 80,
                       e0_conv = 130,
@@ -474,8 +506,12 @@ summary.LinearLink <- function(object, ...) {
                      digits = 5, hlength = 6, tlength = 6)
   H   <- data.frame(Hbxvx, Hk)
   dfs <- object$df_spline
-  out <- list(model_info = mi, call = cl, dev = dev, 
-              coef = H, df_spline = dfs)
+  
+  out <- list(model_info = mi, 
+              call = cl, 
+              dev = dev, 
+              coef = H, 
+              df_spline = dfs)
   out <- structure(class = "summary.LinearLink", out)
   return(out)
 }

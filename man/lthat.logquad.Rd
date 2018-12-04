@@ -4,20 +4,13 @@
 \alias{lthat.logquad}
 \title{Estimated life table using the log-quadratic model}
 \usage{
-lthat.logquad(coefs, x, sex, q0_5, k, radix)
+lthat.logquad(coefs, x, q0_5, k, radix)
 }
 \arguments{
 \item{coefs}{Estimated coefficients}
 
 \item{x}{Numerical vector containing ages corresponding to the input data 
 (in 'mx' or 'LT').}
-
-\item{sex}{Specify the sex of the population. Default: \code{NULL}.
-This argument affects the first two values in the life table 'ax' column; 
-and implicitly the infant mortality. If sex is specified, the values are 
-computed based on Coale-Demeny method and are slightly different for males 
-than for females. 
-Options: \code{NULL, "female", "male" or "total"}.}
 
 \item{q0_5}{5q0. The probability that a new-born will die during the 
 subsequent 5 years;}

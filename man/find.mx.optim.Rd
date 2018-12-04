@@ -4,7 +4,7 @@
 \alias{find.mx.optim}
 \title{Compute fitted mx}
 \usage{
-find.mx.optim(x, ex, x.f, sex, coef, radix, k.int, verbose)
+find.mx.optim(x, ex, x.f, coef, radix, k.int, verbose)
 }
 \arguments{
 \item{x}{Numerical vector containing ages corresponding to the input data 
@@ -14,13 +14,6 @@ find.mx.optim(x, ex, x.f, sex, coef, radix, k.int, verbose)
 
 \item{x.f}{Data frame containing the q0_5 values.}
 
-\item{sex}{Specify the sex of the population. Default: \code{NULL}.
-This argument affects the first two values in the life table 'ax' column; 
-and implicitly the infant mortality. If sex is specified, the values are 
-computed based on Coale-Demeny method and are slightly different for males 
-than for females. 
-Options: \code{NULL, "female", "male" or "total"}.}
-
 \item{coef}{Estimated coefficients (ax, bx, cx) of the Log-Quadratic model.}
 
 \item{radix}{Life table radix. Default: 10^5;}
@@ -28,8 +21,8 @@ Options: \code{NULL, "female", "male" or "total"}.}
 \item{k.int}{a vector containing the end-points of the interval to be 
 searched for k parameter.}
 
-\item{verbose}{Choose whether to display a progress bar during the fitting process. 
-Logical. Default: TRUE.}
+\item{verbose}{Logical. Choose whether to display a progress bar during the 
+fitting process. Default: TRUE.}
 }
 \description{
 Compute fitted mx

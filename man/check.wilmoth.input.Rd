@@ -4,7 +4,7 @@
 \alias{check.wilmoth.input}
 \title{Check wilmoth arguments}
 \usage{
-check.wilmoth.input(input)
+check.wilmoth.input(I)
 }
 \arguments{
 \item{input}{a list containing the input objects of the wilmoth function}
