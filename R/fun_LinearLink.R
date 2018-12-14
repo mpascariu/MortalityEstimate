@@ -30,8 +30,11 @@
 #'  \item{model_info}{Description of the model}
 #'  \item{process_date}{Data and time stamp}
 #' @export
+#' @references 
+#' Pascariu MD (2018). PhD Thesis: Modelling and Forecasting Mortality.
+#' University of Southern Denmark, 53-70. URL:
+#' \url{https://github.com/mpascariu/PhD-Thesis/blob/master/Thesis.pdf}.
 #' @examples 
-#' 
 #' # Select the 1965 - 1990 time interval and fit the Linear-Link model
 #' ages  <- 0:100 # available ages in our datasets
 #' years <- 1965:1990 # available years
@@ -56,7 +59,6 @@
 #' e0 <- 84.05
 #' LT1 <- LinearLinkLT(M, ex = e0)
 #' LT2 <- LinearLinkLT(M, ex = e0, use.vx.rotation = TRUE) 
-#'
 LinearLink <- function(x, 
                        mx, 
                        y,
@@ -75,7 +77,7 @@ LinearLink <- function(x,
   # Data preparation
   mx_input   <- as.matrix(mx)
   dimnames(mx_input) <- list(x, y)
-  model_info <- "Linear-Link (2016): log m[x] = b[x] log e[x] + k v[x]"
+  model_info <- "Linear-Link: log m[x] = b[x] log e[x] + k v[x]"
   # Compute multiple life tables (in order to get ex)
   LT <- data.frame()
   for (i in 1:ncol(mx)) {

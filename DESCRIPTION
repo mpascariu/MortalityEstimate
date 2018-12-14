@@ -1,9 +1,9 @@
 Package: MortalityEstimate
 Type: Package
 Title: Indirect Estimation Methods for Measurement of Demographic Indicators
-Version: 0.9.5
+Version: 0.9.6
 Authors@R: c(
-  person("Marius D.", "Pascariu", role = c("aut", "cre"), email = "rpascariu@outlook.com"),
+  person("Marius D.", "Pascariu", role = c("aut", "cre", "cph"), email = "rpascariu@outlook.com", comment = c(ORCID = "0000-0002-2568-6489")),
   person("Jose Manuel", "Aburto", role = "aut"),
   person("Ugofilippo", "Basellini", role = "aut"),
   person("Vladimir", "Canudas-Romo", role = "aut"))

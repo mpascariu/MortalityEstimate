@@ -16,13 +16,13 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Marius D. Pascariu \email{rpascariu@outlook.com}
+\strong{Maintainer}: Marius D. Pascariu \email{rpascariu@outlook.com} (0000-0002-2568-6489) [copyright holder]
 
-Other contributors:
+Authors:
 \itemize{
-  \item Jose Manuel Aburto [contributor]
-  \item Ugofilippo Basellini [contributor]
-  \item Vladimir Canudas-Romo [contributor]
+  \item Jose Manuel Aburto
+  \item Ugofilippo Basellini
+  \item Vladimir Canudas-Romo
 }
 
 }

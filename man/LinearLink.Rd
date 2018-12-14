@@ -43,7 +43,6 @@ A \code{LinearLink} object containing:
 Fit the Linear-Link Model
 }
 \examples{
-
 # Select the 1965 - 1990 time interval and fit the Linear-Link model
 ages  <- 0:100 # available ages in our datasets
 years <- 1965:1990 # available years
@@ -68,5 +67,9 @@ ls(M)
 e0 <- 84.05
 LT1 <- LinearLinkLT(M, ex = e0)
 LT2 <- LinearLinkLT(M, ex = e0, use.vx.rotation = TRUE) 
-
+}
+\references{
+Pascariu MD (2018). PhD Thesis: Modelling and Forecasting Mortality.
+University of Southern Denmark, 53-70. URL:
+\url{https://github.com/mpascariu/PhD-Thesis/blob/master/Thesis.pdf}.
 }
