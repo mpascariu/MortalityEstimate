@@ -1,4 +1,10 @@
-rm(list = ls())
+# --------------------------------------------------- #
+# Author: Marius D. Pascariu
+# License: MIT
+# Last update: Tue Jun 18 14:45:29 2019
+# --------------------------------------------------- #
+remove(list = ls())
+
 library(dplyr)
 library(MortalityLaws)
 
@@ -34,12 +40,12 @@ build.mx.wide <- function(HMD_mx, years, ages) {
 
 
 
-years = 1965:2014
+years = 1965:2016
 ages  = 0:110
 dta  <- build.mx.wide(HMD_mx, years, ages)
 HMD4mx <- structure(class = "MortalityEstimateData", dta)
 
-devtools::use_data(HMD4mx, overwrite = TRUE)
+usethis::use_data(HMD4mx, overwrite = TRUE)
 #----------------------------------------------------------------------------
 
 
