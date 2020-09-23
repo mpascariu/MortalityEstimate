@@ -31,3 +31,6 @@ you can just type ```?LinearLink``` to see the help file.
 
 Check the examples provided in the `wilmoth` and `LinearLink` functions.
 
+
+## Support
+<a href="https://www.buymeacoffee.com/rpascariu" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/yellow_img.png" alt="Buy Me A Coffee" style="height: 30px !important;width: 100px !important;" ></a>
