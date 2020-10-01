@@ -4,9 +4,16 @@
 \alias{wilmoth.control}
 \title{Auxiliary for Controlling \code{wilmoth} Fitting.}
 \usage{
-wilmoth.control(c = 6, intercept = TRUE, tol.biweight = 1e-06,
-  tol.lsfit = 1e-07, radix = 1e+05, k.int = c(-25, 20), nu = 1,
-  nv = 1)
+wilmoth.control(
+  c = 6,
+  intercept = TRUE,
+  tol.biweight = 1e-06,
+  tol.lsfit = 1e-07,
+  radix = 1e+05,
+  k.int = c(-25, 20),
+  nu = 1,
+  nv = 1
+)
 }
 \arguments{
 \item{c}{Tuning constant when compute weighted least squared using 

@@ -4,9 +4,19 @@
 \alias{wilmothLT}
 \title{Estimate Wilmoth Model Life Table}
 \usage{
-wilmothLT(object, q0_5 = NULL, q0_1 = NULL, q15_45 = NULL,
-  q15_35 = NULL, e0 = NULL, k = NULL, radix = 1e+05, tol = 1e-09,
-  maxit = 200, ...)
+wilmothLT(
+  object,
+  q0_5 = NULL,
+  q0_1 = NULL,
+  q15_45 = NULL,
+  q15_35 = NULL,
+  e0 = NULL,
+  k = NULL,
+  radix = 1e+05,
+  tol = 1e-09,
+  maxit = 200,
+  ...
+)
 }
 \arguments{
 \item{object}{An object of class \code{\link{wilmoth}};}

@@ -2,7 +2,6 @@
 % Please edit documentation in R/MortalityEstimate-package.R
 \docType{package}
 \name{MortalityEstimate}
-\alias{MortalityEstimate-package}
 \title{Import Packages and Functions}
 \description{
 Indirect methods for estimating age-specific death rates.
@@ -16,7 +15,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Marius D. Pascariu \email{rpascariu@outlook.com} (0000-0002-2568-6489) [copyright holder]
+\strong{Maintainer}: Marius D. Pascariu \email{rpascariu@outlook.com} (\href{https://orcid.org/0000-0002-2568-6489}{ORCID}) [copyright holder]
 
 Authors:
 \itemize{

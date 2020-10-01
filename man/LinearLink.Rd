@@ -4,8 +4,15 @@
 \alias{LinearLink}
 \title{Fit the Linear-Link Model}
 \usage{
-LinearLink(x, mx, y, country = "...", theta = 0, use.smooth = TRUE,
-  method = "LSE")
+LinearLink(
+  x,
+  mx,
+  y,
+  country = "...",
+  theta = 0,
+  use.smooth = TRUE,
+  method = "LSE"
+)
 }
 \arguments{
 \item{x}{Numerical vector containing ages corresponding to the input data (mx).}

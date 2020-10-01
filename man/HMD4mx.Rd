@@ -4,7 +4,9 @@
 \name{HMD4mx}
 \alias{HMD4mx}
 \title{Death Rates for Female Populations in England and Wales, France, Sweden and USA}
-\format{An object of class \code{MortalityEstimateData} of length 4.}
+\format{
+An object of class \code{MortalityEstimateData} of length 4.
+}
 \source{
 Human Mortality Database, \url{http://www.mortality.org}.
 }
@@ -14,7 +16,7 @@ HMD4mx
 \description{
 Dataset containing containing 4 matrices with death rates for 
 female populations in England and Wales, France, Sweden and USA 
-between 1965 and 2014. This data is provided for testing purposes only. 
+between 1965 and 2018. This data is provided for testing purposes only. 
 It may not be up to date anymore. Download the actual data free of charge 
 from \url{http://www.mortality.org}.
 }

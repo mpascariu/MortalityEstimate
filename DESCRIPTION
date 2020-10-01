@@ -1,7 +1,7 @@
 Package: MortalityEstimate
 Type: Package
 Title: Indirect Estimation Methods for Measurement of Demographic Indicators
-Version: 0.9.7
+Version: 0.9.8
 Authors@R: c(
   person("Marius D.", "Pascariu", role = c("aut", "cre", "cph"), email = "rpascariu@outlook.com", comment = c(ORCID = "0000-0002-2568-6489")),
   person("Jose Manuel", "Aburto", role = "aut"),
@@ -18,4 +18,4 @@ Suggests:
   testthat (>= 2.0.0)
 URL: https://github.com/mpascariu/MortalityEstimate
 BugReports: https://github.com/mpascariu/MortalityEstimate/issues
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.1
