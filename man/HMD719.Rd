@@ -8,14 +8,15 @@
 An object of class \code{data.frame} with 51768 rows and 12 columns.
 }
 \source{
-Human Mortality Database, \url{http://www.mortality.org}. (2012)
+Human Mortality Database, \url{https://www.mortality.org}. (2012)
 }
 \usage{
 HMD719
 }
 \description{
-Data used in the Wilmoth et. al. (2012) article. Today this dataset is outdated.
-Download the actual data free of charge from \url{http://www.mortality.org}.
+Data used in the Wilmoth et. al. (2012) article. Today this dataset is 
+outdated. Download the actual data free of charge from 
+\url{https://www.mortality.org}.
 }
 \references{
 John Wilmoth, Sarah Zureick, Vladimir Canudas-Romo, Mie Inoue & 

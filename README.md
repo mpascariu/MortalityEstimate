@@ -1,6 +1,6 @@
 # R package - Indirect Estimation Methods for Measurement of Demographic Indicators
 -----------------------------------
-[![lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
+[![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
 [![Build Status](https://travis-ci.org/mpascariu/MortalityEstimate.svg?branch=master)](https://travis-ci.org/mpascariu/MortalityEstimate)
 [![Coverage Status](https://img.shields.io/codecov/c/github/mpascariu/MortalityEstimate/master.svg)](https://codecov.io/github/mpascariu/MortalityEstimate?branch=master)
 [![issues](https://img.shields.io/github/issues-raw/mpascariu/MortalityEstimate.svg)]()

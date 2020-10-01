@@ -3,16 +3,17 @@
 \name{fitw_MLE}
 \alias{fitw_MLE}
 \title{# Estimate bx, vx and k with Poisson Likelihood Method}
-\source{
-Brouhns et al. 2002
-}
 \usage{
 fitw_MLE(log_ex_theta, log_mx, ...)
 }
 \description{
 The implemented method of estimated the bx, vx and k coefficients of the 
-LinearLink model is based on the approach described in Brouhns et al. 2002
+LinearLink model is based on the approach described in 
+\insertCite{brouhns2002;textual}{MortalityEstimate}
 for fitting the Lee-Carter model. 
 Code written by Jose Manuel Aburto with minor changes by Marius Pascariu
+}
+\references{
+\insertAllCited{}
 }
 \keyword{internal}

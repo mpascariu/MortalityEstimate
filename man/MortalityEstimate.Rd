@@ -2,9 +2,18 @@
 % Please edit documentation in R/MortalityEstimate-package.R
 \docType{package}
 \name{MortalityEstimate}
+\alias{MortalityEstimate}
+\alias{MortalityEstimate-package}
 \title{Import Packages and Functions}
 \description{
 Indirect methods for estimating age-specific death rates.
+}
+\details{
+This is a description. To be updated.
+\insertNoCite{*}{MortalityEstimate}
+}
+\references{
+\insertAllCited{}
 }
 \seealso{
 Useful links:
@@ -19,9 +28,9 @@ Useful links:
 
 Authors:
 \itemize{
-  \item Jose Manuel Aburto
-  \item Ugofilippo Basellini
-  \item Vladimir Canudas-Romo
+  \item Jose Manuel Aburto (\href{https://orcid.org/0000-0002-2926-6879}{ORCID})
+  \item Ugofilippo Basellini (\href{https://orcid.org/0000-0003-0292-1404}{ORCID})
+  \item Vladimir Canudas-Romo (\href{https://orcid.org/0000-0001-6532-0089}{ORCID})
 }
 
 }

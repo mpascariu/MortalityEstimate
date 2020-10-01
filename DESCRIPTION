@@ -1,21 +1,25 @@
 Package: MortalityEstimate
 Type: Package
 Title: Indirect Estimation Methods for Measurement of Demographic Indicators
-Version: 0.9.8
+Version: 0.9.9
 Authors@R: c(
   person("Marius D.", "Pascariu", role = c("aut", "cre", "cph"), email = "rpascariu@outlook.com", comment = c(ORCID = "0000-0002-2568-6489")),
-  person("Jose Manuel", "Aburto", role = "aut"),
-  person("Ugofilippo", "Basellini", role = "aut"),
-  person("Vladimir", "Canudas-Romo", role = "aut"))
+  person("Jose Manuel", "Aburto", role = "aut", comment = c(ORCID = "0000-0002-2926-6879")),
+  person("Ugofilippo", "Basellini", role = "aut", comment = c(ORCID = "0000-0003-0292-1404")),
+  person("Vladimir", "Canudas-Romo", role = "aut", comment = c(ORCID = "0000-0001-6532-0089")))
 Description: Indirect methods for estimating age-specific death rates.
-License: GPL-3
+License: MIT + file LICENSE
 LazyData: TRUE
 Depends: R (>= 3.0.0)
 Imports:
   MortalityLaws (>= 1.7.0),
-  pbapply (>= 1.3-4)
+  pbapply (>= 1.3-4),
+  Rdpack (>= 0.11-0)
 Suggests:
   testthat (>= 2.0.0)
+RdMacros: 
+  Rdpack
 URL: https://github.com/mpascariu/MortalityEstimate
 BugReports: https://github.com/mpascariu/MortalityEstimate/issues
 RoxygenNote: 7.1.1
+Encoding: UTF-8

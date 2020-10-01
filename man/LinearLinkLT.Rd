@@ -13,9 +13,10 @@ LinearLinkLT(object, ex, use.vx.rotation = FALSE, ...)
 the mortality curve. Type: numerical scalar.}
 
 \item{use.vx.rotation}{Logical argument. If \code{TRUE} the adjustment method
-described in Li et al. (2013) paper is applied to the vx coefficients before 
-estimated the life table. If \code{FALSE} the fitted vx coefficients are used 
-in the estimations of the life table.}
+inspired from \insertCite{li2013;textual}{MortalityEstimate} article is 
+applied to the vx coefficients before estimated the life table. 
+If \code{FALSE} the fitted vx coefficients are used in the estimations of 
+the life table.}
 
 \item{...}{Additional arguments affecting the predictions produced.}
 }
@@ -27,8 +28,5 @@ Construct a life table based on the Linear-Link estimates and a given value
 of life expectancy at age theta.
 }
 \references{
-Li N., Lee R. and Gerland P. (2013). 
-\href{http://dx.doi.org/10.1007/s13524-013-0232-2}{Extending the Lee-Carter 
-Method to Model the Rotation of Age Patterns of Mortality Decline 
-for Long-Term Projections.} Demography 50:2037-2051.
+\insertAllCited{}
 }

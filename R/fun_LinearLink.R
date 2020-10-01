@@ -1,25 +1,27 @@
 # --------------------------------------------------- #
 # Author: Marius D. Pascariu
-# License: GNU General Public License v3.0
-# Last update: Tue Dec  4 22:43:29 2018
+# License: MIT
+# Last update: Thu Oct 01 23:17:35 2020
 # --------------------------------------------------- #
 
 
 #' Fit the Linear-Link Model
 #' 
-#' @param x Numerical vector containing ages corresponding to the input data (mx).
+#' @param x Numerical vector containing ages corresponding to the input 
+#' data (mx).
 #' @param mx Death rates matrix with age as row and time as column.
 #' @param y Vector of years corresponding to the mx matrix.
 #' @param country Optional. The name of the country that the data 
 #' corresponds to. The name is adopted in the output tables.
 #' @param theta Age to be fitted.
-#' @param use.smooth Logical variable indicating whether the spline smoothing is 
-#' applied or not to the estimated coefficients (bx and vx). The smoothing 
+#' @param use.smooth Logical variable indicating whether the spline smoothing 
+#' is applied or not to the estimated coefficients (bx and vx). The smoothing 
 #' can be applied in order to avoid jumps in the mortality rates from one 
 #' age to another. This using splines. One degree of freedom is allocated 
 #' for every 5 year of age.
-#' @param method Optimizing method. Least squared approach \code{LSE} or Poisson 
-#' likelihood estimation \code{MLE}. Default: \code{LSE}.
+#' @param method Optimizing method. Least squared approach \code{LSE} or 
+#' Poisson likelihood estimation \code{MLE} based on the approach described in 
+#' \insertCite{brouhns2002;textual}{MortalityEstimate}. Default: \code{LSE}.
 #' @return A \code{LinearLink} object containing:
 #'  \item{input}{List with input objects provided in the function}
 #'  \item{coefficients}{Estimated coefficient}
@@ -30,7 +32,8 @@
 #'  \item{model_info}{Description of the model}
 #'  \item{process_date}{Data and time stamp}
 #' @export
-#' @references 
+#' @references \insertAllCited{}
+#' 
 #' Pascariu MD (2018). PhD Thesis: Modelling and Forecasting Mortality.
 #' University of Southern Denmark, 53-70. URL:
 #' \url{https://github.com/mpascariu/PhD-Thesis/blob/master/Thesis.pdf}.
@@ -121,15 +124,17 @@ LinearLink <- function(x,
     k_[i]      <- optim_obj$k
     setpb(pb, i)
   }
-  fitted_mx <- reshape(data = LT_optim[, c("country", "year", "x", "mx")], 
-                       direction = 'wide', idvar = c('country', 'x'), 
-                       timevar = 'year')[, -(1:2)]
+  fitted_mx <- reshape(
+                data = LT_optim[, c("country", "year", "x", "mx")], 
+                direction = 'wide', 
+                idvar = c('country', 'x'), 
+                timevar = 'year')[, -(1:2)]
   dimnames(fitted_mx) <- list(x, y)
   residuals    <- mx_input - fitted_mx
   coefficients <- list(bx = coeffs$bx, vx = coeffs$vx, k = k_)
   #-----------------------------------
   # Output
-  out = list(input = input,
+  out <- list(input = input,
              call = match.call(),
              coefficients = coefficients, 
              fitted = fitted_mx,
@@ -138,7 +143,7 @@ LinearLink <- function(x,
              df_spline = df_spline, 
              model_info = model_info, 
              process_date = date())
-  out = structure(class = 'LinearLink', out)
+  out <- structure(class = 'LinearLink', out)
   return(out)
 }
 
@@ -157,7 +162,9 @@ check.LinearLink.input <- function(input){
     }
     
     if (theta > 50 & method == 'LSE') {
-      message("For theta > 50 the MLE method has been observed to be more reliable.")
+      message(
+        "For theta > 50 the MLE method has been observed to be more reliable."
+        )
     }
     if (!(method %in% c('LSE', 'MLE'))) {
       stop(paste("Method", method, "not available. Try 'LSE' or 'MLE' "), 
@@ -177,13 +184,13 @@ check.LinearLink.input <- function(input){
 compute.lt.optim <- function(x, coefs, ex0){
   penalty <- function(k){
     mx.hat  <- exp(coefs[, 1] * log(ex0) + coefs[, 2] * k)
-    ex0.hat <- LifeTable(x, mx = mx.hat)$lt$ex[1]
+    ex0.hat <- LifeTable(x = x, mx = mx.hat)$lt$ex[1]
     abs(ex0.hat - ex0)
   }
   
   k.hat  <- optim(0, penalty, method = "Brent", upper = 150, lower = -250)$par
   mx.hat <- exp(coefs[, 1]*log(ex0) + coefs[, 2]*k.hat)
-  lt.hat <- LifeTable(x, mx = mx.hat)$lt
+  lt.hat <- LifeTable(x = x, mx = mx.hat)$lt
   out    <- list(k = k.hat, lt = lt.hat)
   return(out)
 }
@@ -209,7 +216,8 @@ fitw_LSE <- function(log_ex_theta, log_mx, nu = 1, nv = 1){
   fitted_log_mx <- log_ex_theta %*% t(bx)
   resid_log_mx  <- fitted_log_mx - log_mx
   dimnames(fitted_log_mx) <- dimnames(resid_log_mx) <- dimnames(log_mx)
-  resid_log_mx[resid_log_mx == Inf] <- unique(sort(resid_log_mx, decreasing = TRUE))[2]
+  resid_log_mx[resid_log_mx == Inf] <- unique(sort(x = resid_log_mx, 
+                                                   decreasing = TRUE))[2]
   vx  <- svd(resid_log_mx, nu, nv)$v
   if (min(vx) < 0) { 
     # Shift upwards the vx curve if negative values found
@@ -265,12 +273,12 @@ LSEfit <- function(x,
 #' # Estimate bx, vx and k with Poisson Likelihood Method 
 #' 
 #' The implemented method of estimated the bx, vx and k coefficients of the 
-#' LinearLink model is based on the approach described in Brouhns et al. 2002
+#' LinearLink model is based on the approach described in 
+#' \insertCite{brouhns2002;textual}{MortalityEstimate}
 #' for fitting the Lee-Carter model. 
 #' Code written by Jose Manuel Aburto with minor changes by Marius Pascariu
-#' @source Brouhns et al. 2002
+#' @references \insertAllCited{}
 #' @keywords internal
-#'
 fitw_MLE <- function(log_ex_theta, log_mx, ...){
   # Normally, deaths and exposes is needed in order to fit the model using 
   # the Poisson distribution. However, if a vector of mx is available we can 
@@ -389,19 +397,16 @@ Update.k <- function(alpha, vx, k, Dx, Ex, Dx_fit, mat_1){
 #' Construct a life table based on the Linear-Link estimates and a given value 
 #' of life expectancy at age theta.
 #' @param object An object of class \code{LinearLink}.
-#' @param use.vx.rotation Logical argument. If \code{TRUE} the adjustment method
-#' described in Li et al. (2013) paper is applied to the vx coefficients before 
-#' estimated the life table. If \code{FALSE} the fitted vx coefficients are used 
-#' in the estimations of the life table.
 #' @param ex Value of life expectancy for which we want to estimate 
 #' the mortality curve. Type: numerical scalar.
-#' @inheritParams rotated_vx 
+#' @param use.vx.rotation Logical argument. If \code{TRUE} the adjustment method
+#' inspired from \insertCite{li2013;textual}{MortalityEstimate} article is 
+#' applied to the vx coefficients before estimated the life table. 
+#' If \code{FALSE} the fitted vx coefficients are used in the estimations of 
+#' the life table.
 #' @param ... Additional arguments affecting the predictions produced.
 #' @return Predicted values of the Linear-Link model.
-#' @references Li N., Lee R. and Gerland P. (2013). 
-#' \href{http://dx.doi.org/10.1007/s13524-013-0232-2}{Extending the Lee-Carter 
-#' Method to Model the Rotation of Age Patterns of Mortality Decline 
-#' for Long-Term Projections.} Demography 50:2037-2051.
+#' @references \insertAllCited{}
 #' @export
 LinearLinkLT <- function(object, 
                          ex, 
@@ -437,19 +442,22 @@ LinearLinkLT <- function(object,
 #' Compute Rotated vx Coefficients
 #' 
 #' This functions computes the rotation of the vx coefficients using the method
-#' presented in Li et al. (2013) paper. 
+#' presented in \insertCite{li2013;textual}{MortalityEstimate} paper. 
 #' @param object An object of class 'LinearLink'
-#' @param ex_target A value of life expectancy for which we want to derive the rotated vx
+#' @param ex_target A value of life expectancy for which we want to derive 
+#' the rotated vx
 #' @param e0_u Ultimate value of life expectancy. At this point the rotation 
-#' process reaches its maximum efficiency. Here. e0_u = 80 is taken as the default.  
+#' process reaches its maximum efficiency. Here. e0_u = 80 is taken as the 
+#' default.  
 #' @param e0_threshold Level of life expectancy where the rotation should begin.
 #' If rotated_vx is computed for ex_target <= e0_threshold then no difference
 #' will be observed.
-#' @param e0_conv Set limit for convergence. For life expectancy a birth the default value is 130.  
+#' @param e0_conv Set limit for convergence. For life expectancy a birth 
+#' the default value is 130.  
 #' @param p_ The power to the smooth-weight function, p_, takes values 
 #' between 0 and 1, which makes the rotation faster at starting times and 
 #' slower at ending times. Here, p = .5 is taken as the default
-#' @source Li et al. (2013) 
+#' @references \insertAllCited{}
 #' @keywords internal
 #' 
 rotate_vx <- function(object, 
@@ -501,11 +509,14 @@ summary.LinearLink <- function(object, ...) {
   mi    <- object$model_info
   cl    <- object$call
   dev   <- round(summary(as.vector(as.matrix(object$residuals))), 5)
-  coefs <- data.frame(bx = coef(object)$bx, vx = coef(object)$vx,
+  coefs <- data.frame(bx = coef(object)$bx, 
+                      vx = coef(object)$vx,
                       row.names = object$input$x)
   Hbxvx <- head_tail(coefs, digits = 5, hlength = 6, tlength = 6)
   Hk    <- head_tail(data.frame(. = '.', k = coef(object)$k),
-                     digits = 5, hlength = 6, tlength = 6)
+                     digits = 5, 
+                     hlength = 6, 
+                     tlength = 6)
   H   <- data.frame(Hbxvx, Hk)
   dfs <- object$df_spline
   

@@ -18,7 +18,8 @@ wilmoth(x, mx = NULL, LT = NULL, verbose = TRUE, control = list())
 \item{verbose}{Logical. Choose whether to display a progress bar during the 
 fitting process. Default: TRUE.}
 
-\item{control}{List with additional parameters. See \code{\link{wilmoth.control}}.}
+\item{control}{List with additional parameters. 
+See \code{\link{wilmoth.control}}.}
 }
 \value{
 The output is of class \code{wilmoth} with the components:
@@ -36,7 +37,8 @@ age 5.}
 }
 \description{
 Estimate the Log-Quadratic model. The implemented estimation using the 
-bi-weight procedure is described in the Appendix of Wilmoth et.al.(2012).
+bi-weight procedure is described in the Appendix of 
+\insertCite{wilmoth2012;textual}{MortalityEstimate}
 }
 \examples{
 \dontrun{
@@ -49,10 +51,7 @@ W <- wilmoth(x, LT = HMD719f)
 }
 }
 \references{
-John Wilmoth, Sarah Zureick, Vladimir Canudas-Romo, Mie Inoue & 
-Cheryl Sawyer (2012): \href{http://dx.doi.org/10.1080/00324728.2011.611411}{
-A flexible two-dimensional mortality model for use in 
-indirect estimation}. Population Studies: A Journal of Demography, 66:1, 1-28.
+\insertAllCited{}
 }
 \seealso{
 \code{\link{wilmothLT}}

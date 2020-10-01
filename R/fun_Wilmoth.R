@@ -1,14 +1,15 @@
 # --------------------------------------------------- #
 # Author: Marius D. Pascariu
-# License: GNU General Public License v3.0
-# Last update: Tue Dec  4 22:17:06 2018
+# License: MIT
+# Last update: Thu Oct 01 23:25:23 2020
 # --------------------------------------------------- #
 
 
 #' Fit the Log-Quadratic Model
 #' 
 #' Estimate the Log-Quadratic model. The implemented estimation using the 
-#' bi-weight procedure is described in the Appendix of Wilmoth et.al.(2012). 
+#' bi-weight procedure is described in the Appendix of 
+#' \insertCite{wilmoth2012;textual}{MortalityEstimate}
 #' @param x Numerical vector containing ages corresponding to the input data 
 #' (in 'mx' or 'LT').
 #' @param mx Input data. A data.frame / matrix with death rates.
@@ -16,7 +17,8 @@
 #' \code{LT} is not necessary and vice versa.
 #' @param verbose Logical. Choose whether to display a progress bar during the 
 #' fitting process. Default: TRUE.
-#' @param control List with additional parameters. See \code{\link{wilmoth.control}}.
+#' @param control List with additional parameters. 
+#' See \code{\link{wilmoth.control}}.
 #' @return The output is of class \code{wilmoth} with the components:
 #'  \item{input}{A list with input objects provided in the function;}
 #'  \item{call}{An unevaluated function call, that is, an unevaluated 
@@ -29,10 +31,7 @@
 #'  \item{model.info}{ Model details (equation). The relationship between 
 #' the death rate at age x, and the probability of dying between birth and 
 #' age 5.}
-#' @references John Wilmoth, Sarah Zureick, Vladimir Canudas-Romo, Mie Inoue & 
-#' Cheryl Sawyer (2012): \href{http://dx.doi.org/10.1080/00324728.2011.611411}{
-#' A flexible two-dimensional mortality model for use in 
-#' indirect estimation}. Population Studies: A Journal of Demography, 66:1, 1-28.
+#' @references \insertAllCited{}
 #' @seealso \code{\link{wilmothLT}}
 #' @examples 
 #' \dontrun{
@@ -101,13 +100,17 @@ wilmoth <- function(x,
   dimnames(y.hat) <- dimnames(y.f)
   dimnames(coef)  <- list(gr_names, c("ax", "bx", "cx", "vx"))
   
-  mx_k <- with(control, find.mx.optim(x = x, 
-                                      ex = exM, 
-                                      x.f = x.f, 
-                                      coef = coef, 
-                                      radix = radix, 
-                                      k.int = k.int, 
-                                      verbose = verbose))
+  mx_k <- with(control, 
+               find.mx.optim(
+                 x = x, 
+                 ex = exM, 
+                 x.f = x.f, 
+                 coef = coef, 
+                 radix = radix, 
+                 k.int = k.int, 
+                 verbose = verbose)
+               )
+  
   mxfit   <- mx_k$mx
   mxresid <- mxM - mxfit
   
@@ -246,30 +249,57 @@ wilmothLT <- function(object,
   }
   
   # Cases 5-8: 1q0 is known, plus k, e0, 45q15 or 35q15;
-  # after finding 5q0 (assume k=0, but it doesn't matter), these become Cases 1-4
+  # after finding 5q0 (assume k=0, but it doesn't matter), 
+  # these become Cases 1-4
   if (my_case %in% c("C5","C6","C7","C8") ) {
-    fun.q0_5 <- function(q0_5) lthat.logquad(cf, x, q0_5, k = 0, radix)$lt$qx[1] - q0_1
+    
+    fun.q0_5 <- function(q0_5) {
+      lthat.logquad(cf, x, q0_5, k = 0, radix)$lt$qx[1] - q0_1
+    }
+    
     root <- uniroot(f = fun.q0_5, interval = c(1e-5, 0.8))$root
   }
-  if (my_case == "C5") tmp <- wilmothLT(object, q0_5 = root, k = k, ...)
-  if (my_case == "C6") tmp <- wilmothLT(object, q0_5 = root, e0 = e0, ...)
-  if (my_case == "C7") tmp <- wilmothLT(object, q0_5 = root, q15_45 = q15_45, ...)
-  if (my_case == "C8") tmp <- wilmothLT(object, q0_5 = root, q15_35 = q15_35, ...)
+  
+  if (my_case == "C5") {
+    tmp <- wilmothLT(object, q0_5 = root, k = k, ...)
+  }
+  
+  if (my_case == "C6") {
+    tmp <- wilmothLT(object, q0_5 = root, e0 = e0, ...)
+  }
+  
+  if (my_case == "C7") {
+    tmp <- wilmothLT(object, q0_5 = root, q15_45 = q15_45, ...)
+  }
+  
+  if (my_case == "C8") {
+    tmp <- wilmothLT(object, q0_5 = root, q15_35 = q15_35, ...)
+  }
   
   # Cases 9-11: k is known, plus e0, 45q15 or 35q15; 
   # must find 5q0
   if (my_case %in% c("C9", "C10", "C11")) {
-    if (my_case == "C9") fun.q0_5 = function(q0_5) { 
-      lthat.logquad(cf, x, q0_5, k, radix)$lt$ex[1] - e0 
+    
+    if (my_case == "C9") {
+      fun.q0_5 = function(q0_5) { 
+        lthat.logquad(cf, x, q0_5, k, radix)$lt$ex[1] - e0 
+      }
     }
-    if (my_case == "C10") fun.q0_5 = function(q0_5) { 
-      lt <- lthat.logquad(cf, x, q0_5, k, radix)$lt
-      return(1 - lt[lt$x == 60, "lx"] / lt[lt$x == 15, "lx"] - q15_45)
+    
+    if (my_case == "C10") {
+      fun.q0_5 = function(q0_5) { 
+        lt <- lthat.logquad(cf, x, q0_5, k, radix)$lt
+        return(1 - lt[lt$x == 60, "lx"] / lt[lt$x == 15, "lx"] - q15_45)
+      }
     }
-    if (my_case == "C11") fun.q0_5 <- function(q0_5) {
-      lt <- lthat.logquad(cf, x, q0_5, k, radix)$lt
-      return(1 - lt[lt$x == 50, "lx"] / lt[lt$x == 15, "lx"] - q15_35)
-    }
+    
+    if (my_case == "C11") {
+      fun.q0_5 <- function(q0_5) {
+        lt <- lthat.logquad(cf, x, q0_5, k, radix)$lt
+        return(1 - lt[lt$x == 50, "lx"] / lt[lt$x == 15, "lx"] - q15_35)
+      }
+    } 
+    
     root <- uniroot(f = fun.q0_5, interval = c(1e-4, 0.8))$root
     tmp  <- lthat.logquad(cf, x, q0_5 = root, k, radix)
   }
@@ -280,17 +310,24 @@ wilmothLT <- function(object,
     iter <- crit <- 1
     
     while (crit > tol & iter <= maxit) {
-      k.old  <- k
+      k.old    <- k
       q0_5.old <- q0_5
       # Get new 5q0 from e0 assuming k
       q0_5 <- wilmothLT(object, k = k, e0 = e0, ...)$values$q0_5 
       # Get k from 45q15 or 35q15 assuming 5q0
-      if (my_case == "C12") tmp = wilmothLT(object, q0_5 = q0_5, q15_45 = q15_45, ...)
-      if (my_case == "C13") tmp = wilmothLT(object, q0_5 = q0_5, q15_35 = q15_35, ...)
-      k  <- tmp$values$k
+      if (my_case == "C12") {
+        tmp = wilmothLT(object, q0_5 = q0_5, q15_45 = q15_45, ...)
+      }
+      
+      if (my_case == "C13") {
+        tmp = wilmothLT(object, q0_5 = q0_5, q15_35 = q15_35, ...)
+      }
+      
+      k    <- tmp$values$k
       crit <- sum(abs(c(k, q0_5) - c(k.old, q0_5.old)))
       iter <- iter + 1
     }
+    
     if (iter > maxit) {
       warning("number of iterations reached maximum without convergence", 
               call. = FALSE)
@@ -369,8 +406,12 @@ bifit <- function(x,
       u     <- cbind(u, z$u)
       coef  <- cbind(coef, z$coef) 
     }
+    
     dimnames(resid) <- dimnames(wt) <- dimnames(u) <- dimnames(y)
-    dimnames(coef) <- list(paste0("b", 0:(ncol(cbind(1, x)) - 1)), dimnames(y)[[2]])
+    dimnames(coef)  <- list(
+      paste0("b", 0:(ncol(cbind(1, x)) - 1)), dimnames(y)[[2]]
+      )
+    
   }
   out <- list(coef = coef, 
               residuals = resid, 
@@ -408,7 +449,9 @@ find.mx.optim <- function(x,
     if (verbose) setpb(pb, i + 1)
     q0_5     <- exp(x.f[i, 1])
     e0t      <- ex[1, i]
-    fun.k    <- function(k) round(lthat.logquad(coef, x, q0_5, k, radix)$values$e0 - e0t, 4)
+    fun.k    <- function(k) {
+      round(lthat.logquad(coef, x, q0_5, k, radix)$values$e0 - e0t, 4)
+    }
     k[i]     <- uniroot(f = fun.k, interval = k.int)$root
     fit[, i] <- lthat.logquad(coef, x, q0_5, k = k[i], radix)$lt$mx
   }
@@ -563,7 +606,9 @@ print.wilmoth <- function(x, ...){
 #' @inheritParams print.wilmoth
 #' @keywords internal
 #' @export
-summary.wilmoth <- function(object, ...) print.wilmoth(x = object, ...)
+summary.wilmoth <- function(object, ...) {
+  print.wilmoth(x = object, ...)
+}
 
 
 

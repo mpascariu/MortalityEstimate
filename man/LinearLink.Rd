@@ -15,7 +15,8 @@ LinearLink(
 )
 }
 \arguments{
-\item{x}{Numerical vector containing ages corresponding to the input data (mx).}
+\item{x}{Numerical vector containing ages corresponding to the input 
+data (mx).}
 
 \item{mx}{Death rates matrix with age as row and time as column.}
 
@@ -26,14 +27,15 @@ corresponds to. The name is adopted in the output tables.}
 
 \item{theta}{Age to be fitted.}
 
-\item{use.smooth}{Logical variable indicating whether the spline smoothing is 
-applied or not to the estimated coefficients (bx and vx). The smoothing 
+\item{use.smooth}{Logical variable indicating whether the spline smoothing 
+is applied or not to the estimated coefficients (bx and vx). The smoothing 
 can be applied in order to avoid jumps in the mortality rates from one 
 age to another. This using splines. One degree of freedom is allocated 
 for every 5 year of age.}
 
-\item{method}{Optimizing method. Least squared approach \code{LSE} or Poisson 
-likelihood estimation \code{MLE}. Default: \code{LSE}.}
+\item{method}{Optimizing method. Least squared approach \code{LSE} or 
+Poisson likelihood estimation \code{MLE} based on the approach described in 
+\insertCite{brouhns2002;textual}{MortalityEstimate}. Default: \code{LSE}.}
 }
 \value{
 A \code{LinearLink} object containing:
@@ -76,6 +78,8 @@ LT1 <- LinearLinkLT(M, ex = e0)
 LT2 <- LinearLinkLT(M, ex = e0, use.vx.rotation = TRUE) 
 }
 \references{
+\insertAllCited{}
+
 Pascariu MD (2018). PhD Thesis: Modelling and Forecasting Mortality.
 University of Southern Denmark, 53-70. URL:
 \url{https://github.com/mpascariu/PhD-Thesis/blob/master/Thesis.pdf}.

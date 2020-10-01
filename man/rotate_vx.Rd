@@ -3,9 +3,6 @@
 \name{rotate_vx}
 \alias{rotate_vx}
 \title{Compute Rotated vx Coefficients}
-\source{
-Li et al. (2013)
-}
 \usage{
 rotate_vx(
   object,
@@ -19,16 +16,19 @@ rotate_vx(
 \arguments{
 \item{object}{An object of class 'LinearLink'}
 
-\item{ex_target}{A value of life expectancy for which we want to derive the rotated vx}
+\item{ex_target}{A value of life expectancy for which we want to derive 
+the rotated vx}
 
 \item{e0_u}{Ultimate value of life expectancy. At this point the rotation 
-process reaches its maximum efficiency. Here. e0_u = 80 is taken as the default.}
+process reaches its maximum efficiency. Here. e0_u = 80 is taken as the 
+default.}
 
 \item{e0_threshold}{Level of life expectancy where the rotation should begin.
 If rotated_vx is computed for ex_target <= e0_threshold then no difference
 will be observed.}
 
-\item{e0_conv}{Set limit for convergence. For life expectancy a birth the default value is 130.}
+\item{e0_conv}{Set limit for convergence. For life expectancy a birth 
+the default value is 130.}
 
 \item{p_}{The power to the smooth-weight function, p_, takes values 
 between 0 and 1, which makes the rotation faster at starting times and 
@@ -36,6 +36,9 @@ slower at ending times. Here, p = .5 is taken as the default}
 }
 \description{
 This functions computes the rotation of the vx coefficients using the method
-presented in Li et al. (2013) paper.
+presented in \insertCite{li2013;textual}{MortalityEstimate} paper.
+}
+\references{
+\insertAllCited{}
 }
 \keyword{internal}

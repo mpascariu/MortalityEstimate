@@ -1,3 +1,9 @@
+# --------------------------------------------------- #
+# Author: Marius D. Pascariu
+# License: MIT
+# Last update: Thu Oct 01 23:23:15 2020
+# --------------------------------------------------- #
+
 # Function borrowed from MortalityLaws R package that are not exported yet.
 
 #' Summary function - display head and tail in a single data.frame
@@ -8,25 +14,32 @@
 #' @param ellipsis separate the head and tail with dots
 #' @keywords internal
 head_tail <- function(x, hlength = 4, tlength = 4, digits = 4, ellipsis = TRUE){
+  
   if (is.data.frame(x) | is.matrix(x)) {
     if (is.matrix(x)) x = data.frame(unclass(x))
     nvar <- dim(x)[2]
     dots <- rep("...", nvar)
     h    <- data.frame(head(x, hlength))
     t    <- data.frame(tail(x, tlength))
+    
     for (i in 1:nvar) {
       if (is.numeric(h[1, i])) {
         h[i] <- round(h[i], digits)
         t[i] <- round(t[i], digits)
+        
       } else {
         dots[i] <- NA
       }
     }
+    
     out <- if (ellipsis) rbind(h, ... = dots, t) else rbind(h, t)
+    
   } else {
     h <- head(x, hlength)
     t <- tail(x, tlength)
-    out <- paste(paste(h, collapse = " "), "...   ...", paste(t, collapse = " "))
+    out <- paste(paste(h, collapse = " "), 
+                 "...   ...", 
+                 paste(t, collapse = " "))
   }
   return(out)
 }
@@ -39,7 +52,11 @@ head_tail <- function(x, hlength = 4, tlength = 4, digits = 4, ellipsis = TRUE){
 #' @param ux a vector of mx or qx
 #' @keywords internal
 mx_qx <- function(x, ux, out = "qx"){
-  if (!(out %in% c("qx", "mx"))) stop("out must be: 'qx' or 'mx'", call. = FALSE)
+  
+  if (!(out %in% c("qx", "mx"))) {
+    stop("out must be: 'qx' or 'mx'", call. = FALSE)
+  }
+  
   N     <- length(x)
   nx    <- c(diff(x), Inf)
   if (out == "qx") {
@@ -52,7 +69,8 @@ mx_qx <- function(x, ux, out = "qx"){
     eta = -log(1 - ux)/nx
     eta[is.infinite(eta)] <- max(eta[!is.infinite(eta)], na.rm = T)
     eta[is.na(eta)] <- max(eta, na.rm = T)
-    # here if qx[N] = 1 then mx[N] = NaN therefore we apply a simple extrapolation method
+    # here if qx[N] = 1 then mx[N] = NaN therefore we apply 
+    # a simple extrapolation method
     eta[N] = eta[N - 1]^2 / eta[N - 2]
   }
   return(eta)
