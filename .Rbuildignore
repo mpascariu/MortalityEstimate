@@ -1,7 +1,5 @@
 ^data-raw$
 ^check$
-^.git$
-^.Rproj.user$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^\.travis\.yml$
@@ -9,4 +7,5 @@
 ^CONTRIBUTING.md$
 ^appveyor\.yml$
 ^LICENSE\.md$
-^LICENSE$
+^doc$
+^Meta$
