@@ -66,7 +66,7 @@ integers. For example \code{45q15} is represented as \code{q45_15}.
 \examples{
 # DATA
 HMD719f <- HMD719[HMD719$sex == "female", ]
-hmd_sample <- HMD719f[1:2e3, ] 
+hmd_sample <- HMD719f[1:2000, ] 
 
 # Fit Log-quadratic model
 x <- c(0,1, seq(5, 110, by = 5))

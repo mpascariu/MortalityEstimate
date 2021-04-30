@@ -25,8 +25,15 @@ Predicted values of the Linear-Link model.
 }
 \description{
 Construct a life table based on the Linear-Link estimates and a given value 
-of life expectancy at age theta.
+of life expectancy at age theta 
+(\insertCite{pascariu2020;textual}{MortalityEstimate}).
+}
+\examples{
+# See examples in the \code{\link{LinearLink}} help page
 }
 \references{
 \insertAllCited{}
+}
+\seealso{
+\code{\link{LinearLink}}
 }

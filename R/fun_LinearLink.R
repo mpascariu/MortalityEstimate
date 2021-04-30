@@ -5,6 +5,9 @@
 
 #' Fit the Linear-Link Model
 #' 
+#' Calibrate the the Linear-Link mortality model introduced in
+#' \insertCite{pascariu2020;textual}{MortalityEstimate}.
+#' 
 #' @param x Numerical vector containing ages corresponding to the input 
 #' data (mx).
 #' @param mx Death rates matrix with age as row and time as column.
@@ -231,6 +234,7 @@ fitw_LSE <- function(log_ex_theta, log_mx, nu = 1, nv = 1){
   return(out)
 }
 
+
 #' Find the Least Squares Fit
 #' 
 #' @inheritParams bifit
@@ -393,7 +397,8 @@ update_k <- function(alpha, vx, k, Dx, Ex, Dx_fit, mat_1){
 #' Estimate LinearLink Life Table
 #' 
 #' Construct a life table based on the Linear-Link estimates and a given value 
-#' of life expectancy at age theta.
+#' of life expectancy at age theta 
+#' (\insertCite{pascariu2020;textual}{MortalityEstimate}).
 #' @param object An object of class \code{LinearLink}.
 #' @param ex Value of life expectancy for which we want to estimate 
 #' the mortality curve. Type: numerical scalar.
@@ -405,6 +410,9 @@ update_k <- function(alpha, vx, k, Dx, Ex, Dx_fit, mat_1){
 #' @param ... Additional arguments affecting the predictions produced.
 #' @return Predicted values of the Linear-Link model.
 #' @references \insertAllCited{}
+#' @seealso \code{\link{LinearLink}}
+#' @examples 
+#' # See examples in the ?LinearLink help page
 #' @export
 LinearLinkLT <- function(object, 
                          ex, 

@@ -49,7 +49,8 @@ A \code{LinearLink} object containing:
  \item{process_date}{Data and time stamp}
 }
 \description{
-Fit the Linear-Link Model
+Calibrate the the Linear-Link mortality model introduced in
+\insertCite{pascariu2020;textual}{MortalityEstimate}.
 }
 \examples{
 # Select the 1965 - 1990 time interval and fit the Linear-Link model

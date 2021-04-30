@@ -1,13 +1,18 @@
 Package: MortalityEstimate
 Type: Package
 Title: Indirect Estimation Methods for Measurement of Demographic Indicators
-Version: 0.9.12
+Version: 0.9.13
 Authors@R: c(
   person("Marius D.", "Pascariu", role = c("aut", "cre", "cph"), email = "rpascariu@outlook.com", comment = c(ORCID = "0000-0002-2568-6489")),
   person("Jose Manuel", "Aburto", role = "aut", comment = c(ORCID = "0000-0002-2926-6879")),
   person("Ugofilippo", "Basellini", role = "aut", comment = c(ORCID = "0000-0003-0292-1404")),
   person("Vladimir", "Canudas-Romo", role = "aut", comment = c(ORCID = "0000-0001-6532-0089")))
-Description: Indirect methods for estimating age-specific death rates.
+Description: Software library containing methods for estimating age-specific 
+death rates and life tables based on demographic indicators other that 
+death counts and population exposure to risk. E.g. life expectancy, infant 
+mortality or observed surviorship within arbitrary age intervals. The methods 
+are described in Pascariu et al. (2020) <doi:10.3390/risks8040109> and 
+Wilmoth et al. (2012) <doi:10.1080/00324728.2011.611411>.
 License: MIT + file LICENSE
 LazyData: TRUE
 Depends: R (>= 3.0.0)
