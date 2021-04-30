@@ -15,7 +15,7 @@ Human Mortality Database, \url{https://www.mortality.org}.
 HMD4mx
 }
 \description{
-Dataset containing containing 4 matrices with death rates for 
+Dataset containing 4 matrices with death rates for 
 female populations in England and Wales, France, Sweden and USA 
 between 1965 and 2018. This data is provided for testing purposes only. 
 It may not be up to date anymore. Download the actual data free of charge 

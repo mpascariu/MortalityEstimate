@@ -31,12 +31,12 @@ head_tail <- function(x, hlength = 4, tlength = 4, digits = 4, ellipsis = TRUE){
   }
   
   out <- if (ellipsis) rbind(h, ... = dots, t) else rbind(h, t)
-    
+  
   return(out)
 }
 
 
-#' Convert 'mx' into 'qx' and viceversa.
+#' Convert 'mx' into 'qx' and vice versa.
 #'
 #' Function to convert mx into qx and back, using the constant force of 
 #' mortality assumption (CFM).

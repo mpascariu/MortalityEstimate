@@ -49,7 +49,7 @@ A \code{LinearLink} object containing:
  \item{process_date}{Data and time stamp}
 }
 \description{
-Calibrate the the Linear-Link mortality model introduced in
+Calibrate the Linear-Link mortality model introduced in
 \insertCite{pascariu2020;textual}{MortalityEstimate}.
 }
 \examples{

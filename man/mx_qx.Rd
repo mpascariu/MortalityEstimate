@@ -2,7 +2,7 @@
 % Please edit documentation in R/fun_Utils.R
 \name{mx_qx}
 \alias{mx_qx}
-\title{Convert 'mx' into 'qx' and viceversa.}
+\title{Convert 'mx' into 'qx' and vice versa.}
 \usage{
 mx_qx(x, ux, out = "qx")
 }

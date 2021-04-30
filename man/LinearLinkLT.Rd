@@ -29,7 +29,7 @@ of life expectancy at age theta
 (\insertCite{pascariu2020;textual}{MortalityEstimate}).
 }
 \examples{
-# See examples in the \code{\link{LinearLink}} help page
+# See examples in the ?LinearLink help page
 }
 \references{
 \insertAllCited{}

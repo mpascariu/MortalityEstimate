@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Fri Apr 30 14:19:39 2021
+# Last update: Fri Apr 30 16:54:32 2021
 # --------------------------------------------------- #
 
 # Data in the package ----
@@ -8,7 +8,7 @@
 #' Death Rates for Female Populations in England and Wales, France, Sweden 
 #' and USA 
 #'
-#' Dataset containing containing 4 matrices with death rates for 
+#' Dataset containing 4 matrices with death rates for 
 #' female populations in England and Wales, France, Sweden and USA 
 #' between 1965 and 2018. This data is provided for testing purposes only. 
 #' It may not be up to date anymore. Download the actual data free of charge 
@@ -28,7 +28,7 @@ print.MortalityEstimateData <- function(x, ...) {
   cat(" Series      : Death rates for females (raw)\n")
   cat(" Years       : 1965 - 2018\n")
   cat(" Ages        : 0 - 110\n")
-  cat(" Format      : List containg 4 data frames\n")
+  cat(" Format      : List containing 4 data frames\n")
   cat(" Source      : Human Mortality Database\n")
   cat(" Download    : September 30, 2020")
 }

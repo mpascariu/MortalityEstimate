@@ -7,7 +7,7 @@
 fitw_LSE(log_ex_theta, log_mx, nu = 1, nv = 1)
 }
 \arguments{
-\item{log_ex_theta}{Life expecatncy at age theta (log values)}
+\item{log_ex_theta}{Life expectancy at age theta (log values)}
 
 \item{log_mx}{death rates (log values)}
 

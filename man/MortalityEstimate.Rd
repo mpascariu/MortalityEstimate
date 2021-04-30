@@ -6,7 +6,13 @@
 \alias{MortalityEstimate-package}
 \title{Import Packages and Functions}
 \description{
-Indirect methods for estimating age-specific death rates.
+Software library containing methods for estimating age-specific 
+ death rates and life tables based on demographic indicators other that 
+ death counts and population exposure to risk. Example of such indices are 
+ life expectancy, infant mortality or observed survivorship within arbitrary 
+ age intervals. The methods are described in Pascariu et al. (2020) 
+ <doi:10.3390/risks8040109> and Wilmoth et al. (2012) 
+ <doi:10.1080/00324728.2011.611411>.
 }
 \details{
 This is a description. To be updated.

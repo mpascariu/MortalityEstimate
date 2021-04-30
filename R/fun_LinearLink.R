@@ -5,7 +5,7 @@
 
 #' Fit the Linear-Link Model
 #' 
-#' Calibrate the the Linear-Link mortality model introduced in
+#' Calibrate the Linear-Link mortality model introduced in
 #' \insertCite{pascariu2020;textual}{MortalityEstimate}.
 #' 
 #' @param x Numerical vector containing ages corresponding to the input 
@@ -126,24 +126,24 @@ LinearLink <- function(x,
     setpb(pb, i)
   }
   fitted_mx <- reshape(
-                data = LT_optim[, c("country", "year", "x", "mx")], 
-                direction = 'wide', 
-                idvar = c('country', 'x'), 
-                timevar = 'year')[, -(1:2)]
+    data = LT_optim[, c("country", "year", "x", "mx")], 
+    direction = 'wide', 
+    idvar = c('country', 'x'), 
+    timevar = 'year')[, -(1:2)]
   dimnames(fitted_mx) <- list(x, y)
   residuals    <- mx_input - fitted_mx
   coefficients <- list(bx = coeffs$bx, vx = coeffs$vx, k = k_)
   #-----------------------------------
   # Output
   out <- list(input = input,
-             call = match.call(),
-             coefficients = coefficients, 
-             fitted = fitted_mx,
-             residuals = residuals, 
-             fitted.life.tables = LT_optim,
-             df_spline = df_spline, 
-             model_info = model_info, 
-             process_date = date())
+              call = match.call(),
+              coefficients = coefficients, 
+              fitted = fitted_mx,
+              residuals = residuals, 
+              fitted.life.tables = LT_optim,
+              df_spline = df_spline, 
+              model_info = model_info, 
+              process_date = date())
   out <- structure(class = 'LinearLink', out)
   return(out)
 }
@@ -165,7 +165,7 @@ check_LinearLink_input <- function(input){
     if (theta > 50 & method == 'LSE') {
       message(
         "For theta > 50 the MLE method has been observed to be more reliable."
-        )
+      )
     }
     if (!(method %in% c('LSE', 'MLE'))) {
       stop(paste("Method", method, "not available. Try 'LSE' or 'MLE' "), 
@@ -204,7 +204,7 @@ compute_lt_optim <- function(x, coefs, ex0){
 # 1. ------------------------------------------------------
 #' Estimate bx using least square method and vx with SVD
 #' 
-#' @param log_ex_theta Life expecatncy at age theta (log values)
+#' @param log_ex_theta Life expectancy at age theta (log values)
 #' @param log_mx death rates (log values)
 #' @inheritParams wilmoth_control
 #' @keywords internal
@@ -551,13 +551,13 @@ print.LinearLink <- function(x, ...){
   cat(x$model_info, "\n")
   with(x$input,
        {
-        cat('\nFitted for life expectancy at age:', theta)
-        cat('\nTime interval:', min(y), '-', max(y))
-        cat('\nAge-range:', min(x), '-', max(x))
-        cat('\nCountry:', country, '\n')
-        met <- ifelse(method == 'LSE', 'Least Squares (LSE)', 
-                     'Poisson Maximum Likelihood (MLE)')
-        cat('\nFitting Procedure:', met)
-        cat('\nSmoothing:', use.smooth)
+         cat('\nFitted for life expectancy at age:', theta)
+         cat('\nTime interval:', min(y), '-', max(y))
+         cat('\nAge-range:', min(x), '-', max(x))
+         cat('\nCountry:', country, '\n')
+         met <- ifelse(method == 'LSE', 'Least Squares (LSE)', 
+                       'Poisson Maximum Likelihood (MLE)')
+         cat('\nFitting Procedure:', met)
+         cat('\nSmoothing:', use.smooth)
        })
 }
