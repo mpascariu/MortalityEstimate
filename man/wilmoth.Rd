@@ -19,7 +19,7 @@ wilmoth(x, mx = NULL, LT = NULL, verbose = TRUE, control = list())
 fitting process. Default: TRUE.}
 
 \item{control}{List with additional parameters. 
-See \code{\link{wilmoth.control}}.}
+See \code{\link{wilmoth_control}}.}
 }
 \value{
 The output is of class \code{wilmoth} with the components:

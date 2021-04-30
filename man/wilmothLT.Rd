@@ -66,10 +66,12 @@ integers. For example \code{45q15} is represented as \code{q45_15}.
 \examples{
 # DATA
 HMD719f <- HMD719[HMD719$sex == "female", ]
+hmd_sample <- HMD719f[1:2e3, ] 
 
 # Fit Log-quadratic model
 x <- c(0,1, seq(5, 110, by = 5))
-W <- wilmoth(x = x, LT = HMD719f)
+W <- wilmoth(x = x, LT = hmd_sample)
+# use all data to replicate Wilmoth et. al results
 
 # Build life tables with various choices of 2 input parameters
 

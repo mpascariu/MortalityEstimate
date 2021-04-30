@@ -1,9 +1,7 @@
 # --------------------------------------------------- #
-# Author: Marius D. Pascariu
-# License: MIT
-# Last update: Thu Oct 01 23:25:23 2020
+# Author: Marius D. PASCARIU
+# Last update: Fri Apr 30 14:07:41 2021
 # --------------------------------------------------- #
-
 
 #' Fit the Log-Quadratic Model
 #' 
@@ -18,7 +16,7 @@
 #' @param verbose Logical. Choose whether to display a progress bar during the 
 #' fitting process. Default: TRUE.
 #' @param control List with additional parameters. 
-#' See \code{\link{wilmoth.control}}.
+#' See \code{\link{wilmoth_control}}.
 #' @return The output is of class \code{wilmoth} with the components:
 #'  \item{input}{A list with input objects provided in the function;}
 #'  \item{call}{An unevaluated function call, that is, an unevaluated 
@@ -49,9 +47,9 @@ wilmoth <- function(x,
                     verbose = TRUE, 
                     control = list()) {
   
-  control  <- do.call("wilmoth.control", control)
+  control  <- do.call("wilmoth_control", control)
   input    <- c(as.list(environment()))
-  check.wilmoth.input(I = input)
+  check_wilmoth_input(I = input)
   info     <- "log m[x] = a[x] + b[x] h + c[x] h^2 + k v[x]"
   na       <- length(x)
   gr_names <- paste0("[", x,",", c(x[-1], "+"), ")")
@@ -101,7 +99,7 @@ wilmoth <- function(x,
   dimnames(coef)  <- list(gr_names, c("ax", "bx", "cx", "vx"))
   
   mx_k <- with(control, 
-               find.mx.optim(
+               find_mx_optim(
                  x = x, 
                  ex = exM, 
                  x.f = x.f, 
@@ -162,10 +160,12 @@ wilmoth <- function(x,
 #' @examples 
 #' # DATA
 #' HMD719f <- HMD719[HMD719$sex == "female", ]
+#' hmd_sample <- HMD719f[1:2000, ] 
 #' 
 #' # Fit Log-quadratic model
 #' x <- c(0,1, seq(5, 110, by = 5))
-#' W <- wilmoth(x = x, LT = HMD719f)
+#' W <- wilmoth(x = x, LT = hmd_sample)
+#' # use all data to replicate Wilmoth et. al results
 #' 
 #' # Build life tables with various choices of 2 input parameters
 #' 
@@ -223,29 +223,29 @@ wilmothLT <- function(object,
                       maxit = 200, 
                       ...) {
   
-  my_case <- find.my.case(q0_5, q0_1, q15_45, q15_35, e0, k)
+  my_case <- find_my_case(q0_5, q0_1, q15_45, q15_35, e0, k)
   cf      <- coef(object)
   x       <- object$input$x
   
   # Cases 1-4:  5q0 is known, plus k, e0, 45q15 or 45q15
   if (my_case == "C1") {
-    tmp <- lthat.logquad(cf, x, q0_5, k, radix)
+    tmp <- lt_logquad(cf, x, q0_5, k, radix)
   }
   if (my_case %in% c("C2", "C3", "C4")) {
     if (my_case == "C2") fun.k <- function(k) {
-      lthat.logquad(cf, x, q0_5, k, radix)$lt$ex[1] - e0
+      lt_logquad(cf, x, q0_5, k, radix)$lt$ex[1] - e0
     }
     if (my_case == "C3") fun.k <- function(k) { 
-      lt <- lthat.logquad(cf, x, q0_5, k, radix)$lt
+      lt <- lt_logquad(cf, x, q0_5, k, radix)$lt
       return(1 - lt[lt$x == 60, "lx"] / lt[lt$x == 15, "lx"] - q15_45)
     }
     if (my_case == "C4") fun.k <- function(k) { 
-      lt <- lthat.logquad(cf, x, q0_5, k, radix)$lt
+      lt <- lt_logquad(cf, x, q0_5, k, radix)$lt
       return(1 - lt[lt$x == 50, "lx"] / lt[lt$x == 15, "lx"] - q15_35)
     }
     
     root <- uniroot(f = fun.k, interval = c(-10, 10))$root
-    tmp  <- lthat.logquad(cf, x, q0_5, k = root, radix) 
+    tmp  <- lt_logquad(cf, x, q0_5, k = root, radix) 
   }
   
   # Cases 5-8: 1q0 is known, plus k, e0, 45q15 or 35q15;
@@ -254,7 +254,7 @@ wilmothLT <- function(object,
   if (my_case %in% c("C5","C6","C7","C8") ) {
     
     fun.q0_5 <- function(q0_5) {
-      lthat.logquad(cf, x, q0_5, k = 0, radix)$lt$qx[1] - q0_1
+      lt_logquad(cf, x, q0_5, k = 0, radix)$lt$qx[1] - q0_1
     }
     
     root <- uniroot(f = fun.q0_5, interval = c(1e-5, 0.8))$root
@@ -282,26 +282,26 @@ wilmothLT <- function(object,
     
     if (my_case == "C9") {
       fun.q0_5 = function(q0_5) { 
-        lthat.logquad(cf, x, q0_5, k, radix)$lt$ex[1] - e0 
+        lt_logquad(cf, x, q0_5, k, radix)$lt$ex[1] - e0 
       }
     }
     
     if (my_case == "C10") {
       fun.q0_5 = function(q0_5) { 
-        lt <- lthat.logquad(cf, x, q0_5, k, radix)$lt
+        lt <- lt_logquad(cf, x, q0_5, k, radix)$lt
         return(1 - lt[lt$x == 60, "lx"] / lt[lt$x == 15, "lx"] - q15_45)
       }
     }
     
     if (my_case == "C11") {
       fun.q0_5 <- function(q0_5) {
-        lt <- lthat.logquad(cf, x, q0_5, k, radix)$lt
+        lt <- lt_logquad(cf, x, q0_5, k, radix)$lt
         return(1 - lt[lt$x == 50, "lx"] / lt[lt$x == 15, "lx"] - q15_35)
       }
     } 
     
     root <- uniroot(f = fun.q0_5, interval = c(1e-4, 0.8))$root
-    tmp  <- lthat.logquad(cf, x, q0_5 = root, k, radix)
+    tmp  <- lt_logquad(cf, x, q0_5 = root, k, radix)
   }
   
   # Case 12 and 13: e0 and 45q15 or 35q15 are known; must find both 5q0 and k
@@ -432,7 +432,7 @@ bifit <- function(x,
 #' @param k.int a vector containing the end-points of the interval to be 
 #' searched for k parameter.
 #' @keywords internal
-find.mx.optim <- function(x, 
+find_mx_optim <- function(x, 
                           ex, 
                           x.f, 
                           coef, 
@@ -450,10 +450,10 @@ find.mx.optim <- function(x,
     q0_5     <- exp(x.f[i, 1])
     e0t      <- ex[1, i]
     fun.k    <- function(k) {
-      round(lthat.logquad(coef, x, q0_5, k, radix)$values$e0 - e0t, 4)
+      round(lt_logquad(coef, x, q0_5, k, radix)$values$e0 - e0t, 4)
     }
     k[i]     <- uniroot(f = fun.k, interval = k.int)$root
-    fit[, i] <- lthat.logquad(coef, x, q0_5, k = k[i], radix)$lt$mx
+    fit[, i] <- lt_logquad(coef, x, q0_5, k = k[i], radix)$lt$mx
   }
   
   # Exit
@@ -469,7 +469,7 @@ find.mx.optim <- function(x,
 #' @inheritParams wilmothLT
 #' @keywords internal
 #' @export
-lthat.logquad <- function(coefs, 
+lt_logquad <- function(coefs, 
                           x, 
                           q0_5, 
                           k, 
@@ -500,7 +500,7 @@ lthat.logquad <- function(coefs,
 #' 
 #' @param input a list containing the input objects of the wilmoth function
 #' @keywords internal
-check.wilmoth.input <- function(I) {
+check_wilmoth_input <- function(I) {
   
   if (!is.numeric(I$x)) {
     stop("'x' must be of class 'numeric'", call. = FALSE)
@@ -517,7 +517,7 @@ check.wilmoth.input <- function(I) {
 #' It also performs some checks
 #' @inheritParams wilmothLT
 #' @keywords internal
-find.my.case <- function(q0_5, q0_1, q15_45, q15_35, e0, k) {
+find_my_case <- function(q0_5, q0_1, q15_45, q15_35, e0, k) {
   # Test that at least of one of 1q0 and 5q0 is null
   input   <- as.list(environment())
   my_case <- unlist(lapply(input, is.null))
@@ -557,7 +557,7 @@ find.my.case <- function(q0_5, q0_1, q15_45, q15_35, e0, k) {
 #' Auxiliary for Controlling \code{wilmoth} Fitting.
 #' 
 #' @inheritParams bifit
-#' @inheritParams find.mx.optim
+#' @inheritParams find_mx_optim
 #' @param nu The number of left singular vectors to be computed in SVD method. 
 #' This must between 0 and n = nrow(x). See \code{\link{svd}}.
 #' @param nv the number of right singular vectors to be computed. 
@@ -565,7 +565,7 @@ find.my.case <- function(q0_5, q0_1, q15_45, q15_35, e0, k) {
 #' @return List with control parameters.
 #' @seealso \code{\link{wilmoth}}
 #' @export
-wilmoth.control <- function(c = 6, 
+wilmoth_control <- function(c = 6, 
                             intercept = TRUE, 
                             tol.biweight = 1e-06, 
                             tol.lsfit = 1e-07,

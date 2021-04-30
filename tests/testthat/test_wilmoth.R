@@ -1,7 +1,6 @@
 # --------------------------------------------------- #
-# Author: Marius D. Pascariu
-# License: GNU General Public License v3.0
-# Last update: Tue Dec  4 22:16:55 2018
+# Author: Marius D. PASCARIU
+# Last update: Fri Apr 30 13:05:38 2021
 # --------------------------------------------------- #
 remove(list = ls())
 
@@ -16,7 +15,6 @@ x <- c(0,1, seq(5, 110, by = 5))
 W0 <- wilmoth(x, LT = H0)
 W1 <- wilmoth(x, mx = H1)
 
-W1$k
 
 test.wilmoth <- function(Y) {
   expect_true(class(Y) == "wilmoth")
@@ -25,6 +23,8 @@ test.wilmoth <- function(Y) {
   expect_false(any(is.na(fitted(Y))))
   expect_false(any(is.na(resid(Y))))
   expect_false(any(is.na(coef(Y))))
+  expect_output(print(Y))
+  expect_output(print(summary(Y)))
 }
 
 test.wilmoth(W0)
@@ -43,6 +43,7 @@ L9 <- wilmothLT(W0, k = 0.01, e0 = 65)
 L10 <- wilmothLT(W0, k = 0.01, q15_45 = 0.2)
 L11 <- wilmothLT(W0, k = 0.01, q15_35 = 0.125)
 L12 <- wilmothLT(W0, q15_45 = 0.125, e0 = 65)
+L13 <- wilmothLT(W0, q15_35 = 0.125, e0 = 65)
 
 
 test.wilmothLT <- function(P){
@@ -54,8 +55,54 @@ test.wilmothLT <- function(P){
   
 }
 
-for (i in 1:12) test.wilmothLT(get(paste0("L",i)))
+for (i in 1:13) test.wilmothLT(get(paste0("L",i)))
 
 # Test Q5 ---
 Q5 = 1 - (1 - L1$lt$qx[1])*(1 - L1$lt$qx[2])
 expect_equal(Q5, 0.05)
+
+
+# ----------------------------------------------------------------------------
+# Test messages
+
+
+expect_warning(
+  wilmothLT(W0, q15_35 = 0.125, e0 = 65, maxit = 1)
+)
+
+expect_error(
+  wilmothLT(W0, q15_35 = 0.125, e0 = 65, k = 0.1)
+)
+
+expect_error(
+  wilmothLT(W0, q15_35 = 0.125, q15_45 = 0.15)
+)
+
+expect_error(
+  wilmothLT(W0, q0_1 = 0.01, q0_5 = 0.05)
+)
+
+expect_error(
+  wilmoth(as.character(x), LT = H0)
+)
+
+expect_error(
+  wilmoth(x[-1], mx = H1)
+)
+
+expect_error(
+  wilmoth(x[-1], mx = H0)
+)
+
+expect_error(
+  wilmoth(x, LT = H0, control = list(tol.biweight = -1))
+)
+
+
+
+
+
+
+
+
+

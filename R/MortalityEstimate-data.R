@@ -1,11 +1,9 @@
 # --------------------------------------------------- #
-# Author: Marius D. Pascariu
-# License: MIT
-# Last update: Wed Sep 30 10:02:58 2020
+# Author: Marius D. PASCARIU
+# Last update: Fri Apr 30 14:19:39 2021
 # --------------------------------------------------- #
 
 # Data in the package ----
-
 
 #' Death Rates for Female Populations in England and Wales, France, Sweden 
 #' and USA 

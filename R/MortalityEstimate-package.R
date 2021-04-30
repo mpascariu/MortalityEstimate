@@ -1,9 +1,7 @@
 # --------------------------------------------------- #
-# Author: Marius D. Pascariu
-# License: MIT
-# Last update: Thu Oct 01 23:37:08 2020
+# Author: Marius D. PASCARIU
+# Last update: Fri Apr 30 14:19:59 2021
 # --------------------------------------------------- #
-
 
 #' Import Packages and Functions
 #'

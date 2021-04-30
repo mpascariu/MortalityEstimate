@@ -1,9 +1,7 @@
 # --------------------------------------------------- #
-# Author: Marius D. Pascariu
-# License: MIT
-# Last update: Thu Oct 01 23:17:35 2020
+# Author: Marius D. PASCARIU
+# Last update: Fri Apr 30 14:19:06 2021
 # --------------------------------------------------- #
-
 
 #' Fit the Linear-Link Model
 #' 
@@ -71,7 +69,7 @@ LinearLink <- function(x,
                        method = 'LSE'){
   #-------------------------------------------------
   input <- c(as.list(environment()))
-  check.LinearLink.input(input)
+  check_LinearLink_input(input)
   
   cat('\n   Fitting Linear-Link model\n')
   pb <- startpb(0, length(y)) # Start the clock!
@@ -118,7 +116,7 @@ LinearLink <- function(x,
   tab_ex   <- LT[LT$x == theta, c('year', 'ex')]
   LT_optim <- NULL
   for (i in 1:length(y)) {
-    optim_obj  <- compute.lt.optim(x, coeffs, tab_ex[i, 2])
+    optim_obj  <- compute_lt_optim(x, coeffs, tab_ex[i, 2])
     LT_optim_i <- cbind(country = country, year = tab_ex[i, 1], optim_obj$lt)
     LT_optim   <- rbind(LT_optim, LT_optim_i)
     k_[i]      <- optim_obj$k
@@ -150,7 +148,7 @@ LinearLink <- function(x,
 #' Check consistency in input arguments
 #' @param input a list containing the input objects of the LinearLink function
 #' @keywords internal
-check.LinearLink.input <- function(input){
+check_LinearLink_input <- function(input){
   with(input, {
     
     if (nrow(mx) != length(x)) {
@@ -181,7 +179,7 @@ check.LinearLink.input <- function(input){
 #' @param coefs coefficients
 #' @param ex0 life expectancy
 #' @keywords internal
-compute.lt.optim <- function(x, coefs, ex0){
+compute_lt_optim <- function(x, coefs, ex0){
   penalty <- function(k){
     mx.hat  <- exp(coefs[, 1] * log(ex0) + coefs[, 2] * k)
     ex0.hat <- LifeTable(x = x, mx = mx.hat)$lt$ex[1]
@@ -205,7 +203,7 @@ compute.lt.optim <- function(x, coefs, ex0){
 #' 
 #' @param log_ex_theta Life expecatncy at age theta (log values)
 #' @param log_mx death rates (log values)
-#' @inheritParams wilmoth.control
+#' @inheritParams wilmoth_control
 #' @keywords internal
 #'
 fitw_LSE <- function(log_ex_theta, log_mx, nu = 1, nv = 1){
@@ -236,7 +234,7 @@ fitw_LSE <- function(log_ex_theta, log_mx, nu = 1, nv = 1){
 #' Find the Least Squares Fit
 #' 
 #' @inheritParams bifit
-#' @inheritParams wilmoth.control
+#' @inheritParams wilmoth_control
 #' @keywords internal
 LSEfit <- function(x, 
                    y, 
@@ -325,15 +323,15 @@ PoissonMLE <- function(log_ex_theta,
   for (i in 1:iter) {
     alpha_old = alpha; vx_old = vx; k_old = k
     #
-    temp   <- Update.alpha(alpha, vx, k, Dx, Ex, Dx_fit, mat_1)
+    temp   <- update_alpha(alpha, vx, k, Dx, Ex, Dx_fit, mat_1)
     Dx_fit <- temp$Dx_fit
     alpha  <- temp$alpha
     #
-    temp   <- Update.vx(alpha, vx, k, Dx, Ex, Dx_fit, mat_1)
+    temp   <- update_vx(alpha, vx, k, Dx, Ex, Dx_fit, mat_1)
     Dx_fit <- temp$Dx_fit
     vx     <- temp$vx
     #
-    temp   <- Update.k(alpha, vx, k, Dx, Ex, Dx_fit, mat_1)
+    temp   <- update_k(alpha, vx, k, Dx, Ex, Dx_fit, mat_1)
     Dx_fit <- temp$Dx_fit
     k      <- temp$k
     crit   <- max(max(abs(alpha - alpha_old)), 
@@ -359,7 +357,7 @@ PoissonMLE <- function(log_ex_theta,
 
 #' Update alpha
 #' @keywords internal
-Update.alpha <- function(alpha, vx, k, Dx, Ex, Dx_fit, mat_1){
+update_alpha <- function(alpha, vx, k, Dx, Ex, Dx_fit, mat_1){
   difD   <- Dx - Dx_fit
   alpha  <- alpha + difD %*% mat_1 / (Dx_fit %*% mat_1)
   Eta    <- alpha %*% t(mat_1) + vx %*% t(k)
@@ -369,7 +367,7 @@ Update.alpha <- function(alpha, vx, k, Dx, Ex, Dx_fit, mat_1){
 
 #' Update vx
 #' @keywords internal
-Update.vx <- function(alpha, vx, k, Dx, Ex, Dx_fit, mat_1){
+update_vx <- function(alpha, vx, k, Dx, Ex, Dx_fit, mat_1){
   difD   <- Dx - Dx_fit  # exp(log_mx) - Dx_fit
   vx     <- vx + difD %*% k / (Dx_fit %*% (k ^ 2))
   Eta    <- alpha %*% t(mat_1) + vx %*% t(k)
@@ -379,7 +377,7 @@ Update.vx <- function(alpha, vx, k, Dx, Ex, Dx_fit, mat_1){
 
 #' Update k
 #' @keywords internal
-Update.k <- function(alpha, vx, k, Dx, Ex, Dx_fit, mat_1){
+update_k <- function(alpha, vx, k, Dx, Ex, Dx_fit, mat_1){
   difD   <- Dx - Dx_fit
   k      <- k + t(difD) %*% vx / (t(Dx_fit) %*% (vx ^ 2))
   k      <- k - mean(k)
@@ -431,7 +429,7 @@ LinearLinkLT <- function(object,
   # Data.frame with all coefficients used in prediction
   coefs <- data.frame(bx = bx, vx = vx, row.names = x)
   # Find the right life table
-  out <- compute.lt.optim(x, coefs = coefs, ex0 = ex)
+  out <- compute_lt_optim(x, coefs = coefs, ex0 = ex)
   out$bx <- bx
   out$vx <- vx
   
