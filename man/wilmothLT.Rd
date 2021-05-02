@@ -64,15 +64,13 @@ of dying \code{nqx} is written \code{qx_n}, where \code{x} and \code{n} are
 integers. For example \code{45q15} is represented as \code{q45_15}.
 }
 \examples{
+\dontrun{ 
 # DATA
 HMD719f <- HMD719[HMD719$sex == "female", ]
-hmd_sample <- HMD719f[1:1500, ] 
 
 # Fit Log-quadratic model
 x <- c(0,1, seq(5, 110, by = 5))
-W <- wilmoth(x = x, LT = hmd_sample)
-# Use all data to replicate the Wilmoth et al results!!!
-# We are usign a sample of 1500 rows to keep the example fast.
+W <- wilmoth(x = x, LT = HMD719f)
 
 # Build life tables with various choices of 2 input parameters
 
@@ -116,7 +114,7 @@ L12 <- wilmothLT(W, q15_45 = 0.125, e0 = 65)
 
 # case 13: Using 35q15 and e0
 L13 <- wilmothLT(W, q15_35 = 0.15, e0 = 65)
-
+}
 }
 \seealso{
 \code{\link{wilmoth}}

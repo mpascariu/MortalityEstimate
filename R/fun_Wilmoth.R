@@ -157,16 +157,14 @@ wilmoth <- function(x,
 #'  \item{values}{ Associated values of \code{q0_5, q0_1, q15_45, q15_35, e0} 
 #' and \code{k}.}
 #' @seealso \code{\link{wilmoth}}
-#' @examples 
+#' @examples
+#' \dontrun{ 
 #' # DATA
 #' HMD719f <- HMD719[HMD719$sex == "female", ]
-#' hmd_sample <- HMD719f[1:1500, ] 
 #' 
 #' # Fit Log-quadratic model
 #' x <- c(0,1, seq(5, 110, by = 5))
-#' W <- wilmoth(x = x, LT = hmd_sample)
-#' # Use all data to replicate the Wilmoth et al results!!!
-#' # We are usign a sample of 1500 rows to keep the example fast.
+#' W <- wilmoth(x = x, LT = HMD719f)
 #' 
 #' # Build life tables with various choices of 2 input parameters
 #' 
@@ -210,7 +208,7 @@ wilmoth <- function(x,
 #' 
 #' # case 13: Using 35q15 and e0
 #' L13 <- wilmothLT(W, q15_35 = 0.15, e0 = 65)
-#' 
+#' }
 #' @export
 wilmothLT <- function(object, 
                       q0_5 = NULL, 
