@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Fri Apr 30 14:07:41 2021
+# Last update: Sun May 02 19:11:50 2021
 # --------------------------------------------------- #
 
 #' Fit the Log-Quadratic Model
@@ -160,12 +160,13 @@ wilmoth <- function(x,
 #' @examples 
 #' # DATA
 #' HMD719f <- HMD719[HMD719$sex == "female", ]
-#' hmd_sample <- HMD719f[1:2000, ] 
+#' hmd_sample <- HMD719f[1:500, ] 
 #' 
 #' # Fit Log-quadratic model
 #' x <- c(0,1, seq(5, 110, by = 5))
 #' W <- wilmoth(x = x, LT = hmd_sample)
-#' # use all data to replicate Wilmoth et. al results
+#' # Use all data to replicate the Wilmoth et al results!!!
+#' # We are usign a sample of 500 rows to keep the example fast.
 #' 
 #' # Build life tables with various choices of 2 input parameters
 #' 
