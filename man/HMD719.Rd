@@ -22,6 +22,6 @@ outdated. Download the actual data free of charge from
 John Wilmoth, Sarah Zureick, Vladimir Canudas-Romo, Mie Inoue & 
 Cheryl Sawyer (2012): A flexible two-dimensional mortality model for use in 
 indirect estimation, Population Studies: A Journal of Demography, 66:1, 1-28
-\url{http://dx.doi.org/10.1080/00324728.2011.611411}
+\doi{10.1080/00324728.2011.611411}
 }
 \keyword{datasets}

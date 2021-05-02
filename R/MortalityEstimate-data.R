@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Fri Apr 30 16:54:32 2021
+# Last update: Sun May 02 18:45:12 2021
 # --------------------------------------------------- #
 
 # Data in the package ----
@@ -42,7 +42,7 @@ print.MortalityEstimateData <- function(x, ...) {
 #' @references John Wilmoth, Sarah Zureick, Vladimir Canudas-Romo, Mie Inoue & 
 #' Cheryl Sawyer (2012): A flexible two-dimensional mortality model for use in 
 #' indirect estimation, Population Studies: A Journal of Demography, 66:1, 1-28
-#' \url{http://dx.doi.org/10.1080/00324728.2011.611411}
+#' \doi{10.1080/00324728.2011.611411}
 #' @source Human Mortality Database, \url{https://www.mortality.org}. (2012)
 "HMD719"
 
