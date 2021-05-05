@@ -6,7 +6,7 @@
 [![R-CMD-check](https://github.com/mpascariu/MortalityEstimate/workflows/R-CMD-check/badge.svg)](https://github.com/mpascariu/MortalityEstimate/actions)
 [![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://lifecycle.r-lib.org/articles/stages.html#maturing)
 [![Coverage Status](https://img.shields.io/codecov/c/github/mpascariu/MortalityEstimate/master.svg)](https://codecov.io/github/mpascariu/MortalityEstimate?branch=master)
-[![issues](https://img.shields.io/github/issues-raw/mpascariu/MortalityEstimate.svg)]()
+[![issues](https://img.shields.io/github/issues-raw/mpascariu/MortalityEstimate.svg)](https://github.com/mpascariu/MortalityEstimate/issues)
 [![license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/mpascariu/MortalityEstimate/blob/master/LICENSE)
 
 This repository includes R code for estimating mortality indicators and full 
